@@ -1,3 +1,6 @@
+.gradle
+build
+
 *.class
 
 # Mobile Tools for Java (J2ME)
