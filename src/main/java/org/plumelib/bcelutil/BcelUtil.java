@@ -3,8 +3,8 @@ package org.plumelib.bcelutil;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Formatter;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
 import org.apache.bcel.classfile.Code;
@@ -30,32 +30,34 @@ import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
 
 /*>>>
+import org.checkerframework.checker.index.qual.*;
 import org.checkerframework.checker.nullness.qual.*;
 import org.checkerframework.checker.signature.qual.*;
+import org.checkerframework.common.value.qual.*;
 */
 
 /** Static utility methods for working with BCEL. */
-public final class BCELUtil {
+public final class BcelUtil {
   /** This class is a collection of methods; it does not represent anything. */
-  private BCELUtil() {
+  private BcelUtil() {
     throw new Error("do not instantiate");
   }
 
   /** Controls whether the checks in checkMgen are actually performed. */
-  public static boolean skip_checks = false;
+  public static boolean skipChecks = false;
 
   /** The type that represents String[]. */
-  private static final Type string_array = Type.getType("[Ljava.lang.String;");
+  private static final Type stringArray = Type.getType("[Ljava.lang.String;");
 
   /**
    * Prints method declarations to System.out.
    *
    * @param gen class whose methods to print
    */
-  static void dump_method_declarations(ClassGen gen) {
+  static void dumpMethodDeclarations(ClassGen gen) {
     System.out.printf("method signatures for class %s%n", gen.getClassName());
     for (Method m : gen.getMethods()) {
-      System.out.printf("  %s%n", get_method_declaration(m));
+      System.out.printf("  %s%n", getMethodDeclaration(m));
     }
   }
 
@@ -67,12 +69,12 @@ public final class BCELUtil {
    * @param m the method
    * @return a string describing the method declaration
    */
-  public static String get_method_declaration(Method m) {
+  public static String getMethodDeclaration(Method m) {
 
     StringBuilder sb = new StringBuilder();
     Formatter f = new Formatter(sb);
 
-    f.format("%s %s %s (", get_access_flags(m), m.getReturnType(), m.getName());
+    f.format("%s %s %s (", getAccessFlags(m), m.getReturnType(), m.getName());
     for (Type at : m.getArgumentTypes()) {
       f.format("%s, ", at);
     }
@@ -86,11 +88,11 @@ public final class BCELUtil {
    * @param m the method whose access flags to retrieve
    * @return a string representation of the access flags of method m
    */
-  static String get_access_flags(Method m) {
+  static String getAccessFlags(Method m) {
 
     int flags = m.getAccessFlags();
 
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG; i++) {
       if ((flags & pow) != 0) {
         if (buf.length() > 0) {
@@ -114,13 +116,13 @@ public final class BCELUtil {
    * @param a the attribute
    * @return the attribute name for the specified attribute
    */
-  public static String get_attribute_name(Attribute a) {
+  public static String getAttributeName(Attribute a) {
 
     ConstantPool pool = a.getConstantPool();
-    int con_index = a.getNameIndex();
-    Constant c = pool.getConstant(con_index);
-    String att_name = ((ConstantUtf8) c).getBytes();
-    return (att_name);
+    int conIndex = a.getNameIndex();
+    Constant c = pool.getConstant(conIndex);
+    String attName = ((ConstantUtf8) c).getBytes();
+    return (attName);
   }
 
   /**
@@ -130,7 +132,7 @@ public final class BCELUtil {
    * @param index the index in the constant pool
    * @return the constant string at the specified offset in the constant pool
    */
-  public static String get_constant_str(ConstantPool pool, int index) {
+  public static String getConstantStr(ConstantPool pool, int index) {
 
     Constant c = pool.getConstant(index);
     assert c != null : "Bad index " + index + " into pool";
@@ -150,7 +152,7 @@ public final class BCELUtil {
    * @param mg the method to test
    * @return true iff the method is a constructor
    */
-  public static boolean is_constructor(MethodGen mg) {
+  public static boolean isConstructor(MethodGen mg) {
     return (mg.getName().equals("<init>") || mg.getName().equals(""));
   }
 
@@ -160,7 +162,7 @@ public final class BCELUtil {
    * @param m the method to test
    * @return true iff the method is a constructor
    */
-  public static boolean is_constructor(Method m) {
+  public static boolean isConstructor(Method m) {
     return (m.getName().equals("<init>") || m.getName().equals(""));
   }
 
@@ -170,7 +172,7 @@ public final class BCELUtil {
    * @param mg the method to test
    * @return true iff the method is a class initializer
    */
-  public static boolean is_clinit(MethodGen mg) {
+  public static boolean isClinit(MethodGen mg) {
     return (mg.getName().equals("<clinit>"));
   }
 
@@ -180,7 +182,7 @@ public final class BCELUtil {
    * @param m the method to test
    * @return true iff the method is a class initializer
    */
-  public static boolean is_clinit(Method m) {
+  public static boolean isClinit(Method m) {
     return (m.getName().equals("<clinit>"));
   }
 
@@ -190,8 +192,8 @@ public final class BCELUtil {
    * @param gen the class to test
    * @return true iff the class is part of the JDK (rt.jar)
    */
-  public static boolean in_jdk(ClassGen gen) {
-    return (in_jdk(gen.getClassName()));
+  public static boolean inJdk(ClassGen gen) {
+    return (inJdk(gen.getClassName()));
   }
 
   /**
@@ -201,7 +203,7 @@ public final class BCELUtil {
    *     an array
    * @return true iff the class is part of the JDK (rt.jar)
    */
-  public static boolean in_jdk(/*@ClassGetName*/ String classname) {
+  public static boolean inJdk(/*@ClassGetName*/ String classname) {
     return classname.startsWith("java.")
         || classname.startsWith("com.oracle.")
         || classname.startsWith("com.sun.")
@@ -222,7 +224,7 @@ public final class BCELUtil {
    * @param classname the class to test, in internal form
    * @return true iff the class is part of the JDK (rt.jar)
    */
-  public static boolean in_jdk_internalform(/*@InternalForm*/ String classname) {
+  public static boolean inJdkInternalform(/*@InternalForm*/ String classname) {
     return classname.startsWith("java/")
         || classname.startsWith("com/oracle/")
         || classname.startsWith("com/sun/")
@@ -242,7 +244,7 @@ public final class BCELUtil {
    *
    * @param gen the class whose methods to print
    */
-  static void dump_methods(ClassGen gen) {
+  static void dumpMethods(ClassGen gen) {
 
     System.out.printf("Class %s methods:%n", gen.getClassName());
     for (Method m : gen.getMethods()) {
@@ -257,7 +259,7 @@ public final class BCELUtil {
    */
   public static void checkMgen(MethodGen mgen) {
 
-    if (skip_checks) {
+    if (skipChecks) {
       return;
     }
 
@@ -295,7 +297,7 @@ public final class BCELUtil {
    */
   public static void checkMgens(final ClassGen gen) {
 
-    if (skip_checks) {
+    if (skipChecks) {
       return;
     }
 
@@ -326,7 +328,7 @@ public final class BCELUtil {
         }
         System.out.printf("%n");
       }
-      dump_methods(gen);
+      dumpMethods(gen);
     }
   }
 
@@ -336,22 +338,22 @@ public final class BCELUtil {
    * @param mg method to be augmented
    * @param nl instructions to prepend to the method
    */
-  public static void add_to_start(MethodGen mg, InstructionList nl) {
+  public static void addToStart(MethodGen mg, InstructionList nl) {
 
     // Add the code before the first instruction
     InstructionList il = mg.getInstructionList();
-    InstructionHandle old_start = il.getStart();
-    InstructionHandle new_start = il.insert(nl);
+    InstructionHandle oldStart = il.getStart();
+    InstructionHandle newStart = il.insert(nl);
 
     // Move any LineNumbers and local variable that currently point to
     // the first instruction to include the new instructions. Other
     // targeters (branches, exceptions) should not include the new
     // code
-    if (old_start.hasTargeters()) {
+    if (oldStart.hasTargeters()) {
       // getTargeters() returns non-null because hasTargeters => true
-      for (InstructionTargeter it : old_start.getTargeters()) {
+      for (InstructionTargeter it : oldStart.getTargeters()) {
         if ((it instanceof LineNumberGen) || (it instanceof LocalVariableGen)) {
-          it.updateTarget(old_start, new_start);
+          it.updateTarget(oldStart, newStart);
         }
       }
     }
@@ -361,31 +363,31 @@ public final class BCELUtil {
 
   /**
    * Dumps the contents of the specified class to the specified directory. The file is named
-   * dump_dir/[class].bcel. It contains a synopsis of the fields and methods followed by the jvm
-   * code for each method.
+   * dumpDir/[class].bcel. It contains a synopsis of the fields and methods followed by the jvm code
+   * for each method.
    *
    * @param jc javaclass to dump
-   * @param dump_dir directory in which to write the file
+   * @param dumpDir directory in which to write the file
    * @see #dump(JavaClass, File)
    */
-  public static void dump(JavaClass jc, String dump_dir) {
+  public static void dump(JavaClass jc, String dumpDir) {
 
-    dump(jc, new File(dump_dir));
+    dump(jc, new File(dumpDir));
   }
 
   /**
    * Dumps the contents of the specified class to the specified directory. The file is named
-   * dump_dir/[class].bcel. It contains a synopsis of the fields and methods followed by the jvm
-   * code for each method.
+   * dumpDir/[class].bcel. It contains a synopsis of the fields and methods followed by the jvm code
+   * for each method.
    *
    * @param jc javaclass to dump
-   * @param dump_dir directory in which to write the file
+   * @param dumpDir directory in which to write the file
    */
-  public static void dump(JavaClass jc, File dump_dir) {
+  public static void dump(JavaClass jc, File dumpDir) {
 
     try {
-      dump_dir.mkdir();
-      File path = new File(dump_dir, jc.getClassName() + ".bcel");
+      dumpDir.mkdir();
+      File path = new File(dumpDir, jc.getClassName() + ".bcel");
       PrintStream p = new PrintStream(path);
 
       // Print the class, super class and interfaces
@@ -439,13 +441,13 @@ public final class BCELUtil {
 
   // TODO: write Javadoc
   @SuppressWarnings("rawtypes")
-  public static String instruction_descr(InstructionList il, ConstantPoolGen pool) {
+  public static String instructionDescr(InstructionList il, ConstantPoolGen pool) {
 
     StringBuilder out = new StringBuilder();
     // not generic because BCEL is not generic
     for (Iterator i = il.iterator(); i.hasNext(); ) {
       @SuppressWarnings(
-          "nullness") // BCEL's InstructionList is raw (non-generic) but contains only non-null elements
+          "nullness") // BCEL's InstructionList is not generic but contains only non-null elements
       /*@NonNull*/ InstructionHandle handle = (InstructionHandle) i.next();
       out.append(handle.getInstruction().toString(pool.getConstantPool()) + "\n");
     }
@@ -458,7 +460,7 @@ public final class BCELUtil {
    * @param mg the method whose local variables to describe
    * @return a description of the local variables (one per line)
    */
-  public static String local_var_descr(MethodGen mg) {
+  public static String localVarDescr(MethodGen mg) {
 
     StringBuilder out = new StringBuilder();
     out.append(String.format("Locals for %s [cnt %d]%n", mg, mg.getMaxLocals()));
@@ -478,7 +480,7 @@ public final class BCELUtil {
    * @param mg the method whose line numbers to extract
    * @param il the instruction list to augment with line numbers
    */
-  public static void add_line_numbers(MethodGen mg, InstructionList il) {
+  public static void addLineNumbers(MethodGen mg, InstructionList il) {
 
     il.setPositions(true);
     for (InstructionHandle ih : il.getInstructionHandles()) {
@@ -492,12 +494,19 @@ public final class BCELUtil {
    *
    * @param mg the method whose locals to set
    */
-  @SuppressWarnings("nullness")
-  public static void setup_init_locals(MethodGen mg) {
+  public static void setupInitLocals(MethodGen mg) {
 
     // Get the parameter types and names.
-    Type[] arg_types = mg.getArgumentTypes();
-    String[] arg_names = mg.getArgumentNames();
+    @SuppressWarnings(
+        "nullness") // The arguments to the annotation aren't necessarily initialized before they
+    // are written here. Since annotations are erased at runtime, this is safe.
+    Type /*@SameLen({"argTypes", "mg.getArgumentTypes()"})*/[] argTypes = mg.getArgumentTypes();
+    @SuppressWarnings(
+        "nullness") // The arguments to the annotation aren't necessarily initialized before they
+    // are written here. Since annotations are erased at runtime, this is safe.
+    String /*@SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"})*/
+            []
+        argNames = mg.getArgumentNames();
 
     // Remove any existing locals
     mg.setMaxLocals(0);
@@ -509,8 +518,8 @@ public final class BCELUtil {
     }
 
     // Add a local for each parameter
-    for (int ii = 0; ii < arg_names.length; ii++) {
-      mg.addLocalVariable(arg_names[ii], arg_types[ii], null, null);
+    for (int ii = 0; ii < argNames.length; ii++) {
+      mg.addLocalVariable(argNames[ii], argTypes[ii], null, null);
     }
 
     // Reset the current number of locals so that when other locals
@@ -526,7 +535,7 @@ public final class BCELUtil {
    *
    * @param mg the method to clear out
    */
-  public static void empty_method(MethodGen mg) {
+  public static void emptyMethod(MethodGen mg) {
 
     mg.setInstructionList(new InstructionList(new RETURN()));
     mg.removeExceptionHandlers();
@@ -542,10 +551,10 @@ public final class BCELUtil {
    *
    * @param mg the method to clear out
    */
-  public static void remove_local_variable_type_tables(MethodGen mg) {
+  public static void removeLocalVariableTypeTables(MethodGen mg) {
 
     for (Attribute a : mg.getCodeAttributes()) {
-      if (is_local_variable_type_table(a, mg.getConstantPool())) {
+      if (isLocalVariableTypeTable(a, mg.getConstantPool())) {
         mg.removeCodeAttribute(a);
       }
     }
@@ -558,8 +567,8 @@ public final class BCELUtil {
    * @param pool the constant pool
    * @return true iff the attribute is a local variable type table
    */
-  public static boolean is_local_variable_type_table(Attribute a, ConstantPoolGen pool) {
-    return (get_attribute_name(a, pool).equals("LocalVariableTypeTable"));
+  public static boolean isLocalVariableTypeTable(Attribute a, ConstantPoolGen pool) {
+    return (getAttributeName(a, pool).equals("LocalVariableTypeTable"));
   }
 
   /**
@@ -569,12 +578,12 @@ public final class BCELUtil {
    * @param pool the constant pool
    * @return the attribute name for the specified attribute
    */
-  public static String get_attribute_name(Attribute a, ConstantPoolGen pool) {
+  public static String getAttributeName(Attribute a, ConstantPoolGen pool) {
 
-    int con_index = a.getNameIndex();
-    Constant c = pool.getConstant(con_index);
-    String att_name = ((ConstantUtf8) c).getBytes();
-    return (att_name);
+    int conIndex = a.getNameIndex();
+    Constant c = pool.getConstant(conIndex);
+    String attName = ((ConstantUtf8) c).getBytes();
+    return (attName);
   }
 
   /**
@@ -584,12 +593,12 @@ public final class BCELUtil {
    * @param mg the method to check
    * @return true iff the method is a main method
    */
-  public static boolean is_main(MethodGen mg) {
-    Type[] arg_types = mg.getArgumentTypes();
+  public static boolean isMain(MethodGen mg) {
+    Type[] argTypes = mg.getArgumentTypes();
     return (mg.isStatic()
         && mg.getName().equals("main")
-        && (arg_types.length == 1)
-        && arg_types[0].equals(string_array));
+        && (argTypes.length == 1)
+        && argTypes[0].equals(stringArray));
   }
 
   /**
@@ -599,9 +608,9 @@ public final class BCELUtil {
    * @param type the type
    * @return the Java classname that corresponds to type
    */
-  public static /*@ClassGetName*/ String type_to_classgetname(Type type) {
+  public static /*@ClassGetName*/ String typeToClassgetname(Type type) {
     String signature = type.getSignature();
-    return fieldDescriptorToClassGetName(signature);
+    return JvmUtil.fieldDescriptorToClassGetName(signature);
   }
 
   /**
@@ -610,9 +619,9 @@ public final class BCELUtil {
    * @param type the type
    * @return the Java class that corresponds to type
    */
-  public static Class<?> type_to_class(Type type) {
+  public static Class<?> typeToClass(Type type) {
 
-    String classname = type_to_classgetname(type);
+    String classname = typeToClassgetname(type);
     try {
       Class<?> c = classForName(classname);
       return c;
@@ -622,48 +631,80 @@ public final class BCELUtil {
   }
 
   /**
-   * Returns a type array with new_type added to the end of types.
+   * Returns a copy of the given type array, with newType added to the end.
    *
    * @param types the array to extend
-   * @param new_type the element to add to the end of the types array
-   * @return the array (or a new one), with new_type at the end
+   * @param newType the element to add to the end of the array
+   * @return a new array, with newType at the end
    */
-  public static Type[] add_type(Type[] types, Type new_type) {
-    Type[] new_types = new Type[types.length + 1];
-    System.arraycopy(types, 0, new_types, 0, types.length);
-    new_types[types.length] = new_type;
-    Type[] new_types_cast = new_types;
-    return (new_types_cast);
+  public static Type[] postpendToArray(Type[] types, Type newType) {
+    Type[] newTypes = new Type[types.length + 1];
+    System.arraycopy(types, 0, newTypes, 0, types.length);
+    newTypes[types.length] = newType;
+    Type[] newTypesCast = newTypes;
+    return (newTypesCast);
   }
 
   /**
-   * Returns a type array with new_type inserted at the beginning.
+   * Returns a copy of the given type array, with newType added to the end.
    *
+   * @deprecated use {@link #postpendToArray}
    * @param types the array to extend
-   * @param new_type the element to add to the beginning of the types array
-   * @return the array (or a new one), with new_type at the beginning
+   * @param newType the element to add to the end of the array
+   * @return a new array, with newType at the end
    */
-  public static Type[] insert_type(Type new_type, Type[] types) {
-    Type[] new_types = new Type[types.length + 1];
-    System.arraycopy(types, 0, new_types, 1, types.length);
-    new_types[0] = new_type;
-    Type[] new_types_cast = new_types;
-    return (new_types_cast);
+  @Deprecated
+  public static Type[] addType(Type[] types, Type newType) {
+    return postpendToArray(types, newType);
   }
 
   /**
-   * Return the type corresponding to a given class name.
+   * Returns a copy of the given type array, with newType inserted at the beginning.
    *
-   * @param classname the class to convert to a type
+   * @param types the array to extend
+   * @param newType the element to add to the beginning of the array
+   * @return a new array, with newType at the beginning
+   */
+  public static Type[] prependToArray(Type newType, Type[] types) {
+    @SuppressWarnings({
+      "index", // newTypes is @MinLen(1) except in the presence of overflow,
+      // which the Value Checker accounts for, but the Index Checker does not.
+      "value" // newTypes is @MinLen(1) except in the presence of overflow,
+      // which the Value Checker accounts for, but the Index Checker does not.
+    })
+    Type /*@MinLen(1)*/[] newTypes = new Type[types.length + 1];
+    System.arraycopy(types, 0, newTypes, 1, types.length);
+    newTypes[0] = newType;
+    Type[] newTypesCast = newTypes;
+    return (newTypesCast);
+  }
+
+  /**
+   * Returns a copy of the given type array, with newType inserted at the beginning.
+   *
+   * @deprecated use {@link #prependToArray}
+   * @param types the array to extend
+   * @param newType the element to add to the beginning of the array
+   * @return a new array, with newType at the beginning
+   */
+  @Deprecated
+  public static Type[] insertType(Type newType, Type[] types) {
+    return prependToArray(newType, types);
+  }
+
+  /**
+   * Return the type corresponding to a given fully-qualified class name.
+   *
+   * @param classname the fully-qualified name of a class
    * @return the type corresponding to the given class name
    */
-  public static Type classname_to_type(String classname) {
+  public static Type classnameToType(String classname) {
 
     // Get the array depth (if any)
-    int array_depth = 0;
+    int arrayDepth = 0;
     while (classname.endsWith("[]")) {
       classname = classname.substring(0, classname.length() - 2);
-      array_depth++;
+      arrayDepth++;
     }
     classname = classname.intern();
 
@@ -690,75 +731,14 @@ public final class BCELUtil {
     }
 
     // If there was an array, build the array type
-    if (array_depth > 0) {
-      t = new ArrayType(t, array_depth);
+    if (arrayDepth > 0) {
+      t = new ArrayType(t, arrayDepth);
     }
 
     return t;
   }
 
-  /**
-   * Convert from a FieldDescriptor to the format of {@link Class#getName()}.
-   *
-   * @param fd the class, in field descriptor format
-   * @return the class name, in Class.getName format
-   */
-  @SuppressWarnings("signature") // conversion routine
-  public static /*@ClassGetName*/ String fieldDescriptorToClassGetName(
-      /*FieldDescriptor*/ String fd) {
-    if (fd.startsWith("[")) {
-      return fd.replace('/', '.');
-    } else {
-      return fieldDescriptorToBinaryName(fd);
-    }
-  }
-
-  private static HashMap<String, String> primitiveClassesFromJvm = new HashMap<String, String>(8);
-
-  static {
-    primitiveClassesFromJvm.put("Z", "boolean");
-    primitiveClassesFromJvm.put("B", "byte");
-    primitiveClassesFromJvm.put("C", "char");
-    primitiveClassesFromJvm.put("D", "double");
-    primitiveClassesFromJvm.put("F", "float");
-    primitiveClassesFromJvm.put("I", "int");
-    primitiveClassesFromJvm.put("J", "long");
-    primitiveClassesFromJvm.put("S", "short");
-  }
-
-  // does not convert "V" to "void".  Should it?
-  /**
-   * Convert a field descriptor to a binary name. For example, convert "[Ljava/lang/Object;" to
-   * "java.lang.Object[]" or "I" to "int".
-   *
-   * @param classname name of the type, in JVML format
-   * @return name of the type, in Java format
-   */
-  @SuppressWarnings("signature") // conversion routine
-  public static /*@BinaryName*/ String fieldDescriptorToBinaryName(String classname) {
-    if (classname.equals("")) {
-      throw new Error("Empty string passed to fieldDescriptorToBinaryName");
-    }
-    int dims = 0;
-    while (classname.startsWith("[")) {
-      dims++;
-      classname = classname.substring(1);
-    }
-    String result;
-    if (classname.startsWith("L") && classname.endsWith(";")) {
-      result = classname.substring(1, classname.length() - 1);
-    } else {
-      result = primitiveClassesFromJvm.get(classname);
-      if (result == null) {
-        throw new Error("Malformed base class: " + classname);
-      }
-    }
-    for (int i = 0; i < dims; i++) {
-      result += "[]";
-    }
-    return result.replace('/', '.');
-  }
-
+  /** Used by {@link #classForName}. */
   private static HashMap<String, Class<?>> primitiveClasses = new HashMap<String, Class<?>>(8);
 
   static {
@@ -772,13 +752,18 @@ public final class BCELUtil {
     primitiveClasses.put("short", Short.TYPE);
   }
 
+  // TODO: This is a private copy (but protected to permit testing).  Whet
+  // the method is moved from monolithic plume-lib, perhaps depend on the
+  // new version.  Or just keep depending on this small implementation.
+  // TODO: should create a method that works exactly for the desired argument type.
   /**
    * Like {@link Class#forName(String)}, but also works when the string represents a primitive type
    * or a fully-qualified name (as opposed to a binary name).
    *
    * <p>If the given name can't be found, this method changes the last '.' to a dollar sign ($) and
    * tries again. This accounts for inner classes that are incorrectly passed in in fully-qualified
-   * format instead of binary format.
+   * format instead of binary format. (It should try multiple dollar signs, not just at the last
+   * position.)
    *
    * <p>Recall the rather odd specification for {@link Class#forName(String)}: the argument is a
    * binary name for non-arrays, but a field descriptor for arrays. This method uses the same rules,
@@ -790,6 +775,7 @@ public final class BCELUtil {
    */
   // The annotation encourages proper use, even though this can take a
   // fully-qualified name (only for a non-array).
+  //TODO: protected
   public static Class<?> classForName(
       /*@ClassGetName*/ String className) throws ClassNotFoundException {
     Class<?> result = primitiveClasses.get(className);
@@ -804,15 +790,14 @@ public final class BCELUtil {
           throw e;
         }
         @SuppressWarnings("signature") // checked below & exception is handled
-        /*@ClassGetName*/ String inner_name =
+        /*@ClassGetName*/ String innerName =
             className.substring(0, pos) + "$" + className.substring(pos + 1);
         try {
-          return Class.forName(inner_name);
+          return Class.forName(innerName);
         } catch (ClassNotFoundException ee) {
           throw e;
         }
       }
     }
   }
-
 }
