@@ -1,0 +1,99 @@
+apply from: 'build.gradle'
+
+// To use this, your ~/.gradle/gradle.properties file must contain:
+//   ossrhUsername=YOUR_USER_NAME_HERE
+//   ossrhPassword=YOUR_PASSWORD_HREE
+
+
+///////////////////////////////////////////////////////////////////////////
+/// Code formatting grossness
+///
+
+// This has to be here as well as in build.gradle!
+
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.6"
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+/// Maven Central publishing
+// (From http://central.sonatype.org/pages/gradle.html )
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+group = "org.plumelib"
+archivesBaseName = "bcel-util"
+// When editing this, also increment in README.md (when it exists).
+version = "0.0.4"
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'Plume-lib Bcel-Util'
+        packaging 'jar'
+        // optionally artifactId can be defined here 
+        description 'Utility functions for BCEL.'
+        url 'https://github.com/plume-lib/bcel-util'
+
+        scm { 
+          connection 'scm:git:git@github.com:plume-lib/bcel-util.git'
+          developerConnection 'scm:git:git@github.com:plume-lib/bcel-util.git'
+          url 'git@github.com:plume-lib/bcel-util.git'
+        }
+
+        licenses {
+          license {
+            name 'MIT License'
+            url 'https://opensource.org/licenses/MIT'
+          }
+        }
+
+        developers {
+          developer {
+            id 'mernst'
+            name 'Michael Ernst'
+            email 'mernst@alum.mit.edu'
+          }
+        }
+      }
+    }
+  }
+}
