@@ -3,6 +3,11 @@ package org.plumelib.bcelutil;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
+/*>>>
+import org.checkerframework.checker.index.qual.*;
+import org.checkerframework.checker.signature.qual.*;
+*/
+
 /**
  * Utility functions for working with the JVM.
  *

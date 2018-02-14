@@ -4,6 +4,9 @@ apply plugin: "com.github.sherter.google-java-format"
 // maven-publish does no signing, so it cannot be used with Maven Central.
 // apply plugin: 'maven-publish'
 
+// Checker Framework pluggable type-checking
+apply from: 'gradle/checkerframework.gradle'
+
 dependencies {
   api group: 'org.apache.bcel', name: 'bcel', version: '6.0'
 
