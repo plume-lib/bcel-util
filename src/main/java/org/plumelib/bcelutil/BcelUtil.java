@@ -693,20 +693,24 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the type corresponding to a given fully-qualified class name.
+   * Return the type corresponding to a given class name.
    *
-   * @param classname the fully-qualified name of a class
+   * @param classname the binary name of a class (= fully-qualified name, except for inner classes)
    * @return the type corresponding to the given class name
    */
-  public static Type classnameToType(String classname) {
+  public static Type classnameToType(/*@BinaryName*/ String classname) {
 
     // Get the array depth (if any)
     int arrayDepth = 0;
     while (classname.endsWith("[]")) {
-      classname = classname.substring(0, classname.length() - 2);
+      @SuppressWarnings("signature") // removing trailing "[]" leaves the string a binary name
+      /*@BinaryName*/ String sansArray = classname.substring(0, classname.length() - 2);
+      classname = sansArray;
       arrayDepth++;
     }
-    classname = classname.intern();
+    @SuppressWarnings("signature") // test of no trailing "[]" => has type @BinaryNameForNonArray
+    /*@BinaryNameForNonArray*/ String tmp = classname;
+    classname = tmp.intern();
 
     // Get the base type
     Type t = null;
