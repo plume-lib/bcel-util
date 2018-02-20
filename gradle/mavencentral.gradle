@@ -1,6 +1,10 @@
 apply from: '../build.gradle'
 
-// To use this, your ~/.gradle/gradle.properties file must contain:
+// To use this, run:
+//   ../gradlew -b mavencentral.gradle uploadArtifacts
+// or run from the top level:
+//   ./gradlew -b gradle/mavencentral.gradle
+// Your ~/.gradle/gradle.properties file must contain:
 //   ossrhUsername=YOUR_USER_NAME_HERE
 //   ossrhPassword=YOUR_PASSWORD_HERE
 
