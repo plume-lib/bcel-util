@@ -6,9 +6,6 @@ apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
 // Code formatting with Google Java Format
 // apply from: 'gradle/codeformatting.gradle'
 
-// Code formatting with Google Java Format
-// apply from: 'gradle/codeformatting.gradle'
-
 dependencies {
   api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '0.0.2'
 

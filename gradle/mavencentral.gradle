@@ -1,9 +1,9 @@
 apply from: '../build.gradle'
 
 // To use this, run:
-//   ../gradlew -b mavencentral.gradle uploadArtifacts
+//   ../gradlew -b mavencentral.gradle uploadArchives
 // or run from the top level:
-//   ./gradlew -b gradle/mavencentral.gradle
+//   ./gradlew -b gradle/mavencentral.gradle uploadArchives
 // Your ~/.gradle/gradle.properties file must contain:
 //   ossrhUsername=YOUR_USER_NAME_HERE
 //   ossrhPassword=YOUR_PASSWORD_HERE
@@ -23,6 +23,7 @@ buildscript {
   }
   dependencies {
     classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.6"
+    classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
   }
 }
 
