@@ -34,23 +34,16 @@ import org.checkerframework.dataflow.qual.*;
 */
 
 /**
- * BCEL should automatically build and maintain the StackMapTable in a manner similar to the
- * LineNumberTable and the LocalVariableTable. However, for historical reasons it does not. Hence,
- * we provide a set of methods to make it easier to manipulate the StackMapTable.
+ * This class provides methods to manipulate the StackMapTable.
+ *
+ * <p>BCEL should automatically build and maintain the StackMapTable in a manner similar to the
+ * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
  */
 @SuppressWarnings("nullness")
 public abstract class StackMapUtils {
 
   /*
    * NOMENCLATURE
-   *
-   * The code in chicory/Instrument and dcomp/DCInstrument were not consistent with
-   * respect to variable naming.  They used different terms for the same item as well
-   * as the same term for different items.  I have tried to modify the code to be consistent,
-   * but I am sure I have missed some poorly named variables.
-   *
-   * The main issue is with the terms 'index' and 'offset'.
-   * My intent is the following:
    *
    * 'index' is an item's subscript into a data structure.
    *
@@ -73,7 +66,7 @@ public abstract class StackMapUtils {
   protected boolean needStackMap = false;
 
   /** Working copy of StackMapTable; set by fetch_current_stack_map_table. */
-  protected StackMapEntry /*@Nullable*/[] stack_map_table = null;
+  protected StackMapEntry /*@Nullable*/ [] stack_map_table = null;
 
   /** Original stack map table attribute; set by fetch_current_stack_map_table. */
   protected /*@Nullable*/ StackMap smta = null;
@@ -118,6 +111,7 @@ public abstract class StackMapUtils {
    * @param a the attribute
    * @return the attribute name for the specified attribute
    */
+  /*@Pure*/
   protected final String get_attribute_name(Attribute a) {
     int con_index = a.getNameIndex();
     Constant c = pool.getConstant(con_index);
@@ -153,6 +147,7 @@ public abstract class StackMapUtils {
    * @param mgen the method
    * @return the StackMapTable attribute for the method (or null if not present)
    */
+  /*@Pure*/
   protected final /*@Nullable*/ Attribute get_stack_map_table_attribute(MethodGen mgen) {
     for (Attribute a : mgen.getCodeAttributes()) {
       if (is_stack_map_table(a)) {
@@ -168,6 +163,7 @@ public abstract class StackMapUtils {
    * @param mgen the method
    * @return the LocalVariableTypeTable attribute for the method (or null if not present)
    */
+  /*@Pure*/
   protected final /*@Nullable*/ Attribute get_local_variable_type_table_attribute(MethodGen mgen) {
     for (Attribute a : mgen.getCodeAttributes()) {
       if (is_local_variable_type_table(a)) {

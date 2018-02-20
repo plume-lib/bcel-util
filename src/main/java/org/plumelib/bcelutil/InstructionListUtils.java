@@ -26,10 +26,11 @@ import org.checkerframework.dataflow.qual.*;
 */
 
 /**
- * BCEL should automatically build and maintain the StackMapTable in a manner similar to the
- * LineNumberTable and the LocalVariableTable. However, for historical reasons it does not. Hence,
- * we provide a set of methods to manipulate BCEL InstructionLists that handle all the StackMap side
- * effects.
+ * This class provides methods that manipulate BCEL InstructionLists while handling all the StackMap
+ * side effects.
+ *
+ * <p>BCEL should automatically build and maintain the StackMapTable in a manner similar to the
+ * LineNumberTable and the LocalVariableTable. However, for historical reasons it does not.
  */
 @SuppressWarnings("nullness")
 public abstract class InstructionListUtils extends StackMapUtils {
@@ -75,7 +76,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
   /**
    * Inserts a new instruction list into an existing instruction list just prior to the indicated
-   * instruction handle. (Which must be a member of the existing instruction list.) If new_il is
+   * instruction handle (which must be a member of the existing instruction list). If new_il is
    * null, do nothing.
    *
    * @param mg MethodGen containing the instruction handle
@@ -84,7 +85,10 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @param redirect_branches flag indicating if branch targets should be moved from ih to new_il
    */
   protected final void insert_before_handle(
-      MethodGen mg, InstructionHandle ih, InstructionList new_il, boolean redirect_branches) {
+      MethodGen mg,
+      InstructionHandle ih,
+      /*@Nullable*/ InstructionList new_il,
+      boolean redirect_branches) {
 
     if (new_il == null) return;
 
@@ -189,7 +193,10 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @param new_il InstructionList holding the new code
    */
   protected final void replace_instructions(
-      MethodGen mg, InstructionList il, InstructionHandle ih, InstructionList new_il) {
+      MethodGen mg,
+      InstructionList il,
+      InstructionHandle ih,
+      /*@Nullable*/ InstructionList new_il) {
 
     if (new_il == null) return;
 

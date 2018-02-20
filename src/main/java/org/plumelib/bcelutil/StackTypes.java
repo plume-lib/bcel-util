@@ -22,7 +22,7 @@ public final class StackTypes {
   boolean track_locals = true;
   OperandStack[] os_arr;
   // non-null if track_locals is true
-  LocalVariables /*@Nullable*/[] loc_arr;
+  LocalVariables /*@Nullable*/ [] loc_arr;
 
   public StackTypes(MethodGen mg) {
     InstructionList il = mg.getInstructionList();
@@ -52,9 +52,10 @@ public final class StackTypes {
     return os_arr[offset];
   }
 
+  @SuppressWarnings("purity") // local StringBuilder
   /*@SideEffectFree*/
   @Override
-  public String toString(/*>>>@GuardSatisfied StackTypes this*/ ) {
+  public String toString(/*>>>@GuardSatisfied StackTypes this*/) {
 
     StringBuilder sb = new StringBuilder();
 
