@@ -207,7 +207,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Find the StackMap entry who's offset matches the input argument. Also sets running_offset.
+   * Find the StackMap entry whose offset matches the input argument. Also sets running_offset.
    *
    * @param offset byte code offset
    * @return the corresponding StackMapEntry
@@ -233,7 +233,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Find the index of the StackMap entry who's offset is the last one before the input argument.
+   * Find the index of the StackMap entry whose offset is the last one before the input argument.
    * Return -1 if there isn't one. Also sets running_offset and number_active_locals.
    *
    * @param offset byte code offset
@@ -278,7 +278,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Find the index of the StackMap entry who's offset is the first one after the input argument.
+   * Find the index of the StackMap entry whose offset is the first one after the input argument.
    * Return -1 if there isn't one. Also sets running_offset.
    *
    * @param offset byte code offset
@@ -527,7 +527,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * One of these special NEW instructions has moved. Update it's offset in StackMap entries. Note
+   * One of these special NEW instructions has moved. Update its offset in StackMap entries. Note
    * that more than one entry could refer to the same instruction.
    *
    * @param old_offset original location of NEW instruction
@@ -632,7 +632,7 @@ public abstract class StackMapUtils {
    *
    * @param mgen MethodGen to search
    * @param java_class_version Java version for the classfile; stack_map_table is optional before
-   *     Java 1.7
+   *     Java 1.7 (= classfile version 51)
    */
   /*@EnsuresNonNull({"stack_map_table"})*/
   protected final void fetch_current_stack_map_table(MethodGen mgen, int java_class_version) {
@@ -658,7 +658,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Print the contents of the StackMapTable to the Debug_instrument log.
+   * Print the contents of the StackMapTable to the debug_instrument log.
    *
    * @param prefix label to display with table
    */
@@ -829,9 +829,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Create a new argument to the method. This will be added after last current argument and before
-   * the first local variable. This might have the side effect of causing us to rewrite the method
-   * byte codes to adjust the offsets for the local variables - see below for details.
+   * Add a new argument to the method. This will be added after last current argument and before the
+   * first local variable. This might have the side effect of causing us to rewrite the method byte
+   * codes to adjust the offsets for the local variables - see below for details.
    *
    * <p>Must call fix_local_variable_table (just once per method) before calling this routine.
    *
