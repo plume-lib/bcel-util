@@ -140,7 +140,12 @@ public abstract class InstructionListUtils extends StackMapUtils {
     modify_stack_maps_for_switches(new_start, il);
   }
 
-  /** Convenience function to build an instruction list */
+  /**
+   * Convenience function to build an instruction list
+   *
+   * @param instructions a variable number of BCEL instructions
+   * @return an InstructionList
+   */
   protected final InstructionList build_il(Instruction... instructions) {
     InstructionList il = new InstructionList();
     for (Instruction inst : instructions) {
@@ -153,6 +158,10 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * Compute the StackMapTypes of the live variables of the current method at a specific location
    * within the method. There may be gaps ("Bogus" or non-live slots) so we can't just count the
    * number of live variables, we must find the max index of all the live variables.
+   *
+   * @param mg MethodGen for the current method
+   * @param location the code location to be evaluated
+   * @return an array of StackMapType describing the live locals at location
    */
   protected final StackMapType[] calculate_live_local_types(MethodGen mg, int location) {
     int max_local_index = -1;
@@ -173,6 +182,9 @@ public abstract class InstructionListUtils extends StackMapUtils {
   /**
    * Compute the StackMapTypes of the items on the execution stack as described by the OperandStack
    * argument.
+   *
+   * @param stack an OperandStack object
+   * @return an array of StackMapType describing the stack contents
    */
   protected final StackMapType[] calculate_live_stack_types(OperandStack stack) {
     int ss = stack.size();

@@ -34,7 +34,8 @@ import org.checkerframework.dataflow.qual.*;
 */
 
 /**
- * This class provides methods to manipulate the StackMapTable.
+ * This class provides methods to manipulate the StackMapTable. It is used to
+ * maintain and modify the StackMap for a method.
  *
  * <p>BCEL should automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
@@ -63,6 +64,8 @@ public abstract class StackMapUtils {
   protected /*@Nullable*/ ConstantPoolGen pool = null;
 
   protected SimpleLog debug_instrument = new SimpleLog(false);
+
+  /** Whether or not the current method needs a StackMap. */
   protected boolean needStackMap = false;
 
   /** Working copy of StackMapTable; set by fetch_current_stack_map_table. */
@@ -74,18 +77,36 @@ public abstract class StackMapUtils {
   /** Initial state of StackMapTypes for locals on method entry. */
   protected StackMapType[] initial_type_list;
 
+  /** The number of local variables in this method prior to any modifications. */
   protected int initial_locals_count;
 
+  /**
+   * The number of live local variables according to the current StackMap of interest.
+   * Set by update_stack_map_offset, find_stack_map_equal, find_stack_map_index_before,
+   * or find_stack_map_index_after.
+   */
   protected int number_active_locals;
+
+  /**
+   * Offset into code that corresponds to the current StackMap of interest.
+   * Set by find_stack_map_index_before.
+   */
   protected int running_offset;
 
   /**
-   * The index of the first 'true' local in the local variable table. (after 'this' and any
-   * parameters)
+   * The index of the first 'true' local in the local variable table.
+   * That is, after 'this' and any parameters.
    */
   protected int first_local_index;
 
+  /** An empty StackMap used for initialization. */
   private StackMapEntry[] empty_stack_map_table = {};
+
+  /**
+   * A map from instructions that create uninitialized NEW objects to
+   * the corresponding StackMap entry.
+   * Set by build_unitialized_NEW_map.
+   */
   private Map<InstructionHandle, Integer> uninitialized_NEW_map =
       new HashMap<InstructionHandle, Integer>();
 
@@ -300,8 +321,8 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Check to see if there have been any changes in a switch statement's padding bytes. If so, we
-   * need to update the corresponding StackMap.
+   * Check to see if (due to some instruction modifications) there have been any changes in a switch
+   * statement's padding bytes. If so, then update the corresponding StackMap to reflect this change.
    *
    * @param ih where to start looking for a switch instruction
    * @param il instruction list to search
@@ -527,8 +548,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * One of these special NEW instructions has moved. Update its offset in StackMap entries. Note
-   * that more than one entry could refer to the same instruction.
+   * One of uninitialized NEW instructions has moved. Update its offset in StackMap entries. Note
+   * that more than one entry could refer to the same instruction. This is a helper routine used
+   * by update_uninitialized_NEW_offsets.
    *
    * @param old_offset original location of NEW instruction
    * @param new_offset new location of NEW instruction
@@ -564,8 +586,8 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Check to see if any of these special NEW instructions has moved. Again, these are rare, so
-   * linear pass is fine.
+   * Check to see if any of the uninitialized NEW instructions has moved. Again, these are rare, so
+   * a linear pass is fine.
    *
    * @param il instruction list to search
    */
@@ -627,8 +649,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Get existing StackMapTable (if present); otherwise creates a new empty one. Sets both smta and
-   * stack_map_table. Must be called prior to any other methods that manipulate the stack_map_table.
+   * Get existing StackMapTable from the MethodGen arguments.  If there is none,
+   * create a new empty one. Sets both smta and stack_map_table.
+   * Must be called prior to any other methods that manipulate the stack_map_table!
    *
    * @param mgen MethodGen to search
    * @param java_class_version Java version for the classfile; stack_map_table is optional before
@@ -676,6 +699,7 @@ public abstract class StackMapUtils {
    * Create a new StackMap code attribute from stack_map_table.
    *
    * @param mgen MethodGen to add attribute to
+   * @throws IOException if cannot create the attribute
    */
   protected final void create_new_stack_map_attribute(MethodGen mgen) throws IOException {
 
@@ -693,6 +717,7 @@ public abstract class StackMapUtils {
    * Convert a Type name to a Class name.
    *
    * @param t type whose name is to be converted
+   * @return a String containing the class name
    */
   @SuppressWarnings("signature") // conversion routine
   protected static /*@ClassGetName*/ String typeToClassGetName(Type t) {
@@ -838,6 +863,7 @@ public abstract class StackMapUtils {
    * @param mgen MethodGen to be modified
    * @param arg_name name of new argument
    * @param arg_type type of new argument
+   * @return a LocalVariableGen for the new argument
    */
   protected final LocalVariableGen add_new_argument(
       MethodGen mgen, String arg_name, Type arg_type) {
@@ -928,6 +954,7 @@ public abstract class StackMapUtils {
    * @param mgen MethodGen to be modified
    * @param local_name name of new local
    * @param local_type type of new local
+   * @return a LocalVariableGen for the new local
    */
   protected final LocalVariableGen create_method_scope_local(
       MethodGen mgen, String local_name, Type local_type) {
@@ -1038,12 +1065,14 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Under some circumstances, there may be problems with the local variable table.
+   * Under some circumstances, there may be problems with the local variable table. These problems occur
+   * when the Java compiler adds unnamed entries. There may be unnamed parameters and/or unnamed local variables.
+   * These items appear as gaps in the LocalVariable table.  This routine creates LocalVariable entries
+   * for these missing items.
    *
    * <ol>
-   *   <li>In some special cases where parameters are added by the Java compiler (eg, constructors
-   *       for inner classes), the local variable table is missing the entry for this additional
-   *       parameter.
+   *   <li>The java Compiler allocates a hidden parameter for the constructor of an inner class.
+   *       These items are given the name $hidden$ appended with their offset.
    *   <li>The Java compiler allocates unnamed local temps for:
    *       <ul>
    *         <li>saving the exception in a finally clause
@@ -1051,7 +1080,7 @@ public abstract class StackMapUtils {
    *         <li>interators
    *         <li>(others?)
    *       </ul>
-   *       We will create a 'fake' local for these cases.
+   *       These items are given the name DaIkOnTeMp appended with their offset.
    * </ol>
    *
    * @param mgen MethodGen to be modified
@@ -1180,6 +1209,9 @@ public abstract class StackMapUtils {
   /**
    * Calculates the types on the stack for each instruction using the BCEL stack verification
    * routines.
+   *
+   * @param mg MethodGen for the method to be analyzed
+   * @return a StackTypes object for the method
    */
   protected final StackTypes bcel_calc_stack_types(MethodGen mg) {
 

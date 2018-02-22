@@ -236,6 +236,8 @@ public final class StackVer {
   /**
    * Return the types on the stack at each byte code offset. Only valid after do_stack_ver() is
    * called.
+   *
+   * @return the StackTypes object for the method being verified
    */
   public StackTypes get_stack_types() {
     return stack_types;
@@ -416,6 +418,8 @@ public final class StackVer {
    * Specification, Second Edition. As it is doing so it keeps track of the stack and local
    * variables at each instruction.
    *
+   * @param mg MethodGen for the method to be verified
+   * @return the VerificationResult
    * @see org.apache.bcel.verifier.statics.Pass2Verifier#getLocalVariablesInfo(int)
    */
   public VerificationResult do_stack_ver(MethodGen mg) {
@@ -506,9 +510,9 @@ public final class StackVer {
   private ArrayList<String> messages = new ArrayList<String>(); //Type of elements: String
 
   /**
-   * This method adds a (warning) message to the message pool of this PassVerifier. This method is
-   * normally only internally used by BCEL's class file verifier "JustIce" and should not be used
-   * from the outside.
+   * This method adds a (warning) message to the message pool of this PassVerifier.
+   *
+   * @param message the String containing the warning message
    */
   public void addMessage(String message) {
     messages.add(message);
