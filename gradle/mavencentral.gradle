@@ -69,7 +69,7 @@ uploadArchives {
       pom.project {
         name 'Plume-lib Bcel-Util'
         packaging 'jar'
-        // optionally artifactId can be defined here 
+        // optionally artifactId can be defined here
         description 'Utility functions for BCEL.'
         url 'https://github.com/plume-lib/bcel-util'
 
