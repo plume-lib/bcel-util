@@ -5,7 +5,7 @@ apply plugin: "com.github.sherter.google-java-format"
 apply from: 'gradle/checkerframework.gradle'
 
 dependencies {
-  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '0.0.1'
+  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '0.0.5'
 
   implementation 'org.apache.commons:commons-math3:3.6.1'
   implementation 'com.google.guava:guava:20.0'
