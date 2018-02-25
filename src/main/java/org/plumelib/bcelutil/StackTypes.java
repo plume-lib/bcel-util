@@ -23,7 +23,7 @@ public final class StackTypes {
   OperandStack[] os_arr;
 
   /** The state of the live local variables at each instruction location. */
-  LocalVariables /*@Nullable*/ [] loc_arr;
+  LocalVariables[] loc_arr;
 
   public StackTypes(MethodGen mg) {
     InstructionList il = mg.getInstructionList();

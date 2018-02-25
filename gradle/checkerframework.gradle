@@ -63,8 +63,7 @@ compileJava {
   doFirst {
     options.compilerArgs = [
         // not done yet: org.checkerframework.checker.index.IndexChecker,
-        // no locks: org.checkerframework.checker.lock.LockChecker,
-        '-processor', 'org.checkerframework.checker.formatter.FormatterChecker,org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.signature.SignatureChecker',
+        '-processor', 'org.checkerframework.checker.formatter.FormatterChecker,org.checkerframework.checker.lock.LockChecker,org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.signature.SignatureChecker',
         '-Xmaxerrs', '10000',
         '-Xmaxwarns', '10000',
         '-Awarns',      // turn Checker Framework errors into warnings
