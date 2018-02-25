@@ -26,10 +26,11 @@ import org.checkerframework.dataflow.qual.*;
 */
 
 /**
- * BCEL should automatically build and maintain the StackMapTable in a manner similar to the
- * LineNumberTable and the LocalVariableTable. However, for historical reasons it does not. Hence,
- * we provide a set of methods to manipulate BCEL InstructionLists that handle all the StackMap side
- * effects.
+ * This class provides methods that manipulate BCEL InstructionLists while handling all the StackMap
+ * side effects.
+ *
+ * <p>BCEL should automatically build and maintain the StackMapTable in a manner similar to the
+ * LineNumberTable and the LocalVariableTable. However, for historical reasons it does not.
  */
 @SuppressWarnings("nullness")
 public abstract class InstructionListUtils extends StackMapUtils {
@@ -75,7 +76,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
   /**
    * Inserts a new instruction list into an existing instruction list just prior to the indicated
-   * instruction handle. (Which must be a member of the existing instruction list.) If new_il is
+   * instruction handle (which must be a member of the existing instruction list). If new_il is
    * null, do nothing.
    *
    * @param mg MethodGen containing the instruction handle
@@ -84,7 +85,10 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @param redirect_branches flag indicating if branch targets should be moved from ih to new_il
    */
   protected final void insert_before_handle(
-      MethodGen mg, InstructionHandle ih, InstructionList new_il, boolean redirect_branches) {
+      MethodGen mg,
+      InstructionHandle ih,
+      /*@Nullable*/ InstructionList new_il,
+      boolean redirect_branches) {
 
     if (new_il == null) return;
 
@@ -136,7 +140,12 @@ public abstract class InstructionListUtils extends StackMapUtils {
     modify_stack_maps_for_switches(new_start, il);
   }
 
-  /** Convenience function to build an instruction list */
+  /**
+   * Convenience function to build an instruction list
+   *
+   * @param instructions a variable number of BCEL instructions
+   * @return an InstructionList
+   */
   protected final InstructionList build_il(Instruction... instructions) {
     InstructionList il = new InstructionList();
     for (Instruction inst : instructions) {
@@ -149,6 +158,10 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * Compute the StackMapTypes of the live variables of the current method at a specific location
    * within the method. There may be gaps ("Bogus" or non-live slots) so we can't just count the
    * number of live variables, we must find the max index of all the live variables.
+   *
+   * @param mg MethodGen for the current method
+   * @param location the code location to be evaluated
+   * @return an array of StackMapType describing the live locals at location
    */
   protected final StackMapType[] calculate_live_local_types(MethodGen mg, int location) {
     int max_local_index = -1;
@@ -169,6 +182,9 @@ public abstract class InstructionListUtils extends StackMapUtils {
   /**
    * Compute the StackMapTypes of the items on the execution stack as described by the OperandStack
    * argument.
+   *
+   * @param stack an OperandStack object
+   * @return an array of StackMapType describing the stack contents
    */
   protected final StackMapType[] calculate_live_stack_types(OperandStack stack) {
     int ss = stack.size();
@@ -189,7 +205,10 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @param new_il InstructionList holding the new code
    */
   protected final void replace_instructions(
-      MethodGen mg, InstructionList il, InstructionHandle ih, InstructionList new_il) {
+      MethodGen mg,
+      InstructionList il,
+      InstructionHandle ih,
+      /*@Nullable*/ InstructionList new_il) {
 
     if (new_il == null) return;
 
