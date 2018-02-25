@@ -84,6 +84,7 @@ import org.apache.bcel.verifier.structurals.UninitializedObjectType;
 
 /*>>>
 import org.checkerframework.checker.nullness.qual.*;
+import org.checkerframework.checker.index.qual.*;
 */
 
 /**
@@ -147,7 +148,7 @@ public final class StackVer {
      *
      * @param i
      */
-    public void remove(int i) {
+    public void remove(/*@NonNegative*/ int i) {
       ics.remove(i);
       ecs.remove(i);
     }
@@ -157,7 +158,7 @@ public final class StackVer {
      * @param i
      * @return
      */
-    public InstructionContext getIC(int i) {
+    public InstructionContext getIC(/*@NonNegative*/ int i) {
       return ics.get(i);
     }
     /**
@@ -166,7 +167,7 @@ public final class StackVer {
      * @param i
      * @return
      */
-    public ArrayList<InstructionContext> getEC(int i) {
+    public ArrayList<InstructionContext> getEC(/*@NonNegative*/ int i) {
       return ecs.get(i);
     }
     /**

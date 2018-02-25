@@ -118,6 +118,7 @@ public abstract class StackMapUtils {
    * @param a the attribute
    * @return the attribute name for the specified attribute
    */
+  /*@Pure*/
   protected final String get_attribute_name(Attribute a) {
     int con_index = a.getNameIndex();
     Constant c = pool.getConstant(con_index);

@@ -52,6 +52,7 @@ public final class StackTypes {
     return os_arr[offset];
   }
 
+  @SuppressWarnings("purity") // local StringBuilder
   /*@SideEffectFree*/
   @Override
   public String toString(/*>>>@GuardSatisfied StackTypes this*/ ) {
