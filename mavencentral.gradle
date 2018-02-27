@@ -1,9 +1,9 @@
-apply from: '../build.gradle'
+apply from: 'build.gradle'
 
-// To use this, run:
-//   ../gradlew -b mavencentral.gradle uploadArchives
-// or run from the top level:
-//   ./gradlew -b gradle/mavencentral.gradle uploadArchives
+// This file does not work when stored in a subdirectory (such as gradle/).
+
+// To use this, run from the top level:
+//   ./gradlew -b mavencentral.gradle uploadArchives
 // Your ~/.gradle/gradle.properties file must contain:
 //   ossrhUsername=YOUR_USER_NAME_HERE
 //   ossrhPassword=YOUR_PASSWORD_HERE
