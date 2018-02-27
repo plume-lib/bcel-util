@@ -9,9 +9,6 @@ apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
 dependencies {
   api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '0.0.6'
 
-  implementation 'org.apache.commons:commons-math3:3.6.1'
-  implementation 'com.google.guava:guava:20.0'
-
   testImplementation 'junit:junit:4.12'
 }
 
