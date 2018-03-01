@@ -96,6 +96,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
     InstructionList il = mg.getInstructionList();
     if (il == null) return;
 
+    boolean at_start = (ih.getPrev() == null);
     new_il.setPositions();
     InstructionHandle new_end = new_il.getEnd();
     int new_length = new_end.getPosition() + new_end.getInstruction().getLength();
@@ -105,6 +106,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
     // Add the new code in front of the instruction handle.
     InstructionHandle new_start = il.insert(ih, new_il);
+    il.setPositions();
 
     if (redirect_branches) {
       // Move all of the branches from the old instruction to the new start.
@@ -114,14 +116,22 @@ public abstract class InstructionListUtils extends StackMapUtils {
     // Move other targets to the new start.
     if (ih.hasTargeters()) {
       for (InstructionTargeter it : ih.getTargeters()) {
-        if (it instanceof LineNumberGen) {
+        if ((it instanceof LineNumberGen) && redirect_branches) {
           it.updateTarget(ih, new_start);
         } else if (it instanceof LocalVariableGen) {
-          it.updateTarget(ih, new_end); //QUESTION: was new_start
+          LocalVariableGen lvg = (LocalVariableGen) it;
+          // If ih is end of local variable range, leave as is.
+          // If ih is start of local variable range and we are
+          // at the begining of the method go ahead and change
+          // start to new_start.  This is to preserve live range
+          // for variables that are live for entire method.
+          if ((lvg.getStart() == ih) && at_start) {
+            it.updateTarget(ih, new_start);
+          }
         } else if ((it instanceof CodeExceptionGen) && redirect_branches) {
           CodeExceptionGen exc = (CodeExceptionGen) it;
           if (exc.getStartPC() == ih) exc.updateTarget(ih, new_start);
-          else if (exc.getEndPC() == ih) exc.updateTarget(ih, new_end);
+          // else if (exc.getEndPC() == ih) leave as is
           else if (exc.getHandlerPC() == ih) exc.setHandlerPC(new_start);
           else System.out.printf("Malformed CodeException: %s%n", exc);
         }
@@ -129,15 +139,38 @@ public abstract class InstructionListUtils extends StackMapUtils {
     }
 
     // Need to update stack map for change in length of instruction bytes.
+    // If redirect_branches is true then we don't want to change the
+    // offset of a stack map that was on the original ih, we want it
+    // to 'move' to the new_start.  If we did not redirect the branches
+    // then we do want any stack map associated with the original ih
+    // to stay there. The routine update_stack_map starts looking for
+    // a stack map after the location given as its first argument.
+    // Thus we need to subtract one from this location if the
+    // redirect_branches flag is false.
     il.setPositions();
-    // We use position-1 as we want any stack map associated with the
-    // ih to stay associated and not move to new_start.
-    // QUESTION: is this still true if redirect_branches?
-    update_stack_map_offset(new_start.getPosition() - 1, new_length);
+    update_stack_map_offset(new_start.getPosition() - (redirect_branches ? 0 : 1), new_length);
+
+    print_il(new_start, "After update_stack_map_offset");
 
     // We need to see if inserting the additional instructions caused
     // a change in the amount of switch instruction padding bytes.
     modify_stack_maps_for_switches(new_start, il);
+  }
+
+  private void print_il(InstructionHandle start, String label) {
+    if (debug_instrument.enabled) {
+      print_stack_map_table(label);
+      InstructionHandle tih = start;
+      while (tih != null) {
+        debug_instrument.log("inst: %s %n", tih);
+        if (tih.hasTargeters()) {
+          for (InstructionTargeter it : tih.getTargeters()) {
+            debug_instrument.log("targeter: %s %n", it);
+          }
+        }
+        tih = tih.getNext();
+      }
+    }
   }
 
   /**
@@ -220,22 +253,8 @@ public abstract class InstructionListUtils extends StackMapUtils {
     InstructionHandle end = new_il.getEnd();
     int new_length = end.getPosition() + end.getInstruction().getLength();
 
-    print_stack_map_table("Before replace_inst");
     debug_instrument.log("  replace_inst: %s %d%n%s%n", ih, new_il.getLength(), new_il);
-
-    if (debug_instrument.enabled) {
-      InstructionHandle tih = ih;
-      debug_instrument.log("replace_inst #0 %n");
-      while (tih != null) {
-        debug_instrument.log("inst: %s %n", tih);
-        if (tih.hasTargeters()) {
-          for (InstructionTargeter it : tih.getTargeters()) {
-            debug_instrument.log("targeter: %s %n", it);
-          }
-        }
-        tih = tih.getNext();
-      }
-    }
+    print_il(ih, "Before replace_inst");
 
     // If there is only one new instruction, just replace it in the handle
     if (new_il.getLength() == 1) {
@@ -266,36 +285,10 @@ public abstract class InstructionListUtils extends StackMapUtils {
       // to recalculate new_length as the padding may have changed.
       new_length = new_end.getNext().getPosition() - new_start.getPosition();
 
-      if (debug_instrument.enabled) {
-        InstructionHandle tih = new_end;
-        debug_instrument.log("replace_inst #0.5 %n");
-        while (tih != null) {
-          debug_instrument.log("inst: %s %n", tih);
-          if (tih.hasTargeters()) {
-            for (InstructionTargeter it : tih.getTargeters()) {
-              debug_instrument.log("targeter: %s %n", it);
-            }
-          }
-          tih = tih.getNext();
-        }
-      }
-
       // Move all of the branches from the old instruction to the new start
       il.redirectBranches(ih, new_start);
 
-      if (debug_instrument.enabled) {
-        InstructionHandle tih = new_end;
-        debug_instrument.log("replace_inst #1 %n");
-        while (tih != null) {
-          debug_instrument.log("inst: %s %n", tih);
-          if (tih.hasTargeters()) {
-            for (InstructionTargeter it : tih.getTargeters()) {
-              debug_instrument.log("targeter: %s %n", it);
-            }
-          }
-          tih = tih.getNext();
-        }
-      }
+      print_il(new_end, "replace_inst #1");
 
       // Move other targets to the new instuctions.
       if (ih.hasTargeters()) {
@@ -316,19 +309,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
         }
       }
 
-      if (debug_instrument.enabled) {
-        InstructionHandle tih = new_end;
-        debug_instrument.log("replace_inst #2 %n");
-        while (tih != null) {
-          debug_instrument.log("inst: %s %n", tih);
-          if (tih.hasTargeters()) {
-            for (InstructionTargeter it : tih.getTargeters()) {
-              debug_instrument.log("targeter: %s %n", it);
-            }
-          }
-          tih = tih.getNext();
-        }
-      }
+      print_il(new_end, "replace_inst #2");
 
       // Remove the old handle.  There should be no targeters left to it.
       try {
@@ -340,19 +321,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
       // Need to update instruction address due to delete above.
       il.setPositions();
 
-      if (debug_instrument.enabled) {
-        InstructionHandle tih = new_end;
-        debug_instrument.log("replace_inst #3 %n");
-        while (tih != null) {
-          debug_instrument.log("inst: %s %n", tih);
-          if (tih.hasTargeters()) {
-            for (InstructionTargeter it : tih.getTargeters()) {
-              debug_instrument.log("targeter: %s %n", it);
-            }
-          }
-          tih = tih.getNext();
-        }
-      }
+      print_il(new_end, "replace_inst #3");
 
       if (needStackMap) {
         // Before we look for branches in the inserted code we need
@@ -394,19 +363,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           nih = nih.getNext();
         }
 
-        if (debug_instrument.enabled) {
-          InstructionHandle tih = new_end;
-          debug_instrument.log("replace_inst #4 %n");
-          while (tih != null) {
-            debug_instrument.log("inst: %s %n", tih);
-            if (tih.hasTargeters()) {
-              for (InstructionTargeter it : tih.getTargeters()) {
-                debug_instrument.log("targeter: %s %n", it);
-              }
-            }
-            tih = tih.getNext();
-          }
-        }
+        print_il(new_end, "replace_inst #4");
 
         if (target_count != 0) {
           // Currently, target_count is always 2; but code is
@@ -571,18 +528,6 @@ public abstract class InstructionListUtils extends StackMapUtils {
     }
 
     debug_instrument.log("%n");
-    print_stack_map_table("replace_inst After");
-    if (debug_instrument.enabled) {
-      debug_instrument.log("replace_inst #5 %n");
-      while (new_end != null) {
-        debug_instrument.log("inst: %s %n", new_end);
-        if (new_end.hasTargeters()) {
-          for (InstructionTargeter it : new_end.getTargeters()) {
-            debug_instrument.log("targeter: %s %n", it);
-          }
-        }
-        new_end = new_end.getNext();
-      }
-    }
+    print_il(new_end, "replace_inst #5");
   }
 }
