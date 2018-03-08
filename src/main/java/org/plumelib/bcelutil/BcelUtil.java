@@ -756,7 +756,7 @@ public final class BcelUtil {
     primitiveClasses.put("short", Short.TYPE);
   }
 
-  // TODO: This is a private copy (but protected to permit testing).  Whet
+  // TODO: This is a private copy (but protected to permit testing).  When
   // the method is moved from monolithic plume-lib, perhaps depend on the
   // new version.  Or just keep depending on this small implementation.
   // TODO: should create a method that works exactly for the desired argument type.

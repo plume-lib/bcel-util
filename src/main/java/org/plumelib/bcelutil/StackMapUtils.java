@@ -25,7 +25,8 @@ import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.RET;
 import org.apache.bcel.generic.Type;
 import org.apache.bcel.verifier.VerificationResult;
-import plume.SimpleLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*>>>
 import org.checkerframework.checker.nullness.qual.*;
@@ -34,8 +35,8 @@ import org.checkerframework.dataflow.qual.*;
 */
 
 /**
- * This class provides methods to manipulate the StackMapTable. It is used to
- * maintain and modify the StackMap for a method.
+ * This class provides methods to manipulate the StackMapTable. It is used to maintain and modify
+ * the StackMap for a method.
  *
  * <p>BCEL should automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
@@ -63,7 +64,7 @@ public abstract class StackMapUtils {
   /** The pool for the method currently being processed. Must be set by the client. */
   protected /*@Nullable*/ ConstantPoolGen pool = null;
 
-  protected SimpleLog debug_instrument = new SimpleLog(false);
+  protected Logger debug_instrument = LoggerFactory.getLogger(StackMapUtils.class);
 
   /** Whether or not the current method needs a StackMap. */
   protected boolean needStackMap = false;
@@ -81,21 +82,21 @@ public abstract class StackMapUtils {
   protected int initial_locals_count;
 
   /**
-   * The number of live local variables according to the current StackMap of interest.
-   * Set by update_stack_map_offset, find_stack_map_equal, find_stack_map_index_before,
-   * or find_stack_map_index_after.
+   * The number of live local variables according to the current StackMap of interest. Set by
+   * update_stack_map_offset, find_stack_map_equal, find_stack_map_index_before, or
+   * find_stack_map_index_after.
    */
   protected int number_active_locals;
 
   /**
-   * Offset into code that corresponds to the current StackMap of interest.
-   * Set by find_stack_map_index_before.
+   * Offset into code that corresponds to the current StackMap of interest. Set by
+   * find_stack_map_index_before.
    */
   protected int running_offset;
 
   /**
-   * The index of the first 'true' local in the local variable table.
-   * That is, after 'this' and any parameters.
+   * The index of the first 'true' local in the local variable table. That is, after 'this' and any
+   * parameters.
    */
   protected int first_local_index;
 
@@ -103,9 +104,8 @@ public abstract class StackMapUtils {
   private StackMapEntry[] empty_stack_map_table = {};
 
   /**
-   * A map from instructions that create uninitialized NEW objects to
-   * the corresponding StackMap entry.
-   * Set by build_unitialized_NEW_map.
+   * A map from instructions that create uninitialized NEW objects to the corresponding StackMap
+   * entry. Set by build_unitialized_NEW_map.
    */
   private Map<InstructionHandle, Integer> uninitialized_NEW_map =
       new HashMap<InstructionHandle, Integer>();
@@ -322,7 +322,8 @@ public abstract class StackMapUtils {
 
   /**
    * Check to see if (due to some instruction modifications) there have been any changes in a switch
-   * statement's padding bytes. If so, then update the corresponding StackMap to reflect this change.
+   * statement's padding bytes. If so, then update the corresponding StackMap to reflect this
+   * change.
    *
    * @param ih where to start looking for a switch instruction
    * @param il instruction list to search
@@ -453,7 +454,7 @@ public abstract class StackMapUtils {
                   offset,
                   il.findHandle(live_start),
                   il.findHandle(byte_code_offset));
-          debug_instrument.log(
+          debug_instrument.debug(
               "Added local  %s, %d, %d : %s, %s%n",
               new_lvg.getIndex(),
               new_lvg.getStart().getPosition(),
@@ -474,7 +475,7 @@ public abstract class StackMapUtils {
       new_lvg =
           mgen.addLocalVariable(
               "DaIkOnTeMp" + offset, live_type, offset, il.findHandle(live_start), null);
-      debug_instrument.log(
+      debug_instrument.debug(
           "Added local  %s, %d, %d : %s, %s%n",
           new_lvg.getIndex(),
           new_lvg.getStart().getPosition(),
@@ -496,7 +497,7 @@ public abstract class StackMapUtils {
         new_lvg =
             mgen.addLocalVariable(
                 "DaIkOnTeMp" + offset, Type.OBJECT, offset, il.findHandle(byte_code_offset), null);
-        debug_instrument.log(
+        debug_instrument.debug(
             "Added local  %s, %d, %d : %s, %s%n",
             new_lvg.getIndex(),
             new_lvg.getStart().getPosition(),
@@ -549,8 +550,8 @@ public abstract class StackMapUtils {
 
   /**
    * One of uninitialized NEW instructions has moved. Update its offset in StackMap entries. Note
-   * that more than one entry could refer to the same instruction. This is a helper routine used
-   * by update_uninitialized_NEW_offsets.
+   * that more than one entry could refer to the same instruction. This is a helper routine used by
+   * update_uninitialized_NEW_offsets.
    *
    * @param old_offset original location of NEW instruction
    * @param new_offset new location of NEW instruction
@@ -649,9 +650,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Get existing StackMapTable from the MethodGen arguments.  If there is none,
-   * create a new empty one. Sets both smta and stack_map_table.
-   * Must be called prior to any other methods that manipulate the stack_map_table!
+   * Get existing StackMapTable from the MethodGen arguments. If there is none, create a new empty
+   * one. Sets both smta and stack_map_table. Must be called prior to any other methods that
+   * manipulate the stack_map_table!
    *
    * @param mgen MethodGen to search
    * @param java_class_version Java version for the classfile; stack_map_table is optional before
@@ -666,7 +667,7 @@ public abstract class StackMapUtils {
       stack_map_table = ((StackMap) (smta.copy(smta.getConstantPool()))).getStackMap();
       needStackMap = true;
 
-      debug_instrument.log(
+      debug_instrument.debug(
           "Attribute tag: %s length: %d nameIndex: %d%n",
           smta.getTag(), smta.getLength(), smta.getNameIndex());
       // Delete existing stack map - we'll add a new one later.
@@ -681,17 +682,17 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Print the contents of the StackMapTable to the debug_instrument log.
+   * Print the contents of the StackMapTable to the debug_instrument.debug.
    *
    * @param prefix label to display with table
    */
   protected final void print_stack_map_table(String prefix) {
 
-    debug_instrument.log("%nStackMap(%s) %s items:%n", prefix, stack_map_table.length);
+    debug_instrument.debug("%nStackMap(%s) %s items:%n", prefix, stack_map_table.length);
     running_offset = -1; // no +1 on first entry
     for (int i = 0; i < stack_map_table.length; i++) {
       running_offset = stack_map_table[i].getByteCodeOffset() + running_offset + 1;
-      debug_instrument.log("@%03d %s %n", running_offset, stack_map_table[i]);
+      debug_instrument.debug("@%03d %s %n", running_offset, stack_map_table[i]);
     }
   }
 
@@ -924,7 +925,7 @@ public abstract class StackMapUtils {
       }
       mgen.setMaxLocals(mgen.getMaxLocals() + arg_type.getSize());
 
-      debug_instrument.log(
+      debug_instrument.debug(
           "Added arg    %s%n",
           arg_new.getIndex() + ": " + arg_new.getName() + ", " + arg_new.getType());
 
@@ -938,7 +939,7 @@ public abstract class StackMapUtils {
       // add in the new local variable type.
       update_full_frame_stack_map_entries(new_offset, arg_type, locals);
 
-      debug_instrument.log("New LocalVariableTable:%n%s%n", mgen.getLocalVariableTable(pool));
+      debug_instrument.debug("New LocalVariableTable:%n%s%n", mgen.getLocalVariableTable(pool));
     }
     return arg_new;
   }
@@ -1047,7 +1048,7 @@ public abstract class StackMapUtils {
       mgen.setMaxLocals(mgen.getMaxLocals() + local_type.getSize());
     }
 
-    debug_instrument.log(
+    debug_instrument.debug(
         "Added local  %s%n", lv_new.getIndex() + ": " + lv_new.getName() + ", " + lv_new.getType());
 
     // Now process the instruction list, adding one to the offset
@@ -1060,15 +1061,15 @@ public abstract class StackMapUtils {
     // add in the new local variable type.
     update_full_frame_stack_map_entries(new_offset, local_type, locals);
 
-    debug_instrument.log("New LocalVariableTable:%n%s%n", mgen.getLocalVariableTable(pool));
+    debug_instrument.debug("New LocalVariableTable:%n%s%n", mgen.getLocalVariableTable(pool));
     return lv_new;
   }
 
   /**
-   * Under some circumstances, there may be problems with the local variable table. These problems occur
-   * when the Java compiler adds unnamed entries. There may be unnamed parameters and/or unnamed local variables.
-   * These items appear as gaps in the LocalVariable table.  This routine creates LocalVariable entries
-   * for these missing items.
+   * Under some circumstances, there may be problems with the local variable table. These problems
+   * occur when the Java compiler adds unnamed entries. There may be unnamed parameters and/or
+   * unnamed local variables. These items appear as gaps in the LocalVariable table. This routine
+   * creates LocalVariable entries for these missing items.
    *
    * <ol>
    *   <li>The java Compiler allocates a hidden parameter for the constructor of an inner class.
@@ -1131,7 +1132,7 @@ public abstract class StackMapUtils {
       // Add the 'this' pointer argument back in.
       l = locals[0];
       new_lvg = mgen.addLocalVariable(l.getName(), l.getType(), l.getIndex(), null, null);
-      debug_instrument.log(
+      debug_instrument.debug(
           "Added <this> %s%n",
           new_lvg.getIndex() + ": " + new_lvg.getName() + ", " + new_lvg.getType());
       loc_index = 1;
@@ -1152,7 +1153,7 @@ public abstract class StackMapUtils {
         new_lvg = mgen.addLocalVariable(l.getName(), l.getType(), l.getIndex(), null, null);
         loc_index++;
       }
-      debug_instrument.log(
+      debug_instrument.debug(
           "Added param  %s%n",
           new_lvg.getIndex() + ": " + new_lvg.getName() + ", " + new_lvg.getType());
       offset += arg_types[ii].getSize();
@@ -1190,7 +1191,7 @@ public abstract class StackMapUtils {
       } else {
         new_lvg =
             mgen.addLocalVariable(l.getName(), l.getType(), l.getIndex(), l.getStart(), l.getEnd());
-        debug_instrument.log(
+        debug_instrument.debug(
             "Added local  %s%n",
             new_lvg.getIndex() + ": " + new_lvg.getName() + ", " + new_lvg.getType());
         offset = new_lvg.getIndex() + (new_lvg.getType()).getSize();

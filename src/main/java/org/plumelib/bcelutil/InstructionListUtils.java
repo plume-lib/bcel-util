@@ -102,7 +102,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
     int new_length = new_end.getPosition() + new_end.getInstruction().getLength();
 
     print_stack_map_table("Before insert_inst");
-    debug_instrument.log("  insert_inst: %d%n%s%n", new_il.getLength(), new_il);
+    debug_instrument.debug("  insert_inst: %d%n%s%n", new_il.getLength(), new_il);
 
     // Add the new code in front of the instruction handle.
     InstructionHandle new_start = il.insert(ih, new_il);
@@ -158,14 +158,14 @@ public abstract class InstructionListUtils extends StackMapUtils {
   }
 
   private void print_il(InstructionHandle start, String label) {
-    if (debug_instrument.enabled) {
+    if (debug_instrument.isDebugEnabled()) {
       print_stack_map_table(label);
       InstructionHandle tih = start;
       while (tih != null) {
-        debug_instrument.log("inst: %s %n", tih);
+        debug_instrument.debug("inst: %s %n", tih);
         if (tih.hasTargeters()) {
           for (InstructionTargeter it : tih.getTargeters()) {
-            debug_instrument.log("targeter: %s %n", it);
+            debug_instrument.debug("targeter: %s %n", it);
           }
         }
         tih = tih.getNext();
@@ -253,7 +253,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
     InstructionHandle end = new_il.getEnd();
     int new_length = end.getPosition() + end.getInstruction().getLength();
 
-    debug_instrument.log("  replace_inst: %s %d%n%s%n", ih, new_il.getLength(), new_il);
+    debug_instrument.debug("  replace_inst: %s %d%n%s%n", ih, new_il.getLength(), new_il);
     print_il(ih, "Before replace_inst");
 
     // If there is only one new instruction, just replace it in the handle
@@ -356,7 +356,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
             for (InstructionTargeter it : nih.getTargeters()) {
               if (it instanceof BranchInstruction) {
                 target_offsets[target_count++] = nih.getPosition();
-                debug_instrument.log("New branch target: %s %n", nih);
+                debug_instrument.debug("New branch target: %s %n", nih);
               }
             }
           }
@@ -434,7 +434,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           boolean need_full_maps = false;
           for (int i = 0; i < target_count; i++) {
             stack = stack_types.get(target_offsets[i]);
-            debug_instrument.log("stack: %s %n", stack);
+            debug_instrument.debug("stack: %s %n", stack);
 
             if (number_extra_locals == 0 && stack.size() == 1 && !need_full_maps) {
               // the simple case
@@ -527,7 +527,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
       }
     }
 
-    debug_instrument.log("%n");
+    debug_instrument.debug("%n");
     print_il(new_end, "replace_inst #5");
   }
 }
