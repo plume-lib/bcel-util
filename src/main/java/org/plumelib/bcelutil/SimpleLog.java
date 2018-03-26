@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.*;
  *   <li>Can be enabled and disabled (when disabled, all operations are no-ops),
  *   <li>Can indent/exdent log output,
  *   <li>Writes to standard output, and
- *   <li>Can provide a backtrace
+ *   <li>Can provide a StackTrace
  * </ul>
  */
 public final class SimpleLog {
@@ -24,7 +24,7 @@ public final class SimpleLog {
   /** The current indentation string. */
   private String indent_str = "";
   /** Indentation string for one level of indentation. */
-  public final String INDENT_STR_ONE_LEVEL = "  ";
+  private final String INDENT_STR_ONE_LEVEL = "  ";
 
   /**
    * Create a new SimpleLog object.
@@ -44,7 +44,10 @@ public final class SimpleLog {
   }
 
   /**
-   * Log a message.
+   * Log a message to System.out.
+   * The message is prepended with the current indentation string.
+   * Note that the indentation is only applied at the start of
+   * the message, not for every line break within the message.
    *
    * @param format format string for message
    * @param args values to be substituted into format
@@ -57,8 +60,8 @@ public final class SimpleLog {
     }
   }
 
-  /** Print a backtrace (traceback, or tb) to the log. */
-  public void tb() {
+  /** Print a StackTrace to System.out. */
+  public void logStackTrace() {
     if (enabled) {
       Throwable t = new Throwable();
       t.fillInStackTrace();
@@ -70,26 +73,26 @@ public final class SimpleLog {
     }
   }
 
-  /** Indents by one level. */
+  /** Increases indentation by one level. */
   public void indent() {
     if (enabled) {
       indent_str += INDENT_STR_ONE_LEVEL;
     }
   }
 
-  /** Clears indent. */
-  public void clear() {
+  /** Resets indentation to none. */
+  public void resetIndent() {
     if (enabled) {
       indent_str = "";
     }
   }
 
-  /** Exdents: reduces indentation. */
+  /** Decreases indentation by one level. */
   public void exdent() {
     if (enabled) {
       if (indent_str.isEmpty()) {
         log("Called exdent when indentation was 0.");
-        tb();
+        logStackTrace();
       } else {
         indent_str = indent_str.substring(0, indent_str.length() - INDENT_STR_ONE_LEVEL.length());
       }
