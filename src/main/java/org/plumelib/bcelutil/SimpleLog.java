@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.*;
  *   <li>Can be enabled and disabled (when disabled, all operations are no-ops),
  *   <li>Can indent/exdent log output,
  *   <li>Writes to standard output, and
- *   <li>Can provide a StackTrace
+ *   <li>Can provide a stack trace.
  * </ul>
  */
 public final class SimpleLog {
@@ -26,6 +26,11 @@ public final class SimpleLog {
   /** Indentation string for one level of indentation. */
   private final String INDENT_STR_ONE_LEVEL = "  ";
 
+  /** Create a new SimpleLog object with logging enabled. */
+  public SimpleLog() {
+    this(true);
+  }
+
   /**
    * Create a new SimpleLog object.
    *
@@ -35,19 +40,19 @@ public final class SimpleLog {
     this.enabled = enabled;
   }
 
-  public SimpleLog() {
-    this(true);
-  }
-
+  /**
+   * Return whether logging is enabled.
+   *
+   * @param whether logging is enabled
+   */
   public boolean enabled() {
     return enabled;
   }
 
   /**
-   * Log a message to System.out.
-   * The message is prepended with the current indentation string.
-   * Note that the indentation is only applied at the start of
-   * the message, not for every line break within the message.
+   * Log a message to System.out. The message is prepended with the current indentation string. The
+   * indentation is only applied at the start of the message, not for every line break within the
+   * message.
    *
    * @param format format string for message
    * @param args values to be substituted into format
@@ -60,7 +65,7 @@ public final class SimpleLog {
     }
   }
 
-  /** Print a StackTrace to System.out. */
+  /** Print a stack trace to System.out. */
   public void logStackTrace() {
     if (enabled) {
       Throwable t = new Throwable();
@@ -80,13 +85,6 @@ public final class SimpleLog {
     }
   }
 
-  /** Resets indentation to none. */
-  public void resetIndent() {
-    if (enabled) {
-      indent_str = "";
-    }
-  }
-
   /** Decreases indentation by one level. */
   public void exdent() {
     if (enabled) {
@@ -96,6 +94,13 @@ public final class SimpleLog {
       } else {
         indent_str = indent_str.substring(0, indent_str.length() - INDENT_STR_ONE_LEVEL.length());
       }
+    }
+  }
+
+  /** Resets indentation to none. Has no effect if logging is disabled. */
+  public void resetIndent() {
+    if (enabled) {
+      indent_str = "";
     }
   }
 }
