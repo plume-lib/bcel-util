@@ -703,6 +703,7 @@ public abstract class StackMapUtils {
   protected final void create_new_stack_map_attribute(MethodGen mgen) throws IOException {
 
     if (!needStackMap) return;
+    if (stack_map_table == empty_stack_map_table) return;
     print_stack_map_table("Final");
 
     // Build new StackMapTable attribute
