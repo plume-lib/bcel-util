@@ -43,7 +43,7 @@ public final class SimpleLog {
   /**
    * Return whether logging is enabled.
    *
-   * @param whether logging is enabled
+   * @return whether logging is enabled
    */
   public boolean enabled() {
     return enabled;
