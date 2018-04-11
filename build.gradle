@@ -1,16 +1,14 @@
-plugins {
-  id "com.github.johnrengelman.shadow" version "2.0.3"
-  id "com.github.sherter.google-java-format" version "0.6"
-  id "com.dorongold.task-tree" version "1.3"
-}
-
-apply plugin: 'java'
+// Use "apply plugins" instead of "plugins { ... }", because this file
+// is included from other files.
 apply plugin: 'java-library'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 // Checker Framework pluggable type-checking
 apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
 
-// Code formatting with Google Java Format
+// Code formatting with Google Java Format.
+// Currently commented out because of conflicts with other Gradle commands.
+// Uncomment as needed.  :-(
 // apply from: 'gradle/codeformatting.gradle'
 
 dependencies {
@@ -33,23 +31,17 @@ task javadocWeb(type: Javadoc) {
 }
 
 // To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
+// To show task list as a tree, run: ./gradlew <taskname> taskTree
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
+    }
+}
 
 // To show task list as a tree, run: ./gradlew <taskname> taskTree
-
-/*
- * Configuration for formatting
- */
-googleJavaFormat {
-}
-
-tasks.googleJavaFormat {
-  group 'Formatting'
-  description = "Reformat Java source code with Google-Java-format"
-  exclude 'src/test'
-}
-
-tasks.verifyGoogleJavaFormat {
-  group 'Formatting'
-  description = "Check Java source code formatting with Google-Java-format"
-  exclude 'src/test'
-}
+// plugins {
+//   id "com.dorongold.task-tree" version "1.3"
+// }
