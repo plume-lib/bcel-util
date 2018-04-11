@@ -37,7 +37,7 @@ apply plugin: 'signing'
 
 group = "org.plumelib"
 archivesBaseName = "bcel-util"
-version = "0.0.6"
+version = "0.0.7"
 
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
