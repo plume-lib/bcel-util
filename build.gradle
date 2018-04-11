@@ -1,3 +1,10 @@
+plugins {
+  id "com.github.johnrengelman.shadow" version "2.0.3"
+  id "com.github.sherter.google-java-format" version "0.6"
+  id "com.dorongold.task-tree" version "1.3"
+}
+
+apply plugin: 'java'
 apply plugin: 'java-library'
 
 // Checker Framework pluggable type-checking
@@ -8,8 +15,6 @@ apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
 
 dependencies {
   api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '0.0.6'
-
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.13'
 
   testImplementation 'junit:junit:4.12'
 }
@@ -27,15 +32,24 @@ task javadocWeb(type: Javadoc) {
   classpath = project.sourceSets.main.compileClasspath
 }
 
-
 // To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
-    }
+
+// To show task list as a tree, run: ./gradlew <taskname> taskTree
+
+/*
+ * Configuration for formatting
+ */
+googleJavaFormat {
 }
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
+
+tasks.googleJavaFormat {
+  group 'Formatting'
+  description = "Reformat Java source code with Google-Java-format"
+  exclude 'src/test'
+}
+
+tasks.verifyGoogleJavaFormat {
+  group 'Formatting'
+  description = "Check Java source code formatting with Google-Java-format"
+  exclude 'src/test'
+}
