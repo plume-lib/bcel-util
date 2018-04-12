@@ -188,6 +188,68 @@ public abstract class InstructionListUtils extends StackMapUtils {
   }
 
   /**
+   * Delete instruction(s) from start_ih thru end_ih in an instruction list. start_ih may be the
+   * first instruction of the list, but end_ih must not be the last instruction of the list.
+   * start_ih may be equal to end_ih. There must not be any targeters on any of the instructions to
+   * be deleted except for start_ih. Those targeters will be moved to the first instruction
+   * following end_ih.
+   *
+   * @param mg MethodGen containing the instruction handles
+   * @param start_ih InstructionHandle indicating first instruction to be deleted
+   * @param end_ih InstructionHandle indicating last instruction to be deleted
+   */
+  protected final void delete_instructions(
+      MethodGen mg, InstructionHandle start_ih, InstructionHandle end_ih) {
+    InstructionList il = mg.getInstructionList();
+    InstructionHandle new_start = end_ih.getNext();
+    if (new_start == null) {
+      throw new RuntimeException("Cannot delete last instruction.");
+    }
+
+    il.setPositions();
+    int size_deletion = start_ih.getPosition() - new_start.getPosition();
+
+    // Move all of the branches from the first instruction to the new start
+    il.redirectBranches(start_ih, new_start);
+
+    // Move other targeters to the new start.
+    if (start_ih.hasTargeters()) {
+      for (InstructionTargeter it : start_ih.getTargeters()) {
+        if (it instanceof LineNumberGen) {
+          it.updateTarget(start_ih, new_start);
+        } else if (it instanceof LocalVariableGen) {
+          it.updateTarget(start_ih, new_start);
+        } else if (it instanceof CodeExceptionGen) {
+          CodeExceptionGen exc = (CodeExceptionGen) it;
+          if (exc.getStartPC() == start_ih) exc.updateTarget(start_ih, new_start);
+          else if (exc.getEndPC() == start_ih) exc.updateTarget(start_ih, new_start);
+          else if (exc.getHandlerPC() == start_ih) exc.setHandlerPC(new_start);
+          else System.out.printf("Malformed CodeException: %s%n", exc);
+        } else {
+          System.out.printf("unexpected target %s%n", it);
+        }
+      }
+    }
+
+    // Remove the old handle(s).  There should not be any targeters left.
+    try {
+      il.delete(start_ih, end_ih);
+    } catch (Exception e) {
+      throw new Error("Can't delete instruction list", e);
+    }
+    // Need to update instruction positions due to delete above.
+    il.setPositions();
+
+    // Update stack map to account for deleted instructions.
+    update_stack_map_offset(new_start.getPosition(), size_deletion);
+
+    // Check to see if the deletion caused any changes
+    // in the amount of switch instruction padding bytes.
+    // If so, we may need to update the corresponding stackmap.
+    modify_stack_maps_for_switches(new_start, il);
+  }
+
+  /**
    * Compute the StackMapTypes of the live variables of the current method at a specific location
    * within the method. There may be gaps ("Bogus" or non-live slots) so we can't just count the
    * number of live variables, we must find the max index of all the live variables.
