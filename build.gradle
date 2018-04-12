@@ -40,6 +40,8 @@ buildscript {
         classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
 }
+apply plugin: 'com.github.johnrengelman.shadow'
+
 
 // To show task list as a tree, run: ./gradlew <taskname> taskTree
 // plugins {
