@@ -51,7 +51,7 @@ public final class StackTypes {
   @SuppressWarnings({"purity", "lock"}) // local StringBuilder
   /*@SideEffectFree*/
   @Override
-  public String toString(/*>>>@GuardSatisfied StackTypes this*/ ) {
+  public String toString(/*>>>@GuardSatisfied StackTypes this*/) {
 
     StringBuilder sb = new StringBuilder();
 
