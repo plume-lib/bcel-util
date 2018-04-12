@@ -1,7 +1,6 @@
 // Use "apply plugins" instead of "plugins { ... }", because this file
 // is included from other files.
 apply plugin: 'java-library'
-apply plugin: 'com.github.johnrengelman.shadow'
 
 // Checker Framework pluggable type-checking
 apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
@@ -30,8 +29,8 @@ task javadocWeb(type: Javadoc) {
   classpath = project.sourceSets.main.compileClasspath
 }
 
+
 // To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
-// To show task list as a tree, run: ./gradlew <taskname> taskTree
 buildscript {
     repositories {
         jcenter()
