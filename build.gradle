@@ -1,9 +1,13 @@
+// Use "apply plugins" instead of "plugins { ... }", because this file
+// is included from other files.
 apply plugin: 'java-library'
 
 // Checker Framework pluggable type-checking
 apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
 
-// Code formatting with Google Java Format
+// Code formatting with Google Java Format.
+// Currently commented out because of conflicts with other Gradle commands.
+// Uncomment as needed.  :-(
 // apply from: 'gradle/codeformatting.gradle'
 
 dependencies {
@@ -39,3 +43,9 @@ buildscript {
 }
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
+
+
+// To show task list as a tree, run: ./gradlew <taskname> taskTree
+// plugins {
+//   id "com.dorongold.task-tree" version "1.3"
+// }
