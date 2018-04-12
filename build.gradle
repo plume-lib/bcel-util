@@ -13,8 +13,6 @@ apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
 dependencies {
   api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '0.0.6'
 
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.13'
-
   testImplementation 'junit:junit:4.12'
 }
 
@@ -42,7 +40,6 @@ buildscript {
     }
 }
 apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
 
 
 // To show task list as a tree, run: ./gradlew <taskname> taskTree
