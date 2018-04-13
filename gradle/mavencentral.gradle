@@ -33,6 +33,7 @@ artifacts {
 }
 
 signing {
+    required { project.gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
 
