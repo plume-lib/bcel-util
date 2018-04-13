@@ -1,5 +1,8 @@
 // Use "apply plugins" instead of "plugins { ... }", because the latter can currently
 // only be used in a project's build script and this file is included from other files.
+// Another consequence of this file's inclusion is that any buildscripts (that identify
+// plugins) added to this file need to be duplicated in mavencentral.gradle.
+
 apply plugin: 'java-library'
 
 // Checker Framework pluggable type-checking
