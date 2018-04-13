@@ -1,14 +1,14 @@
-// Use "apply plugins" instead of "plugins { ... }", because this file
-// is included from other files.
+plugins {
+  id "com.github.johnrengelman.shadow" version "2.0.3"
+  id "com.github.sherter.google-java-format" version "0.6"
+  id "com.dorongold.task-tree" version "1.3"
+}
+
 apply plugin: 'java-library'
 
 // Checker Framework pluggable type-checking
 apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
-
-// Code formatting with Google Java Format.
-// Currently commented out because of conflicts with other Gradle commands.
-// Uncomment as needed.  :-(
-// apply from: 'gradle/codeformatting.gradle'
+apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
 dependencies {
   api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '0.0.6'
@@ -28,21 +28,3 @@ task javadocWeb(type: Javadoc) {
   destinationDir = file("/cse/web/research/plumelib/bcel-util/api")
   classpath = project.sourceSets.main.compileClasspath
 }
-
-
-// To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
-    }
-}
-apply plugin: 'com.github.johnrengelman.shadow'
-
-
-// To show task list as a tree, run: ./gradlew <taskname> taskTree
-// plugins {
-//   id "com.dorongold.task-tree" version "1.3"
-// }
