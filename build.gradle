@@ -1,15 +1,17 @@
-// Use "apply plugins" instead of "plugins { ... }", because the latter can currently
-// only be used in a project's build script and this file is included from other files.
-// Another consequence of this file's inclusion is that any buildscripts (that identify
-// plugins) added to this file need to be duplicated in mavencentral.gradle.
+plugins {
+  // To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
+  id "com.github.johnrengelman.shadow" version "2.0.3"
+  // Code formatting with Google Java Format
+  id "com.github.sherter.google-java-format" version "0.6"
+  // To show task list as a tree, run: ./gradlew <taskname> taskTree
+  id "com.dorongold.task-tree" version "1.3"
+}
 
 apply plugin: 'java-library'
 
 // Checker Framework pluggable type-checking
 apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
-
-// Code formatting with Google Java Format
-apply plugin: 'com.github.sherter.google-java-format'
+apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
 dependencies {
   api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '0.0.6'
@@ -30,21 +32,4 @@ task javadocWeb(type: Javadoc) {
   classpath = project.sourceSets.main.compileClasspath
 }
 
-
-// To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.6"
-    classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
-    classpath "gradle.plugin.com.dorongold.plugins:task-tree:1.3"
-  }
-}
-apply plugin: 'com.github.johnrengelman.shadow'
-
-// To show task list as a tree, run: ./gradlew <taskname> taskTree
 apply plugin: 'com.dorongold.task-tree'
