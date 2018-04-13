@@ -58,42 +58,44 @@ signing {
 }
 
 uploadArchives {
-  repositories {
-    mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+  doFirst {
+    repositories {
+      mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      pom.project {
-        name 'Plume-lib Bcel-Util'
-        packaging 'jar'
-        description 'Utility functions for BCEL.'
-        url 'https://github.com/plume-lib/bcel-util'
-
-        scm { 
-          connection 'scm:git:git@github.com:plume-lib/bcel-util.git'
-          developerConnection 'scm:git:git@github.com:plume-lib/bcel-util.git'
-          url 'git@github.com:plume-lib/bcel-util.git'
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+          authentication(userName: ossrhUsername, password: ossrhPassword)
         }
 
-        licenses {
-          license {
-            name 'MIT License'
-            url 'https://opensource.org/licenses/MIT'
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+          authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        pom.project {
+          name 'Plume-lib Bcel-Util'
+          packaging 'jar'
+          description 'Utility functions for BCEL.'
+          url 'https://github.com/plume-lib/bcel-util'
+
+          scm {
+            connection 'scm:git:git@github.com:plume-lib/bcel-util.git'
+            developerConnection 'scm:git:git@github.com:plume-lib/bcel-util.git'
+            url 'git@github.com:plume-lib/bcel-util.git'
           }
-        }
 
-        developers {
-          developer {
-            id 'mernst'
-            name 'Michael Ernst'
-            email 'mernst@alum.mit.edu'
+          licenses {
+            license {
+              name 'MIT License'
+              url 'https://opensource.org/licenses/MIT'
+            }
+          }
+
+          developers {
+            developer {
+              id 'mernst'
+              name 'Michael Ernst'
+              email 'mernst@alum.mit.edu'
+            }
           }
         }
       }
