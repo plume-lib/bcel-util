@@ -68,7 +68,7 @@ public abstract class StackMapUtils {
   protected boolean needStackMap = false;
 
   /** Working copy of StackMapTable; set by fetch_current_stack_map_table. */
-  protected StackMapEntry /*@Nullable*/ [] stack_map_table = null;
+  protected StackMapEntry /*@Nullable*/[] stack_map_table = null;
 
   /** Original stack map table attribute; set by fetch_current_stack_map_table. */
   protected /*@Nullable*/ StackMap smta = null;
