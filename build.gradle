@@ -8,6 +8,7 @@ apply plugin: 'java-library'
 
 // Checker Framework pluggable type-checking
 apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
+// To upload to Maven Central, run:  ./gradlew uploadArchives
 apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
 dependencies {
