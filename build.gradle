@@ -32,10 +32,16 @@ task javadocWeb(type: Javadoc) {
   destinationDir = file("/cse/web/research/plumelib/bcel-util/api")
   classpath = project.sourceSets.main.compileClasspath
 }
+
 task installGitHooks(type: Copy) {
   description 'Copies git hooks to .git directory'
   from 'githooks'
   into '.git/hooks'
+}
+
+task compileAll() {
+  dependsOn compileJava
+  dependsOn compileTestJava
 }
 
 tasks.withType(JavaCompile) {
