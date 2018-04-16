@@ -2,10 +2,10 @@
 #
 # Verify proper Java file formatting prior to checkin.
 
-files=$(git diff --cached --name-only --diff-filter=ACM | paste -s -d",")
+changed_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.java$' | paste -s -d",")
 # this only works if ignoreFailures is set to false (which it is by default)
-./gradlew verifyGJF -DverifyGoogleJavaFormat.include="$files" &>/dev/null && exit 0
+./gradlew verifyGJF -DverifyGoogleJavaFormat.include="$changed_files" &>/dev/null && exit 0
 
 echo "Some files are not formatted properly. Please run:"
-echo "./gradlew gJF -DgoogleJavaFormat.include=\"$files\""
+echo "./gradlew gJF -DgoogleJavaFormat.include=\"$changed_files\""
 exit 1
