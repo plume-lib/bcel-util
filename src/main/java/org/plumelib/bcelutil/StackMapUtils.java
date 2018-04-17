@@ -523,7 +523,9 @@ public abstract class StackMapUtils {
     for (StackMapEntry smte : stack_map_table) {
       int frame_type = smte.getFrameType();
 
-      if ((frame_type >= Const.APPEND_FRAME && frame_type <= Const.APPEND_FRAME_MAX)
+      if ((frame_type >= Const.SAME_LOCALS_1_STACK_ITEM_FRAME
+              && frame_type <= Const.SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED)
+          || (frame_type >= Const.APPEND_FRAME && frame_type <= Const.APPEND_FRAME_MAX)
           || (frame_type == Const.FULL_FRAME)) {
 
         if (smte.getNumberOfLocals() > 0) {
@@ -559,7 +561,9 @@ public abstract class StackMapUtils {
     for (StackMapEntry smte : stack_map_table) {
       int frame_type = smte.getFrameType();
 
-      if ((frame_type >= Const.APPEND_FRAME && frame_type <= Const.APPEND_FRAME_MAX)
+      if ((frame_type >= Const.SAME_LOCALS_1_STACK_ITEM_FRAME
+              && frame_type <= Const.SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED)
+          || (frame_type >= Const.APPEND_FRAME && frame_type <= Const.APPEND_FRAME_MAX)
           || (frame_type == Const.FULL_FRAME)) {
 
         if (smte.getNumberOfLocals() > 0) {
@@ -585,7 +589,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Check to see if any of the uninitialized NEW instructions has moved. Again, these are rare, so
+   * Check to see if any of the uninitialized NEW instructions have moved. Again, these are rare, so
    * a linear pass is fine.
    *
    * @param il instruction list to search
