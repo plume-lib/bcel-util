@@ -1,6 +1,9 @@
 plugins {
+  // To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
   id "com.github.johnrengelman.shadow" version "2.0.3"
+  // Code formatting with Google Java Format
   id "com.github.sherter.google-java-format" version "0.6"
+  // To show task list as a tree, run: ./gradlew <taskname> taskTree
   id "com.dorongold.task-tree" version "1.3"
 }
 
@@ -28,4 +31,19 @@ task javadocWeb(type: Javadoc) {
   source = sourceSets.main.allJava
   destinationDir = file("/cse/web/research/plumelib/bcel-util/api")
   classpath = project.sourceSets.main.compileClasspath
+}
+
+task installGitHooks(type: Copy) {
+  description 'Copies git hooks to .git directory'
+  from 'githooks'
+  into '.git/hooks'
+}
+
+task compileAll() {
+  dependsOn compileJava
+  dependsOn compileTestJava
+}
+
+tasks.withType(JavaCompile) {
+  dependsOn(':installGitHooks')
 }
