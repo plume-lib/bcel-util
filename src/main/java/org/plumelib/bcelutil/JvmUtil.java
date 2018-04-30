@@ -58,7 +58,7 @@ public final class JvmUtil {
   }
 
   /**
-   * Convert a primitive java type name (e.g., "int", "double", etc.) to a field descriptor (e.g.,
+   * Convert a primitive Java type name (e.g., "int", "double", etc.) to a field descriptor (e.g.,
    * "I", "D", etc.).
    *
    * @param primitiveName name of the type, in Java format
