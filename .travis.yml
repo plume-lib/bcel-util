@@ -2,12 +2,6 @@ language: java
 
 sudo: false
 
-# TODO: Is this necessary?
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
-
 # Enable Gradle caching
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
