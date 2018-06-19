@@ -302,7 +302,7 @@ public final class StackVer {
           if (skip_jsr < 0) {
             throw new AssertionViolatedException("More RET than JSR in execution chain?!");
           }
-          //System.err.println("+"+oldchain.get(ss));
+          // System.err.println("+"+oldchain.get(ss));
           if ((oldchain.get(ss)).getInstruction().getInstruction() instanceof JsrInstruction) {
             if (skip_jsr == 0) {
               lastJSR = oldchain.get(ss);
@@ -364,8 +364,10 @@ public final class StackVer {
         // mean we're in a subroutine if we go to the exception handler.
         // We should address this problem later; by now we simply "cut" the chain
         // by using an empty chain for the exception handlers.
-        //if (v.execute(new Frame(u.getOutFrame(oldchain).getLocals(), new OperandStack (u.getOutFrame().getStack().maxStack(), (exc_hds[s].getExceptionType()==null? Type.THROWABLE : exc_hds[s].getExceptionType())) ), newchain), icv, ev){
-        //icq.add(v, (ArrayList) newchain.clone());
+        // if (v.execute(new Frame(u.getOutFrame(oldchain).getLocals(), new OperandStack
+        // (u.getOutFrame().getStack().maxStack(), (exc_hds[s].getExceptionType()==null?
+        // Type.THROWABLE : exc_hds[s].getExceptionType())) ), newchain), icv, ev){
+        // icq.add(v, (ArrayList) newchain.clone());
         Frame f =
             new Frame(
                 u.getOutFrame(oldchain).getLocals(),
@@ -508,7 +510,7 @@ public final class StackVer {
   // Code from PassVerifier in BCEL so that we don't have to extend it
 
   /** The (warning) messages. */
-  private ArrayList<String> messages = new ArrayList<String>(); //Type of elements: String
+  private ArrayList<String> messages = new ArrayList<String>();
 
   /**
    * This method adds a (warning) message to the message pool of this PassVerifier.

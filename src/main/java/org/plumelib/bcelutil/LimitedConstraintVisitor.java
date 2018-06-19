@@ -70,7 +70,8 @@ import org.checkerframework.checker.nullness.qual.*;
  */
 public class LimitedConstraintVisitor extends InstConstraintVisitor {
 
-  // private static ObjectType GENERIC_ARRAY = new ObjectType("org.apache.bcel.verifier.structurals.GenericArray");
+  // private static ObjectType GENERIC_ARRAY = new
+  // ObjectType("org.apache.bcel.verifier.structurals.GenericArray");
 
   /** The constructor. Constructs a new instance of this class. */
   public LimitedConstraintVisitor() {}
@@ -127,7 +128,9 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
    */
   //	private void constraintViolated(Instruction violator, String description) {
   //		String fq_classname = violator.getClass().getName();
-  //		throw new StructuralCodeConstraintException("Instruction "+ fq_classname.substring(fq_classname.lastIndexOf('.')+1) +" constraint violated: " + description);
+  //		throw new StructuralCodeConstraintException("Instruction "+
+  // fq_classname.substring(fq_classname.lastIndexOf('.')+1) +" constraint violated: " +
+  // description);
   //	}
 
   /**
@@ -141,7 +144,8 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   @Override
   public void setFrame(Frame f) {
     this.frame = f;
-    //if (singleInstance.mg == null || singleInstance.cpg == null) throw new AssertionViolatedException("Forgot to set important values first.");
+    // if (singleInstance.mg == null || singleInstance.cpg == null) throw new
+    // AssertionViolatedException("Forgot to set important values first.");
   }
 
   /** Sets the ConstantPoolGen instance needed for constraint checking prior to execution. */
@@ -158,7 +162,8 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
 
   //	/**
   //	 * Assures index is of type INT.
-  //	 * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException if the above constraint is not satisfied.
+  //	 * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException if the above
+  //         constraint is not satisfied.
   //	 */
   //	private void indexOfInt(Instruction o, Type index) {
   //		if (! index.equals(Type.INT))
@@ -169,7 +174,8 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   //	 * Assures the ReferenceType r is initialized (or Type.NULL).
   //	 * Formally, this means (!(r instanceof UninitializedObjectType)), because
   //	 * there are no uninitialized array types.
-  //	 * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException if the above constraint is not satisfied.
+  //	 * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException if the above
+  //         constraint is not satisfied.
   //	 */
   //	private void referenceTypeIsInitialized(Instruction o, ReferenceType r) {
   //		if (r instanceof UninitializedObjectType) {
@@ -186,11 +192,13 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   //	/**
   //	 * Assures arrayref is of ArrayType or NULL;
   //	 * returns true if and only if arrayref is non-NULL.
-  //	 * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException if the above constraint is violated.
+  //	 * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException if the above
+  //         constraint is violated.
   // 	 */
   //	private boolean arrayrefOfArrayType(Instruction o, Type arrayref) {
   //		if (! ((arrayref instanceof ArrayType) || arrayref.equals(Type.NULL)) )
-  //				constraintViolated(o, "The 'arrayref' does not refer to an array but is of type "+arrayref+".");
+  //				constraintViolated(o, "The 'arrayref' does not refer to an array but is of type
+  // "+arrayref+".");
   //		return (arrayref instanceof ArrayType);
   //	}
 
@@ -214,12 +222,15 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   //        // System.out.println ("visitStackAccessor: " + o);
   //		int consume = o.consumeStack(cpg); // Stack values are always consumed first; then produced.
   //		if (consume > stack().slotsUsed()) {
-  //			constraintViolated((Instruction) o, "Cannot consume "+consume+" stack slots: only "+stack().slotsUsed()+" slot(s) left on stack!\nStack:\n"+stack());
+  //			constraintViolated((Instruction) o, "Cannot consume "+consume+" stack slots: only
+  // "+stack().slotsUsed()+" slot(s) left on stack!\nStack:\n"+stack());
   //		}
   //
-  //		int produce = o.produceStack(cpg) - ((Instruction) o).consumeStack(cpg); // Stack values are always consumed first; then produced.
+  //    // Stack values are always consumed first; then produced.
+  //		int produce = o.produceStack(cpg) - ((Instruction) o).consumeStack(cpg);
   //		if ( produce + stack().slotsUsed() > stack().maxStack() ) {
-  //			constraintViolated((Instruction) o, "Cannot produce "+produce+" stack slots: only "+(stack().maxStack()-stack().slotsUsed())+" free stack slot(s) left.\nStack:\n"+stack());
+  //			constraintViolated((Instruction) o, "Cannot produce "+produce+" stack slots: only
+  // "+(stack().maxStack()-stack().slotsUsed())+" free stack slot(s) left.\nStack:\n"+stack());
   //		}
   //	}
 

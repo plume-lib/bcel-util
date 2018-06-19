@@ -777,7 +777,7 @@ public final class BcelUtil {
    */
   // The annotation encourages proper use, even though this can take a
   // fully-qualified name (only for a non-array).
-  //TODO: protected
+  // TODO: protected
   public static Class<?> classForName(
       /*@ClassGetName*/ String className) throws ClassNotFoundException {
     Class<?> result = primitiveClasses.get(className);

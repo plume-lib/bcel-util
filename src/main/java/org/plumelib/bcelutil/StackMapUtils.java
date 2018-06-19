@@ -420,8 +420,10 @@ public abstract class StackMapUtils {
       }
       // all other frame_types do not modify locals.
 
-      //System.out.printf("byte_code_offset: %d, temp offset: %d, locals_offset_height: %d, number_active_locals: %d, local types: %s%n",
-      //       byte_code_offset, offset, locals_offset_height, number_active_locals, Arrays.toString(types_of_active_locals));
+      // System.out.printf("byte_code_offset: %d, temp offset: %d, locals_offset_height: %d,
+      // number_active_locals: %d, local types: %s%n",
+      //       byte_code_offset, offset, locals_offset_height, number_active_locals,
+      // Arrays.toString(types_of_active_locals));
 
       if (live_start == 0) {
         // did the latest StackMap entry define the temp in question?

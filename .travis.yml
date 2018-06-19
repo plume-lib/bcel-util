@@ -14,7 +14,7 @@ cache:
 jdk:
   - oraclejdk8
 
-script: ./gradlew build javadoc
+script: ./gradlew build javadoc verGJF
 
 git:
   depth: 9
