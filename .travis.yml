@@ -1,8 +1,8 @@
-dist: trusty
-sudo: false
-
 language: java
 
+sudo: false
+
+# TODO: Is this necessary?
 addons:
   apt:
     packages:
@@ -19,5 +19,8 @@ cache:
 
 jdk:
   - oraclejdk8
-#  - oraclejdk9
-#  - openjdk7
+
+script: ./gradlew build javadoc
+
+git:
+  depth: 9
