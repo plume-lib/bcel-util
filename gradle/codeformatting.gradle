@@ -13,6 +13,7 @@ buildscript {
   }
 }
 
+// Code formatting with Google Java Format; defines targets "goJF" and "verJF".
 apply plugin: "com.github.sherter.google-java-format"
 
 googleJavaFormat {
