@@ -29,7 +29,9 @@ targetCompatibility = 1.7
 
 // Turn Javadoc warnings into errors.
 javadoc {
-  options.addStringOption('Xwerror', '-quiet')
+  options.addStringOption('Xwerror', '-Xdoclint:all')
+  // This cannot be enabled because StackVer.java lacks some documentation.
+  // options.addStringOption('private', '-quiet')
 }
 
 task javadocWeb(type: Javadoc) {

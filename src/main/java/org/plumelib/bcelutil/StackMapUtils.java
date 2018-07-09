@@ -62,6 +62,7 @@ public abstract class StackMapUtils {
   /** The pool for the method currently being processed. Must be set by the client. */
   protected /*@Nullable*/ ConstantPoolGen pool = null;
 
+  /** A log to which to print debugging information about program instrumentation. */
   protected SimpleLog debug_instrument = new SimpleLog(false);
 
   /** Whether or not the current method needs a StackMap. */

@@ -102,6 +102,7 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   /**
    * The OperandStack we're working on.
    *
+   * @return the OperandStack we're working on
    * @see #setFrame(Frame f)
    */
   /*@RequiresNonNull("frame")*/
@@ -112,6 +113,7 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   /**
    * The LocalVariables we're working on.
    *
+   * @return the LocalVariables we're working on
    * @see #setFrame(Frame f)
    */
   /*@RequiresNonNull("frame")*/

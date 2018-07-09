@@ -439,7 +439,13 @@ public final class BcelUtil {
     }
   }
 
-  // TODO: write Javadoc
+  /**
+   * Return a printed description of the given instructions.
+   *
+   * @param il the instructions to describe
+   * @param pool the constant pool the instructions refer to
+   * @return a printed representation of the instructions in {@code il}
+   */
   @SuppressWarnings("rawtypes")
   public static String instructionDescr(InstructionList il, ConstantPoolGen pool) {
 

@@ -25,6 +25,12 @@ public final class StackTypes {
   /** The state of the live local variables at each instruction location. */
   LocalVariables[] loc_arr;
 
+  /**
+   * Create a record of the types on the stack at each instruction in a method. The created object
+   * starts out empty, with no type information.
+   *
+   * @param mg the method
+   */
   public StackTypes(MethodGen mg) {
     InstructionList il = mg.getInstructionList();
     int size = 0;
@@ -33,7 +39,12 @@ public final class StackTypes {
     loc_arr = new LocalVariables[size + 1];
   }
 
-  /* Sets the stack for the instruction at the specified offset */
+  /**
+   * Sets the stack for the instruction at the specified offset.
+   *
+   * @param offset the offset at which the instruction appears
+   * @param f the stack frame to use for the instruction
+   */
   public void set(int offset, Frame f) {
 
     OperandStack os = f.getStack();
@@ -43,7 +54,12 @@ public final class StackTypes {
     os_arr[offset] = (OperandStack) (os.clone());
   }
 
-  /* Returns the stack contents at the specified offset */
+  /**
+   * Returns the stack contents at the specified offset.
+   *
+   * @param offset the offset to which to get the stack contents
+   * @return the stack at the (instruction at the) given offset
+   */
   public OperandStack get(int offset) {
     return os_arr[offset];
   }
@@ -66,6 +82,12 @@ public final class StackTypes {
     return (sb.toString());
   }
 
+  /**
+   * Return a printed representation of the given OperandStack.
+   *
+   * @param os the OperandStack to print
+   * @return a printed representation of {@code os}
+   */
   /*@SideEffectFree*/
   public String toString(/*>>>@GuardSatisfied StackTypes this,*/ OperandStack os) {
 
@@ -84,6 +106,12 @@ public final class StackTypes {
     return ("{" + buff + "}");
   }
 
+  /**
+   * Return a printed representation of the given LocalVariables.
+   *
+   * @param lv the LocalVariablesStack to print
+   * @return a printed representation of {@code lv}
+   */
   /*@SideEffectFree*/
   public String toString(/*>>>@GuardSatisfied StackTypes this,*/ LocalVariables lv) {
 
