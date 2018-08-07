@@ -29,6 +29,10 @@ dependencies {
     checkerFrameworkJavac "org.checkerframework:compiler:2.4.0"
     checkerFrameworkCheckerJar "org.checkerframework:checker:${checkerFrameworkVersion}"
     implementation "org.checkerframework:checker-qual7:2.4.0"
+  } else if (System.getenv("CHECKERFRAMEWORK") == null) {
+    throw new ProjectConfigurationException("Environment variable CHECKERFRAMEWORK is not set")
+  } else if (! file(System.getenv("CHECKERFRAMEWORK")).exists()) {
+    throw new ProjectConfigurationException("Environment variable CHECKERFRAMEWORK is set to non-existent directory " + System.getenv("CHECKERFRAMEWORK"));
   } else {
     ext.checkerframeworkdist = "$System.env.CHECKERFRAMEWORK/checker/dist"
     checkerFrameworkAnnotatedJDK fileTree(dir: "${ext.checkerframeworkdist}", include: "jdk8.jar")
