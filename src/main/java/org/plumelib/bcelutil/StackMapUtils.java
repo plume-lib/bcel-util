@@ -25,6 +25,8 @@ import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.RET;
 import org.apache.bcel.generic.Type;
 import org.apache.bcel.verifier.VerificationResult;
+import org.checkerframework.checker.index.qual.IndexOrLow;
+import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.interning.qual.InternedDistinct;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -84,7 +86,7 @@ public abstract class StackMapUtils {
    * update_stack_map_offset, find_stack_map_equal, find_stack_map_index_before, or
    * find_stack_map_index_after.
    */
-  protected int number_active_locals;
+  protected @NonNegative int number_active_locals;
 
   /**
    * Offset into code that corresponds to the current StackMap of interest. Set by
@@ -304,7 +306,7 @@ public abstract class StackMapUtils {
    * @param offset byte code offset
    * @return the corresponding StackMapEntry index
    */
-  protected final int find_stack_map_index_after(int offset) {
+  protected final @IndexOrLow("stack_map_table") int find_stack_map_index_after(int offset) {
 
     running_offset = -1; // no +1 on first entry
     for (int i = 0; i < stack_map_table.length; i++) {
@@ -827,7 +829,7 @@ public abstract class StackMapUtils {
    */
   protected final void update_full_frame_stack_map_entries(
       int offset, Type type_new_var, LocalVariableGen[] locals) {
-    int index; // locals index
+    @NonNegative int index; // locals index
 
     for (int i = 0; i < stack_map_table.length; i++) {
       if (stack_map_table[i].getFrameType() == Const.FULL_FRAME) {
@@ -903,8 +905,8 @@ public abstract class StackMapUtils {
 
       if (arg_types.length > 0) {
         LocalVariableGen last_arg;
-        ;
         new_index = new_index + arg_types.length;
+        // new_index is now positive, because arg_types.length is
         last_arg = locals[new_index - 1];
         new_offset = last_arg.getIndex() + (last_arg.getType()).getSize();
       }
@@ -988,7 +990,7 @@ public abstract class StackMapUtils {
     int new_offset = -1;
     // get a copy of the local before modification
     LocalVariableGen[] locals = mgen.getLocalVariables();
-    int compiler_temp_i = -1;
+    @IndexOrLow("locals") int compiler_temp_i = -1;
     int new_index = -1;
     int i;
 

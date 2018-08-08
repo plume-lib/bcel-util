@@ -7,6 +7,8 @@ import org.apache.bcel.verifier.structurals.Frame;
 import org.apache.bcel.verifier.structurals.LocalVariables;
 import org.apache.bcel.verifier.structurals.OperandStack;
 import org.apache.bcel.verifier.structurals.UninitializedObjectType;
+import org.checkerframework.checker.index.qual.IndexFor;
+import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.lock.qual.GuardSatisfied;
 import org.checkerframework.dataflow.qual.SideEffectFree;
 
@@ -16,10 +18,10 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
 public final class StackTypes {
 
   /** The state of the operand stack at each instruction location. */
-  OperandStack[] os_arr;
+  OperandStack @SameLen("loc_arr") [] os_arr;
 
   /** The state of the live local variables at each instruction location. */
-  LocalVariables[] loc_arr;
+  LocalVariables @SameLen("os_arr") [] loc_arr;
 
   /**
    * Create a record of the types on the stack at each instruction in a method. The created object
@@ -41,7 +43,7 @@ public final class StackTypes {
    * @param offset the offset at which the instruction appears
    * @param f the stack frame to use for the instruction
    */
-  public void set(int offset, Frame f) {
+  public void set(@IndexFor({"loc_arr", "os_arr"}) int offset, Frame f) {
 
     OperandStack os = f.getStack();
     // logger.info ("stack[" + offset + "] = " + toString(os));
@@ -56,7 +58,7 @@ public final class StackTypes {
    * @param offset the offset to which to get the stack contents
    * @return the stack at the (instruction at the) given offset
    */
-  public OperandStack get(int offset) {
+  public OperandStack get(@IndexFor({"loc_arr", "os_arr"}) int offset) {
     return os_arr[offset];
   }
 

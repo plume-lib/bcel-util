@@ -59,7 +59,7 @@ compileJava {
   doFirst {
     options.compilerArgs = [
         '-processor', 'org.checkerframework.checker.formatter.FormatterChecker,org.checkerframework.checker.interning.InterningChecker,org.checkerframework.checker.lock.LockChecker,org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.nullness.NullnessRawnessChecker,org.checkerframework.checker.regex.RegexChecker,org.checkerframework.checker.signature.SignatureChecker',
-        // not done yet: org.checkerframework.checker.index.IndexChecker,
+        // not done yet: org.checkerframework.checker.index.IndexChecker, (54 errors as of 2018-08-08)
         '-Xmaxerrs', '10000',
         '-Xmaxwarns', '10000',
         // '-Awarns',      // turn Checker Framework errors into warnings
