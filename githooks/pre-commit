@@ -4,7 +4,7 @@
 # Verify all .java files compile prior to checkin.
 ./gradlew compileAll
 
-## Enable when  google-java-format handles type annotations better;
+## Enable when google-java-format handles type annotations better;
 ## see https://github.com/google/google-java-format/issues/5
 # # Verify proper Java file formatting prior to checkin.
 # changed_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.java$' | paste -s -d",")
