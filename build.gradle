@@ -12,12 +12,12 @@ plugins {
 apply plugin: 'java-library'
 
 // Checker Framework pluggable type-checking
-apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework-annos-in-comments.gradle"
-// To upload to Maven Central, run:  ./gradlew uploadArchives
+apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
+// To upload to Maven Central, see instructions in this file.
 apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
 dependencies {
-  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '0.0.6'
+  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.2.0.1'
   errorprone 'com.google.errorprone:error_prone_core:2.3.1'
   testImplementation 'junit:junit:4.12'
 }
@@ -26,8 +26,8 @@ repositories {
   mavenCentral()
 }
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 // Turn Javadoc warnings into errors.
 javadoc {

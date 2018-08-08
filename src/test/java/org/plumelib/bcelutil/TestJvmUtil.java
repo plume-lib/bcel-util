@@ -1,5 +1,9 @@
 package org.plumelib.bcelutil;
 
+import org.checkerframework.checker.signature.qual.BinaryName;
+import org.checkerframework.checker.signature.qual.ClassGetName;
+import org.checkerframework.checker.signature.qual.FieldDescriptor;
+import org.checkerframework.checker.signature.qual.FullyQualifiedName;
 import org.junit.Test;
 
 /*>>>
@@ -37,7 +41,7 @@ public final class TestJvmUtil {
     assert JvmUtil.binaryNameToFieldDescriptor("Java.lang.Integer[][][]")
         .equals("[[[LJava/lang/Integer;");
 
-    // public static /*@ClassGetName*/ String binaryNameToClassGetName(/*BinaryName*/ String bn)
+    // public static @ClassGetName String binaryNameToClassGetName(/*BinaryName*/ String bn)
     assert JvmUtil.binaryNameToClassGetName("boolean").equals("boolean");
     assert JvmUtil.binaryNameToClassGetName("byte").equals("byte");
     assert JvmUtil.binaryNameToClassGetName("char").equals("char");
@@ -80,7 +84,7 @@ public final class TestJvmUtil {
     assert JvmUtil.fieldDescriptorToBinaryName("[[LJava/lang/Integer;")
         .equals("Java.lang.Integer[][]");
 
-    // public static /*@ClassGetName*/ String
+    // public static @ClassGetName String
     //     fieldDescriptorToClassGetName(/*FieldDescriptor*/ String fd)
     assert JvmUtil.fieldDescriptorToClassGetName("Z").equals("boolean");
     assert JvmUtil.fieldDescriptorToClassGetName("B").equals("byte");
@@ -135,18 +139,18 @@ public final class TestJvmUtil {
   }
 
   private static void checkTypeStrings(
-      /*@FullyQualifiedName*/ String fqn,
-      /*@BinaryName*/ String bn,
-      /*@ClassGetName*/ String cgn,
-      /*@FieldDescriptor*/ String fd) {
+      @FullyQualifiedName String fqn,
+      @BinaryName String bn,
+      @ClassGetName String cgn,
+      @FieldDescriptor String fd) {
     checkTypeStrings(fqn, bn, cgn, fd, false);
   }
 
   private static void checkTypeStrings(
-      /*@FullyQualifiedName*/ String fqn,
-      /*@BinaryName*/ String bn,
-      /*@ClassGetName*/ String cgn,
-      /*@FieldDescriptor*/ String fd,
+      @FullyQualifiedName String fqn,
+      @BinaryName String bn,
+      @ClassGetName String cgn,
+      @FieldDescriptor String fd,
       boolean skipClassForName) {
     if (!skipClassForName) {
       try {

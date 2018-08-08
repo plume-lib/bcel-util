@@ -59,10 +59,8 @@ import org.apache.bcel.verifier.structurals.Frame;
 import org.apache.bcel.verifier.structurals.InstConstraintVisitor;
 import org.apache.bcel.verifier.structurals.LocalVariables;
 import org.apache.bcel.verifier.structurals.OperandStack;
-
-/*>>>
-import org.checkerframework.checker.nullness.qual.*;
-*/
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
 /**
  * A Visitor class testing for valid preconditions of JVM instructions. No checks are actually
@@ -83,7 +81,7 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
    * @see #locals()
    * @see #stack()
    */
-  private /*@MonotonicNonNull*/ Frame frame = null;
+  private @MonotonicNonNull Frame frame = null;
 
   /**
    * The ConstantPoolGen we're working on.
@@ -105,7 +103,7 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
    * @return the OperandStack we're working on
    * @see #setFrame(Frame f)
    */
-  /*@RequiresNonNull("frame")*/
+  @RequiresNonNull("frame")
   private OperandStack stack() {
     return frame.getStack();
   }
@@ -116,7 +114,7 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
    * @return the LocalVariables we're working on
    * @see #setFrame(Frame f)
    */
-  /*@RequiresNonNull("frame")*/
+  @RequiresNonNull("frame")
   private LocalVariables locals() {
     return frame.getLocals();
   }

@@ -2,11 +2,11 @@ package org.plumelib.bcelutil;
 
 import java.util.HashMap;
 import java.util.StringTokenizer;
-
-/*>>>
-import org.checkerframework.checker.index.qual.*;
-import org.checkerframework.checker.signature.qual.*;
-*/
+import org.checkerframework.checker.index.qual.Positive;
+import org.checkerframework.checker.signature.qual.BinaryName;
+import org.checkerframework.checker.signature.qual.ClassGetName;
+import org.checkerframework.checker.signature.qual.FieldDescriptor;
+import org.checkerframework.checker.signature.qual.SourceNameForNonArrayNonInner;
 
 /**
  * Utility functions for working with the JVM.
@@ -16,9 +16,9 @@ import org.checkerframework.checker.signature.qual.*;
  */
 public final class JvmUtil {
 
-  private static HashMap</*@SourceNameForNonArrayNonInner*/ String, /*@FieldDescriptor*/ String>
+  private static HashMap<@SourceNameForNonArrayNonInner String, @FieldDescriptor String>
       primitiveClassesJvm =
-          new HashMap</*@SourceNameForNonArrayNonInner*/ String, /*@FieldDescriptor*/ String>(8);
+          new HashMap<@SourceNameForNonArrayNonInner String, @FieldDescriptor String>(8);
 
   static {
     primitiveClassesJvm.put("boolean", "Z");
@@ -39,8 +39,7 @@ public final class JvmUtil {
    * @return name of the class, in field descriptor format
    */
   @SuppressWarnings("signature") // conversion routine
-  public static /*@FieldDescriptor*/ String binaryNameToFieldDescriptor(
-      /*@BinaryName*/ String classname) {
+  public static @FieldDescriptor String binaryNameToFieldDescriptor(@BinaryName String classname) {
     int dims = 0;
     String sansArray = classname;
     while (sansArray.endsWith("[]")) {
@@ -65,8 +64,7 @@ public final class JvmUtil {
    * @return name of the type, in field descriptor format
    * @throws IllegalArgumentException if primitiveName is not a valid primitive type name
    */
-  public static /*@FieldDescriptor*/ String primitiveTypeNameToFieldDescriptor(
-      String primitiveName) {
+  public static @FieldDescriptor String primitiveTypeNameToFieldDescriptor(String primitiveName) {
     String result = primitiveClassesJvm.get(primitiveName);
     if (result == null) {
       throw new IllegalArgumentException("Not the name of a primitive type: " + primitiveName);
@@ -81,7 +79,7 @@ public final class JvmUtil {
    * @return the class name, in Class.getName format
    */
   @SuppressWarnings("signature") // conversion routine
-  public static /*@ClassGetName*/ String binaryNameToClassGetName(/*BinaryName*/ String bn) {
+  public static @ClassGetName String binaryNameToClassGetName(/*BinaryName*/ String bn) {
     if (bn.endsWith("[]")) {
       return binaryNameToFieldDescriptor(bn).replace('/', '.');
     } else {
@@ -96,8 +94,7 @@ public final class JvmUtil {
    * @return the class name, in Class.getName format
    */
   @SuppressWarnings("signature") // conversion routine
-  public static /*@ClassGetName*/ String fieldDescriptorToClassGetName(
-      /*FieldDescriptor*/ String fd) {
+  public static @ClassGetName String fieldDescriptorToClassGetName(/*FieldDescriptor*/ String fd) {
     if (fd.startsWith("[")) {
       return fd.replace('/', '.');
     } else {
@@ -122,7 +119,8 @@ public final class JvmUtil {
     StringTokenizer argsTokenizer = new StringTokenizer(commaSepArgs, ",", false);
     while (argsTokenizer.hasMoreTokens()) {
       @SuppressWarnings("signature") // substring
-      /*@BinaryName*/ String arg = argsTokenizer.nextToken().trim();
+      @BinaryName
+      String arg = argsTokenizer.nextToken().trim();
       result += binaryNameToFieldDescriptor(arg);
     }
     result += ")";
@@ -152,7 +150,7 @@ public final class JvmUtil {
    * @return name of the type, in Java format
    */
   @SuppressWarnings("signature") // conversion routine
-  public static /*@BinaryName*/ String fieldDescriptorToBinaryName(String classname) {
+  public static @BinaryName String fieldDescriptorToBinaryName(String classname) {
     if (classname.equals("")) {
       throw new Error("Empty string passed to fieldDescriptorToBinaryName");
     }
@@ -189,7 +187,7 @@ public final class JvmUtil {
       throw new Error("Malformed arglist: " + arglist);
     }
     String result = "(";
-    /*@Positive*/ int pos = 1;
+    @Positive int pos = 1;
     while (pos < arglist.length() - 1) {
       if (pos > 1) {
         result += ", ";

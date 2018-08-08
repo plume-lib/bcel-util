@@ -81,11 +81,9 @@ import org.apache.bcel.verifier.structurals.InstructionContext;
 import org.apache.bcel.verifier.structurals.LocalVariables;
 import org.apache.bcel.verifier.structurals.OperandStack;
 import org.apache.bcel.verifier.structurals.UninitializedObjectType;
-
-/*>>>
-import org.checkerframework.checker.nullness.qual.*;
-import org.checkerframework.checker.index.qual.*;
-*/
+import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * This is a slightly modified version of Pass3bVerifier from BCEL. It uses LimitedConstaintVisitor
@@ -148,7 +146,7 @@ public final class StackVer {
      *
      * @param i
      */
-    public void remove(/*@NonNegative*/ int i) {
+    public void remove(@NonNegative int i) {
       ics.remove(i);
       ecs.remove(i);
     }
@@ -158,7 +156,7 @@ public final class StackVer {
      * @param i
      * @return
      */
-    public InstructionContext getIC(/*@NonNegative*/ int i) {
+    public InstructionContext getIC(@NonNegative int i) {
       return ics.get(i);
     }
     /**
@@ -167,7 +165,7 @@ public final class StackVer {
      * @param i
      * @return
      */
-    public ArrayList<InstructionContext> getEC(/*@NonNegative*/ int i) {
+    public ArrayList<InstructionContext> getEC(@NonNegative int i) {
       return ecs.get(i);
     }
     /**
@@ -225,7 +223,7 @@ public final class StackVer {
 
   /** The types on the stack for each instruction by byte code offset */
   // Set by do_stack_ver().
-  private /*@MonotonicNonNull*/ StackTypes stack_types;
+  private @MonotonicNonNull StackTypes stack_types;
 
   /**
    * This class should only be instantiated by a Verifier.
@@ -463,7 +461,8 @@ public final class StackVer {
             f.getLocals().set(0, Frame.getThis());
           } else {
             @SuppressWarnings("nullness") // unannotated: org.apache.bcel.verifier.structurals.Frame
-            /*@NonNull*/ UninitializedObjectType dummy = null;
+            @NonNull
+            UninitializedObjectType dummy = null;
             Frame.setThis(dummy);
             f.getLocals().set(0, new ObjectType(mg.getClassName()));
           }

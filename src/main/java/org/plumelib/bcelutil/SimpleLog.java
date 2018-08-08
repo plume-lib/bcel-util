@@ -1,10 +1,7 @@
 package org.plumelib.bcelutil;
 
-/*>>>
-import org.checkerframework.checker.formatter.qual.*;
-import org.checkerframework.checker.initialization.qual.*;
-import org.checkerframework.checker.nullness.qual.*;
-*/
+import org.checkerframework.checker.formatter.qual.FormatMethod;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A logging class with the following features:
@@ -57,8 +54,8 @@ public final class SimpleLog {
    * @param format format string for message
    * @param args values to be substituted into format
    */
-  /*@FormatMethod*/
-  public void log(String format, /*@Nullable*/ Object... args) {
+  @FormatMethod
+  public void log(String format, @Nullable Object... args) {
     if (enabled) {
       System.out.print(indent_str);
       System.out.printf(format, args);

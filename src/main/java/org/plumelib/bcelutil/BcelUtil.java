@@ -28,13 +28,12 @@ import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
-
-/*>>>
-import org.checkerframework.checker.index.qual.*;
-import org.checkerframework.checker.nullness.qual.*;
-import org.checkerframework.checker.signature.qual.*;
-import org.checkerframework.common.value.qual.*;
-*/
+import org.checkerframework.checker.index.qual.SameLen;
+import org.checkerframework.checker.signature.qual.BinaryName;
+import org.checkerframework.checker.signature.qual.BinaryNameForNonArray;
+import org.checkerframework.checker.signature.qual.ClassGetName;
+import org.checkerframework.checker.signature.qual.InternalForm;
+import org.checkerframework.common.value.qual.MinLen;
 
 /** Static utility methods for working with BCEL. */
 public final class BcelUtil {
@@ -203,7 +202,7 @@ public final class BcelUtil {
    *     an array
    * @return true iff the class is part of the JDK (rt.jar)
    */
-  public static boolean inJdk(/*@ClassGetName*/ String classname) {
+  public static boolean inJdk(@ClassGetName String classname) {
     return classname.startsWith("java.")
         || classname.startsWith("com.oracle.")
         || classname.startsWith("com.sun.")
@@ -224,7 +223,7 @@ public final class BcelUtil {
    * @param classname the class to test, in internal form
    * @return true iff the class is part of the JDK (rt.jar)
    */
-  public static boolean inJdkInternalform(/*@InternalForm*/ String classname) {
+  public static boolean inJdkInternalform(@InternalForm String classname) {
     return classname.startsWith("java/")
         || classname.startsWith("com/oracle/")
         || classname.startsWith("com/sun/")
@@ -504,12 +503,11 @@ public final class BcelUtil {
     @SuppressWarnings(
         "nullness") // The arguments to the annotation aren't necessarily initialized before they
     // are written here. Since annotations are erased at runtime, this is safe.
-    Type /*@SameLen({"argTypes", "mg.getArgumentTypes()"})*/[] argTypes = mg.getArgumentTypes();
+    Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
     @SuppressWarnings(
         "nullness") // The arguments to the annotation aren't necessarily initialized before they
     // are written here. Since annotations are erased at runtime, this is safe.
-    String /*@SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"})*/
-            []
+    String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
         argNames = mg.getArgumentNames();
 
     // Remove any existing locals
@@ -612,7 +610,7 @@ public final class BcelUtil {
    * @param type the type
    * @return the Java classname that corresponds to type
    */
-  public static /*@ClassGetName*/ String typeToClassgetname(Type type) {
+  public static @ClassGetName String typeToClassgetname(Type type) {
     String signature = type.getSignature();
     return JvmUtil.fieldDescriptorToClassGetName(signature);
   }
@@ -676,7 +674,7 @@ public final class BcelUtil {
       "value" // newTypes is @MinLen(1) except in the presence of overflow,
       // which the Value Checker accounts for, but the Index Checker does not.
     })
-    Type /*@MinLen(1)*/[] newTypes = new Type[types.length + 1];
+    Type @MinLen(1) [] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 1, types.length);
     newTypes[0] = newType;
     Type[] newTypesCast = newTypes;
@@ -702,18 +700,20 @@ public final class BcelUtil {
    * @param classname the binary name of a class (= fully-qualified name, except for inner classes)
    * @return the type corresponding to the given class name
    */
-  public static Type classnameToType(/*@BinaryName*/ String classname) {
+  public static Type classnameToType(@BinaryName String classname) {
 
     // Get the array depth (if any)
     int arrayDepth = 0;
     while (classname.endsWith("[]")) {
       @SuppressWarnings("signature") // removing trailing "[]" leaves the string a binary name
-      /*@BinaryName*/ String sansArray = classname.substring(0, classname.length() - 2);
+      @BinaryName
+      String sansArray = classname.substring(0, classname.length() - 2);
       classname = sansArray;
       arrayDepth++;
     }
     @SuppressWarnings("signature") // test of no trailing "[]" => has type @BinaryNameForNonArray
-    /*@BinaryNameForNonArray*/ String tmp = classname;
+    @BinaryNameForNonArray
+    String tmp = classname;
     classname = tmp.intern();
 
     // Get the base type
@@ -784,8 +784,8 @@ public final class BcelUtil {
   // The annotation encourages proper use, even though this can take a
   // fully-qualified name (only for a non-array).
   // TODO: protected
-  public static Class<?> classForName(
-      /*@ClassGetName*/ String className) throws ClassNotFoundException {
+  public static Class<?> classForName(@ClassGetName String className)
+      throws ClassNotFoundException {
     Class<?> result = primitiveClasses.get(className);
     if (result != null) {
       return result;
@@ -798,8 +798,8 @@ public final class BcelUtil {
           throw e;
         }
         @SuppressWarnings("signature") // checked below & exception is handled
-        /*@ClassGetName*/ String innerName =
-            className.substring(0, pos) + "$" + className.substring(pos + 1);
+        @ClassGetName
+        String innerName = className.substring(0, pos) + "$" + className.substring(pos + 1);
         try {
           return Class.forName(innerName);
         } catch (ClassNotFoundException ee) {

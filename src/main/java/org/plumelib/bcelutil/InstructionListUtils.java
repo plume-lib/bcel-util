@@ -18,12 +18,7 @@ import org.apache.bcel.generic.LocalVariableGen;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.TABLESWITCH;
 import org.apache.bcel.verifier.structurals.OperandStack;
-
-/*>>>
-import org.checkerframework.checker.nullness.qual.*;
-import org.checkerframework.checker.signature.qual.*;
-import org.checkerframework.dataflow.qual.*;
-*/
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * This class provides methods that manipulate BCEL InstructionLists while handling all the StackMap
@@ -87,7 +82,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
   protected final void insert_before_handle(
       MethodGen mg,
       InstructionHandle ih,
-      /*@Nullable*/ InstructionList new_il,
+      @Nullable InstructionList new_il,
       boolean redirect_branches) {
 
     if (new_il == null) return;
@@ -300,10 +295,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @param new_il InstructionList holding the new code
    */
   protected final void replace_instructions(
-      MethodGen mg,
-      InstructionList il,
-      InstructionHandle ih,
-      /*@Nullable*/ InstructionList new_il) {
+      MethodGen mg, InstructionList il, InstructionHandle ih, @Nullable InstructionList new_il) {
 
     if (new_il == null) return;
 

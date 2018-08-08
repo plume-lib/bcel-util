@@ -7,12 +7,8 @@ import org.apache.bcel.verifier.structurals.Frame;
 import org.apache.bcel.verifier.structurals.LocalVariables;
 import org.apache.bcel.verifier.structurals.OperandStack;
 import org.apache.bcel.verifier.structurals.UninitializedObjectType;
-
-/*>>>
-import org.checkerframework.checker.lock.qual.*;
-import org.checkerframework.checker.nullness.qual.*;
-import org.checkerframework.dataflow.qual.*;
-*/
+import org.checkerframework.checker.lock.qual.GuardSatisfied;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * Stores the types on the stack at each instruction (identified by byte code offset) in a method.
@@ -65,9 +61,9 @@ public final class StackTypes {
   }
 
   @SuppressWarnings({"purity", "lock"}) // local StringBuilder
-  /*@SideEffectFree*/
+  @SideEffectFree
   @Override
-  public String toString(/*>>>@GuardSatisfied StackTypes this*/ ) {
+  public String toString(@GuardSatisfied StackTypes this) {
 
     StringBuilder sb = new StringBuilder();
 
@@ -88,8 +84,8 @@ public final class StackTypes {
    * @param os the OperandStack to print
    * @return a printed representation of {@code os}
    */
-  /*@SideEffectFree*/
-  public String toString(/*>>>@GuardSatisfied StackTypes this,*/ OperandStack os) {
+  @SideEffectFree
+  public String toString(@GuardSatisfied StackTypes this, OperandStack os) {
 
     String buff = "";
 
@@ -112,8 +108,8 @@ public final class StackTypes {
    * @param lv the LocalVariablesStack to print
    * @return a printed representation of {@code lv}
    */
-  /*@SideEffectFree*/
-  public String toString(/*>>>@GuardSatisfied StackTypes this,*/ LocalVariables lv) {
+  @SideEffectFree
+  public String toString(@GuardSatisfied StackTypes this, LocalVariables lv) {
 
     String buff = "";
 

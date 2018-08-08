@@ -25,12 +25,10 @@ import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.RET;
 import org.apache.bcel.generic.Type;
 import org.apache.bcel.verifier.VerificationResult;
-
-/*>>>
-import org.checkerframework.checker.nullness.qual.*;
-import org.checkerframework.checker.signature.qual.*;
-import org.checkerframework.dataflow.qual.*;
-*/
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.signature.qual.ClassGetName;
+import org.checkerframework.dataflow.qual.Pure;
 
 /**
  * This class provides methods to manipulate the StackMapTable. It is used to maintain and modify
@@ -60,7 +58,7 @@ public abstract class StackMapUtils {
    */
 
   /** The pool for the method currently being processed. Must be set by the client. */
-  protected /*@Nullable*/ ConstantPoolGen pool = null;
+  protected @Nullable ConstantPoolGen pool = null;
 
   /** A log to which to print debugging information about program instrumentation. */
   protected SimpleLog debug_instrument = new SimpleLog(false);
@@ -69,10 +67,10 @@ public abstract class StackMapUtils {
   protected boolean needStackMap = false;
 
   /** Working copy of StackMapTable; set by fetch_current_stack_map_table. */
-  protected StackMapEntry /*@Nullable*/[] stack_map_table = null;
+  protected StackMapEntry @Nullable [] stack_map_table = null;
 
   /** Original stack map table attribute; set by fetch_current_stack_map_table. */
-  protected /*@Nullable*/ StackMap smta = null;
+  protected @Nullable StackMap smta = null;
 
   /** Initial state of StackMapTypes for locals on method entry. */
   protected StackMapType[] initial_type_list;
@@ -131,7 +129,7 @@ public abstract class StackMapUtils {
    * @param a the attribute
    * @return the attribute name for the specified attribute
    */
-  /*@Pure*/
+  @Pure
   protected final String get_attribute_name(Attribute a) {
     int con_index = a.getNameIndex();
     Constant c = pool.getConstant(con_index);
@@ -145,7 +143,7 @@ public abstract class StackMapUtils {
    * @param a the attribute
    * @return true iff the attribute is a LocalVariableTypeTable
    */
-  /*@Pure*/
+  @Pure
   protected final boolean is_local_variable_type_table(Attribute a) {
     return (get_attribute_name(a).equals("LocalVariableTypeTable"));
   }
@@ -156,7 +154,7 @@ public abstract class StackMapUtils {
    * @param a the attribute
    * @return true iff the attribute is a StackMapTable
    */
-  /*@Pure*/
+  @Pure
   protected final boolean is_stack_map_table(Attribute a) {
     return (get_attribute_name(a).equals("StackMapTable"));
   }
@@ -167,8 +165,8 @@ public abstract class StackMapUtils {
    * @param mgen the method
    * @return the StackMapTable attribute for the method (or null if not present)
    */
-  /*@Pure*/
-  protected final /*@Nullable*/ Attribute get_stack_map_table_attribute(MethodGen mgen) {
+  @Pure
+  protected final @Nullable Attribute get_stack_map_table_attribute(MethodGen mgen) {
     for (Attribute a : mgen.getCodeAttributes()) {
       if (is_stack_map_table(a)) {
         return a;
@@ -183,8 +181,8 @@ public abstract class StackMapUtils {
    * @param mgen the method
    * @return the LocalVariableTypeTable attribute for the method (or null if not present)
    */
-  /*@Pure*/
-  protected final /*@Nullable*/ Attribute get_local_variable_type_table_attribute(MethodGen mgen) {
+  @Pure
+  protected final @Nullable Attribute get_local_variable_type_table_attribute(MethodGen mgen) {
     for (Attribute a : mgen.getCodeAttributes()) {
       if (is_local_variable_type_table(a)) {
         return a;
@@ -663,7 +661,7 @@ public abstract class StackMapUtils {
    * @param java_class_version Java version for the classfile; stack_map_table is optional before
    *     Java 1.7 (= classfile version 51)
    */
-  /*@EnsuresNonNull({"stack_map_table"})*/
+  @EnsuresNonNull({"stack_map_table"})
   protected final void fetch_current_stack_map_table(MethodGen mgen, int java_class_version) {
 
     smta = (StackMap) get_stack_map_table_attribute(mgen);
@@ -727,7 +725,7 @@ public abstract class StackMapUtils {
    * @return a String containing the class name
    */
   @SuppressWarnings("signature") // conversion routine
-  protected static /*@ClassGetName*/ String typeToClassGetName(Type t) {
+  protected static @ClassGetName String typeToClassGetName(Type t) {
 
     if (t instanceof ObjectType) {
       return ((ObjectType) t).getClassName();
