@@ -1,12 +1,14 @@
-// To use this, update the versio below nnumber, then run from the top level:
-//   ./gradlew uploadArchives
+// To make a release:
+//  * Update the version number in ../README.md and in this file.
+//  * Run in the top-level directory:  ./gradlew uploadArchives && ./gradlew javadocWeb
+//  * Browse to https://oss.sonatype.org/#stagingRepositories
 // Your ~/.gradle/gradle.properties file must contain:
 //   ossrhUsername=YOUR_USER_NAME_HERE
 //   ossrhPassword=YOUR_PASSWORD_HERE
 
 ///////////////////////////////////////////////////////////////////////////
 /// Maven Central publishing
-// (From http://central.sonatype.org/pages/gradle.html )
+/// (From http://central.sonatype.org/pages/gradle.html )
 
 apply plugin: 'maven'
 apply plugin: 'signing'

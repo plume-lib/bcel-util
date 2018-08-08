@@ -25,6 +25,7 @@ import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.RET;
 import org.apache.bcel.generic.Type;
 import org.apache.bcel.verifier.VerificationResult;
+import org.checkerframework.checker.interning.qual.InternedDistinct;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.signature.qual.ClassGetName;
@@ -98,7 +99,8 @@ public abstract class StackMapUtils {
   protected int first_local_index;
 
   /** An empty StackMap used for initialization. */
-  private StackMapEntry[] empty_stack_map_table = {};
+  @SuppressWarnings("interning") // @InternedDistinct initalization with fresh object
+  private StackMapEntry @InternedDistinct [] empty_stack_map_table = {};
 
   /**
    * A map from instructions that create uninitialized NEW objects to the corresponding StackMap

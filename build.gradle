@@ -1,25 +1,28 @@
 plugins {
   // To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
   id "com.github.johnrengelman.shadow" version "2.0.4"
-  // Code formatting with Google Java Format; use targets "goJF" and "verJF"
-  id "com.github.sherter.google-java-format" version "0.7.1"
-  // To show task list as a tree, run: ./gradlew <taskname> taskTree
-  id "com.dorongold.task-tree" version "1.3"
   // Run the Error Prone linter.
   id "net.ltgt.errorprone-base" version "0.0.16"
+  // Formating is disabled due to poor handling of type annotations; wait until
+  // this issue is fixed: https://github.com/google/google-java-format/issues/5
+  // // Code formatting with Google Java Format; defines targets "goJF" and "verJF".
+  // id "com.github.sherter.google-java-format" version "0.7.1"
+  // To show task list as a tree, run: ./gradlew <taskname> taskTree
+  id "com.dorongold.task-tree" version "1.3"
 }
 
 apply plugin: 'java-library'
 
 // Checker Framework pluggable type-checking
 apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
-// To upload to Maven Central, see instructions in this file.
+
+// To upload to Maven Central, see instructions in the file.
 apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
 dependencies {
   api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.2.0.1'
-  errorprone 'com.google.errorprone:error_prone_core:2.3.1'
   testImplementation 'junit:junit:4.12'
+  errorprone 'com.google.errorprone:error_prone_core:2.3.1'
 }
 
 repositories {
@@ -40,6 +43,24 @@ task javadocWeb(type: Javadoc) {
   source = sourceSets.main.allJava
   destinationDir = file("/cse/web/research/plumelib/bcel-util/api")
   classpath = project.sourceSets.main.compileClasspath
+}
+
+// `requireJavadoc` target ensures that all Java elements have Javadoc documentation.
+configurations {
+  requireJavadoc
+}
+dependencies {
+  compile group: 'org.plumelib', name: 'require-javadoc', version: '0.0.6'
+}
+task requireJavadoc(type: Javadoc) {
+  destinationDir.deleteDir()
+  source = sourceSets.main.allJava
+  classpath = project.sourceSets.main.compileClasspath
+  // TODO: uncomment.  "requireJavadoc" has no effect over "javadoc" while this line is commented.
+  options.memberLevel = JavadocMemberLevel.PRIVATE
+  options.docletpath = project.sourceSets.main.compileClasspath as List
+  options.doclet = "org.plumelib.javadoc.RequireJavadoc"
+  options.addStringOption('skip', 'WeakIdentityHashMap|WeakHasherMap')
 }
 
 task installGitHooks(type: Copy) {

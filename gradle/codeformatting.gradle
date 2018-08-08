@@ -32,7 +32,9 @@ tasks.verifyGoogleJavaFormat {
   exclude 'src/testinput'
 }
 
-// Run googleJavaFormat before compiling (would be better to just verify?)
-tasks.withType(JavaCompile) {
-  dependsOn 'googleJavaFormat' // task name conflicts with plugin name
-}
+// Formatting for type annotations is poor.  Re-enable after this issue is fixed:
+// https://github.com/google/google-java-format/issues/5
+// // Run googleJavaFormat before compiling (would be better to just verify?)
+// tasks.withType(JavaCompile) {
+//   dependsOn 'googleJavaFormat' // task name conflicts with plugin name
+// }
