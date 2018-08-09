@@ -42,7 +42,7 @@ public final class BcelUtil {
     throw new Error("do not instantiate");
   }
 
-  /** Controls whether the checks in checkMgen are actually performed. */
+  /** Controls whether the checks in {@link #checkMgen} are actually performed. */
   public static boolean skipChecks = false;
 
   /** The type that represents String[]. */
@@ -71,13 +71,18 @@ public final class BcelUtil {
   public static String getMethodDeclaration(Method m) {
 
     StringBuilder sb = new StringBuilder();
+    // TODO: This formatter seems unnecessary.  String.format would be adequate, or (better)
+    // just make multiple calls to sb.add, to avoid the String manipulation.
     Formatter f = new Formatter(sb);
 
+    // TODO: can getAccessFlags return the empty string?
+    // If so, the following " " should not be returned.
     f.format("%s %s %s (", getAccessFlags(m), m.getReturnType(), m.getName());
     for (Type at : m.getArgumentTypes()) {
       f.format("%s, ", at);
     }
     f.format(")");
+    // TODO: throughout, don't write redundant parentheses on return statement expressions.
     return (sb.toString().replace(", )", ")"));
   }
 
@@ -92,6 +97,7 @@ public final class BcelUtil {
     int flags = m.getAccessFlags();
 
     StringBuilder buf = new StringBuilder();
+    // TODO: document that pow = 2^i.  (I think that's true; is it?)
     for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG; i++) {
       if ((flags & pow) != 0) {
         if (buf.length() > 0) {
@@ -100,7 +106,7 @@ public final class BcelUtil {
         if (i < Const.ACCESS_NAMES_LENGTH) {
           buf.append(Const.getAccessName(i));
         } else {
-          buf.append(String.format("ACC_BIT %x", pow));
+          buf.append(String.format("ACC_BIT(%x)", pow));
         }
       }
       pow <<= 1;
@@ -141,7 +147,7 @@ public final class BcelUtil {
       ConstantClass cc = (ConstantClass) c;
       return cc.getBytes(pool) + " [" + cc.getNameIndex() + "]";
     } else {
-      throw new Error("unexpected constant " + c + " class " + c.getClass());
+      throw new Error("unexpected constant " + c + " of class " + c.getClass());
     }
   }
 
@@ -189,7 +195,7 @@ public final class BcelUtil {
    * Returns whether or not the class is part of the JDK (rt.jar).
    *
    * @param gen the class to test
-   * @return true iff the class is part of the JDK (rt.jar)
+   * @return true iff the class is in a package that is in the JDK (rt.jar)
    */
   public static boolean inJdk(ClassGen gen) {
     return (inJdk(gen.getClassName()));
@@ -200,7 +206,7 @@ public final class BcelUtil {
    *
    * @param classname the class to test, in the format of Class.getName(); the class should not be
    *     an array
-   * @return true iff the class is part of the JDK (rt.jar)
+   * @return true iff the class is in a package that is in the JDK (rt.jar)
    */
   public static boolean inJdk(@ClassGetName String classname) {
     return classname.startsWith("java.")
@@ -252,7 +258,9 @@ public final class BcelUtil {
   }
 
   /**
-   * Checks the specific method for consistency.
+   * Checks the specified method for consistency.
+   *
+   * <p>Does nothing if {@link #skipChecks} is false.
    *
    * @param mgen the class to check
    */
@@ -283,9 +291,11 @@ public final class BcelUtil {
       MethodGen nmg = new MethodGen(mgen.getMethod(), mgen.getClassName(), mgen.getConstantPool());
       nmg.getLineNumberTable(mgen.getConstantPool());
     } catch (Throwable t) {
-      System.out.printf("failure in method %s.%s%n", mgen.getClassName(), mgen.getName());
-      t.printStackTrace();
-      throw new Error(t);
+      Error e =
+          new Error(
+              String.format("failure in method %s.%s%n", mgen.getClassName(), mgen.getName()), t);
+      e.printStackTrace();
+      throw e;
     }
   }
 
@@ -308,6 +318,7 @@ public final class BcelUtil {
       checkMgen(new MethodGen(method, gen.getClassName(), gen.getConstantPool()));
     }
 
+    // Diagnostic output
     if (false) {
       Throwable t = new Throwable();
       t.fillInStackTrace();
@@ -332,7 +343,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Adds code in nl to start of method mg.
+   * Adds instructions to the start of a method.
    *
    * @param mg method to be augmented
    * @param nl instructions to prepend to the method
@@ -344,10 +355,9 @@ public final class BcelUtil {
     InstructionHandle oldStart = il.getStart();
     InstructionHandle newStart = il.insert(nl);
 
-    // Move any LineNumbers and local variable that currently point to
+    // Move any LineNumbers and local variables that currently point to
     // the first instruction to include the new instructions. Other
-    // targeters (branches, exceptions) should not include the new
-    // code
+    // targeters (branches, exceptions) should not include the new code.
     if (oldStart.hasTargeters()) {
       // getTargeters() returns non-null because hasTargeters => true
       for (InstructionTargeter it : oldStart.getTargeters()) {
@@ -362,10 +372,10 @@ public final class BcelUtil {
 
   /**
    * Dumps the contents of the specified class to the specified directory. The file is named
-   * dumpDir/[class].bcel. It contains a synopsis of the fields and methods followed by the jvm code
+   * dumpDir/[class].bcel. It contains a synopsis of the fields and methods followed by the JVM code
    * for each method.
    *
-   * @param jc javaclass to dump
+   * @param jc JavaClass to dump
    * @param dumpDir directory in which to write the file
    * @see #dump(JavaClass, File)
    */
@@ -376,10 +386,10 @@ public final class BcelUtil {
 
   /**
    * Dumps the contents of the specified class to the specified directory. The file is named
-   * dumpDir/[class].bcel. It contains a synopsis of the fields and methods followed by the jvm code
+   * dumpDir/[class].bcel. It contains a synopsis of the fields and methods followed by the JVM code
    * for each method.
    *
-   * @param jc javaclass to dump
+   * @param jc JavaClass to dump
    * @param dumpDir directory in which to write the file
    */
   public static void dump(JavaClass jc, File dumpDir) {
@@ -389,7 +399,7 @@ public final class BcelUtil {
       File path = new File(dumpDir, jc.getClassName() + ".bcel");
       PrintStream p = new PrintStream(path);
 
-      // Print the class, super class and interfaces
+      // Print the class, superclass, and interfaces
       p.printf("class %s extends %s%n", jc.getClassName(), jc.getSuperclassName());
       String[] inames = jc.getInterfaceNames();
       if ((inames != null) && (inames.length > 0)) {
@@ -412,12 +422,14 @@ public final class BcelUtil {
         p.printf("  %s%n", m);
       }
 
+      // TODO: In Java 8, interface methods can have default implementations.  Should you drop the
+      // test, because m.getCode() will be null if there is no default implementation?
       // If this is not an interface, print the code for each method
       if (!jc.isInterface()) {
         for (Method m : jc.getMethods()) {
-          p.printf("%nMethod %s%n", m);
           Code code = m.getCode();
           if (code != null) {
+            p.printf("%nMethod %s%n", m);
             p.printf("  %s%n", code.toString().replace("\n", "\n  "));
           }
         }
@@ -434,7 +446,8 @@ public final class BcelUtil {
       p.close();
 
     } catch (Exception e) {
-      throw new Error("Unexpected error dumping javaclass", e);
+      // TODO: include jc and dumpDir in the error message
+      throw new Error("Unexpected error dumping JavaClass", e);
     }
   }
 
@@ -476,6 +489,9 @@ public final class BcelUtil {
     return (out.toString());
   }
 
+  // TODO: The documentation says "builds an array", but the method doesn't return an array.  How is
+  // the array accessed?
+  // TODO: Why does this start at 1000?
   /**
    * Builds an array of line numbers for the specified instruction list. Each opcode is assigned the
    * next source line number starting at 1000.
@@ -492,8 +508,8 @@ public final class BcelUtil {
   }
 
   /**
-   * Sets the locals to 'this' and each of the arguments. Any other locals are removed. An
-   * instruction list with at least one instruction must exist.
+   * Sets the locals to the formal parameters. Any other locals are removed. An instruction list
+   * with at least one instruction must exist.
    *
    * @param mg the method whose locals to set
    */
@@ -501,12 +517,14 @@ public final class BcelUtil {
 
     // Get the parameter types and names.
     @SuppressWarnings(
-        "nullness") // The arguments to the annotation aren't necessarily initialized before they
+        "nullness" // The arguments to the annotation aren't necessarily initialized before they
     // are written here. Since annotations are erased at runtime, this is safe.
+    )
     Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
     @SuppressWarnings(
-        "nullness") // The arguments to the annotation aren't necessarily initialized before they
+        "nullness" // The arguments to the annotation aren't necessarily initialized before they
     // are written here. Since annotations are erased at runtime, this is safe.
+    )
     String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
         argNames = mg.getArgumentNames();
 
@@ -525,7 +543,7 @@ public final class BcelUtil {
     }
 
     // Reset the current number of locals so that when other locals
-    // are added they get added at the correct offset
+    // are added they get added at the correct offset.
     mg.setMaxLocals();
 
     return;
@@ -588,9 +606,10 @@ public final class BcelUtil {
     return (attName);
   }
 
+  // TODO: Don't you need to check the return type too?
   /**
-   * Returns whether or not this is a standard main method (static, name is 'main', and one argument
-   * of string array).
+   * Returns whether or not this is a standard main method (static, name is 'main', and one formal
+   * parameter: a string array).
    *
    * @param mg the method to check
    * @return true iff the method is a main method
@@ -648,19 +667,6 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns a copy of the given type array, with newType added to the end.
-   *
-   * @deprecated use {@link #postpendToArray}
-   * @param types the array to extend
-   * @param newType the element to add to the end of the array
-   * @return a new array, with newType at the end
-   */
-  @Deprecated
-  public static Type[] addType(Type[] types, Type newType) {
-    return postpendToArray(types, newType);
-  }
-
-  /**
    * Returns a copy of the given type array, with newType inserted at the beginning.
    *
    * @param types the array to extend
@@ -668,6 +674,8 @@ public final class BcelUtil {
    * @return a new array, with newType at the beginning
    */
   public static Type[] prependToArray(Type newType, Type[] types) {
+    // TODO: add a test for types.length == MAX_INT (throw an error if so),
+    // and remove this @SuppressWarnings.  Do the same for postpendToArray above.
     @SuppressWarnings({
       "index", // newTypes is @MinLen(1) except in the presence of overflow,
       // which the Value Checker accounts for, but the Index Checker does not.
@@ -682,19 +690,6 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns a copy of the given type array, with newType inserted at the beginning.
-   *
-   * @deprecated use {@link #prependToArray}
-   * @param types the array to extend
-   * @param newType the element to add to the beginning of the array
-   * @return a new array, with newType at the beginning
-   */
-  @Deprecated
-  public static Type[] insertType(Type newType, Type[] types) {
-    return prependToArray(newType, types);
-  }
-
-  /**
    * Return the type corresponding to a given class name.
    *
    * @param classname the binary name of a class (= fully-qualified name, except for inner classes)
@@ -706,14 +701,12 @@ public final class BcelUtil {
     int arrayDepth = 0;
     while (classname.endsWith("[]")) {
       @SuppressWarnings("signature") // removing trailing "[]" leaves the string a binary name
-      @BinaryName
-      String sansArray = classname.substring(0, classname.length() - 2);
+      @BinaryName String sansArray = classname.substring(0, classname.length() - 2);
       classname = sansArray;
       arrayDepth++;
     }
     @SuppressWarnings("signature") // test of no trailing "[]" => has type @BinaryNameForNonArray
-    @BinaryNameForNonArray
-    String tmp = classname;
+    @BinaryNameForNonArray String tmp = classname;
     classname = tmp.intern();
 
     // Get the base type
@@ -760,10 +753,10 @@ public final class BcelUtil {
     primitiveClasses.put("short", Short.TYPE);
   }
 
-  // TODO: This is a private copy (but protected to permit testing).  When
-  // the method is moved from monolithic plume-lib, perhaps depend on the
-  // new version.  Or just keep depending on this small implementation.
-  // TODO: should create a method that works exactly for the desired argument type.
+  // TODO: This method is a private copy (but protected to permit testing).  We made a copy because
+  // the method is in plume-util and because plume-util depends on bcel-util and; therefore,
+  // bcel-util cannot depend on plume-util.  In the future, this should probably be moved into a
+  // common dependency, such as the checker-framework's SignatureUtil class.
   /**
    * Like {@link Class#forName(String)}, but also works when the string represents a primitive type
    * or a fully-qualified name (as opposed to a binary name).
@@ -798,8 +791,7 @@ public final class BcelUtil {
           throw e;
         }
         @SuppressWarnings("signature") // checked below & exception is handled
-        @ClassGetName
-        String innerName = className.substring(0, pos) + "$" + className.substring(pos + 1);
+        @ClassGetName String innerName = className.substring(0, pos) + "$" + className.substring(pos + 1);
         try {
           return Class.forName(innerName);
         } catch (ClassNotFoundException ee) {
