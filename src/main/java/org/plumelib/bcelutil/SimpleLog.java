@@ -1,5 +1,7 @@
 package org.plumelib.bcelutil;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.checkerframework.checker.formatter.qual.FormatMethod;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -18,10 +20,17 @@ public final class SimpleLog {
   /** If false, do no output. */
   public boolean enabled;
 
-  /** The current indentation string. */
-  private String indent_str = "";
+  /** The current indentation level. */
+  private int indentLevel = 0;
   /** Indentation string for one level of indentation. */
   private final String INDENT_STR_ONE_LEVEL = "  ";
+  /**
+   * Cache for the current indentation string, or null if needs to be recomputed. Never access this
+   * directly; always call {@link #getIndentString}.
+   */
+  private @Nullable String indentString = null;
+  /** Cache of indentation strings that have been computed so far. */
+  private List<String> indentStrings;
 
   /** Create a new SimpleLog object with logging enabled. */
   public SimpleLog() {
@@ -35,6 +44,8 @@ public final class SimpleLog {
    */
   public SimpleLog(boolean enabled) {
     this.enabled = enabled;
+    indentStrings = new ArrayList<String>();
+    indentStrings.add("");
   }
 
   /**
@@ -57,7 +68,7 @@ public final class SimpleLog {
   @FormatMethod
   public void log(String format, @Nullable Object... args) {
     if (enabled) {
-      System.out.print(indent_str);
+      System.out.print(getIndentString());
       System.out.printf(format, args);
     }
   }
@@ -70,26 +81,40 @@ public final class SimpleLog {
       StackTraceElement[] ste_arr = t.getStackTrace();
       for (int ii = 2; ii < ste_arr.length; ii++) {
         StackTraceElement ste = ste_arr[ii];
-        System.out.printf("%s  %s%n", indent_str, ste);
+        System.out.printf("%s  %s%n", getIndentString(), ste);
       }
     }
+  }
+
+  /** Return the current indentation string. */
+  private String getIndentString() {
+    assert enabled;
+    if (indentString == null) {
+      for (int i = indentLevel; i < indentStrings.size(); i++) {
+        indentStrings.add(indentStrings.get(i - 1) + INDENT_STR_ONE_LEVEL);
+      }
+      indentString = indentStrings.get(indentLevel);
+    }
+    return indentString;
   }
 
   /** Increases indentation by one level. */
   public void indent() {
     if (enabled) {
-      indent_str += INDENT_STR_ONE_LEVEL;
+      indentLevel++;
+      indentString = null;
     }
   }
 
   /** Decreases indentation by one level. */
   public void exdent() {
     if (enabled) {
-      if (indent_str.isEmpty()) {
-        log("Called exdent when indentation was 0.");
+      if (indentLevel == 0) {
+        log("Called exdent when indentation level was 0.");
         logStackTrace();
       } else {
-        indent_str = indent_str.substring(0, indent_str.length() - INDENT_STR_ONE_LEVEL.length());
+        indentLevel--;
+        indentString = null;
       }
     }
   }
@@ -97,7 +122,8 @@ public final class SimpleLog {
   /** Resets indentation to none. Has no effect if logging is disabled. */
   public void resetIndent() {
     if (enabled) {
-      indent_str = "";
+      indentLevel = 0;
+      indentString = "";
     }
   }
 }
