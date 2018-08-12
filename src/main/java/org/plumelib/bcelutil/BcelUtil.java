@@ -34,6 +34,7 @@ import org.checkerframework.checker.signature.qual.BinaryNameForNonArray;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.InternalForm;
 import org.checkerframework.common.value.qual.MinLen;
+import org.plumelib.signature.Signatures;
 
 /** Static utility methods for working with BCEL. */
 public final class BcelUtil {
@@ -618,7 +619,7 @@ public final class BcelUtil {
    */
   public static @ClassGetName String typeToClassgetname(Type type) {
     String signature = type.getSignature();
-    return JvmUtil.fieldDescriptorToClassGetName(signature);
+    return Signatures.fieldDescriptorToClassGetName(signature);
   }
 
   /**
@@ -741,7 +742,7 @@ public final class BcelUtil {
   // TODO: This method is a private copy (but protected to permit testing).  We made a copy because
   // the method is in plume-util and because plume-util depends on bcel-util and; therefore,
   // bcel-util cannot depend on plume-util.  In the future, this should probably be moved into a
-  // common dependency, such as the checker-framework's SignatureUtil class.
+  // common dependency, such as the checker-framework's Signatures class.
   /**
    * Like {@link Class#forName(String)}, but also works when the string represents a primitive type
    * or a fully-qualified name (as opposed to a binary name).

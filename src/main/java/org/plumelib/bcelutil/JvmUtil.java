@@ -13,7 +13,10 @@ import org.checkerframework.checker.signature.qual.SourceNameForNonArrayNonInner
  *
  * <p>Currently contains conversion utilities between Java and JVM string formats, for types and
  * signatures.
+ *
+ * @deprecated Use Signatures
  */
+@Deprecated
 public final class JvmUtil {
 
   private static HashMap<@SourceNameForNonArrayNonInner String, @FieldDescriptor String>
@@ -119,8 +122,7 @@ public final class JvmUtil {
     StringTokenizer argsTokenizer = new StringTokenizer(commaSepArgs, ",", false);
     while (argsTokenizer.hasMoreTokens()) {
       @SuppressWarnings("signature") // substring
-      @BinaryName
-      String arg = argsTokenizer.nextToken().trim();
+      @BinaryName String arg = argsTokenizer.nextToken().trim();
       result += binaryNameToFieldDescriptor(arg);
     }
     result += ")";
