@@ -1,0 +1,22 @@
+///////////////////////////////////////////////////////////////////////////
+/// Bcel bytecode manipulation library
+///
+
+repositories {
+  mavenCentral()
+}
+
+// By default, use Checker Framework from Maven Central.
+// Pass -PbcelLocal to use a locally-built version of BCEL.
+dependencies {
+  if (!rootProject.hasProperty('bcelLocal')) {
+    api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.2.0.1'
+  } else if (System.getenv("BCEL") == null) {
+    throw new GradleException("Environment variable BCEL is not set")
+  } else if (! file(System.getenv("BCEL")).exists()) {
+    throw new GradleException("Environment variable BCEL is set to non-existent directory " + System.getenv("BCEL"));
+  } else {
+    ext.bceldist = "$System.env.BCEL/target"
+    implementation fileTree(dir: "${ext.bceldist}", include: 'bcel-6.2.0.1.jar')
+  }
+}
