@@ -90,7 +90,7 @@ public final class SimpleLog {
   private String getIndentString() {
     assert enabled;
     if (indentString == null) {
-      for (int i = indentLevel; i < indentStrings.size(); i++) {
+      for (int i = indentStrings.size(); i <= indentLevel; i++) {
         indentStrings.add(indentStrings.get(i - 1) + INDENT_STR_ONE_LEVEL);
       }
       indentString = indentStrings.get(indentLevel);
