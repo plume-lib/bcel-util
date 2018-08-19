@@ -5,8 +5,8 @@ import java.util.StringTokenizer;
 import org.checkerframework.checker.index.qual.Positive;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
+import org.checkerframework.checker.signature.qual.DotSeparatedIdentifiers;
 import org.checkerframework.checker.signature.qual.FieldDescriptor;
-import org.checkerframework.checker.signature.qual.SourceNameForNonArrayNonInner;
 
 /**
  * Utility functions for working with the JVM.
@@ -19,9 +19,9 @@ import org.checkerframework.checker.signature.qual.SourceNameForNonArrayNonInner
 @Deprecated
 public final class JvmUtil {
 
-  private static HashMap<@SourceNameForNonArrayNonInner String, @FieldDescriptor String>
+  private static HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>
       primitiveClassesJvm =
-          new HashMap<@SourceNameForNonArrayNonInner String, @FieldDescriptor String>(8);
+          new HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>(8);
 
   static {
     primitiveClassesJvm.put("boolean", "Z");

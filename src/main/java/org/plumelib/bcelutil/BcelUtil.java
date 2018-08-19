@@ -30,7 +30,6 @@ import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
 import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.signature.qual.BinaryName;
-import org.checkerframework.checker.signature.qual.BinaryNameForNonArray;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.InternalForm;
 import org.checkerframework.common.value.qual.MinLen;
@@ -683,16 +682,7 @@ public final class BcelUtil {
    */
   public static Type classnameToType(@BinaryName String classname) {
 
-    // Get the array depth (if any)
-    int arrayDepth = 0;
-    while (classname.endsWith("[]")) {
-      @SuppressWarnings("signature") // removing trailing "[]" leaves the string a binary name
-      @BinaryName String sansArray = classname.substring(0, classname.length() - 2);
-      classname = sansArray;
-      arrayDepth++;
-    }
-    @SuppressWarnings("signature") // test of no trailing "[]" => has type @BinaryNameForNonArray
-    @BinaryNameForNonArray String tmp = classname;
+    @BinaryName String tmp = classname;
     classname = tmp.intern();
 
     // Get the base type
@@ -715,11 +705,6 @@ public final class BcelUtil {
       t = Type.SHORT;
     } else { // must be a non-primitive
       t = new ObjectType(classname);
-    }
-
-    // If there was an array, build the array type
-    if (arrayDepth > 0) {
-      t = new ArrayType(t, arrayDepth);
     }
 
     return t;
