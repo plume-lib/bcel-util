@@ -19,6 +19,7 @@ import org.checkerframework.checker.signature.qual.FieldDescriptor;
 @Deprecated
 public final class JvmUtil {
 
+  /** A map from Java primitive data types to the corresponding field descriptor letter. */
   private static HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>
       primitiveClassesJvm =
           new HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>(8);
@@ -130,6 +131,7 @@ public final class JvmUtil {
     return result;
   }
 
+  /** A map from field descriptor letters to the corresponding Java primitive data type. */
   private static HashMap<String, String> primitiveClassesFromJvm = new HashMap<String, String>(8);
 
   static {
