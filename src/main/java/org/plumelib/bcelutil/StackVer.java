@@ -84,10 +84,10 @@ public final class StackVer {
     private final List<InstructionContext> ics = new Vector<>();
     private final List<ArrayList<InstructionContext>> ecs = new Vector<>();
     /**
-     * TODO
+     * Add an (InstructionContext, ExecutionChain) pair to their respective queues.
      *
-     * @param ic
-     * @param executionChain
+     * @param ic the InstructionContext
+     * @param executionChain the ExecutionChain
      */
     public void add(
         final InstructionContext ic, final ArrayList<InstructionContext> executionChain) {
@@ -95,18 +95,18 @@ public final class StackVer {
       ecs.add(executionChain);
     }
     /**
-     * TODO
+     * Test if InstructionContext queue is empty.
      *
-     * @return
+     * @return true if the InstructionContext queue is empty.
      */
     public boolean isEmpty() {
       return ics.isEmpty();
     }
 
     /**
-     * TODO
+     * Remove a specific (InstructionContext, ExecutionChain) pair from their respective queues.
      *
-     * @param i
+     * @param i the index of the items to be removed
      */
     public void remove(@NonNegative final int i) {
       ics.remove(i);
@@ -114,29 +114,29 @@ public final class StackVer {
     }
 
     /**
-     * TODO
+     * Fetch a specific InstructionContext from the queue.
      *
-     * @param i
-     * @return
+     * @param i the index of the item to be fetched
+     * @return the indicated InstructionContext
      */
     public InstructionContext getIC(@NonNegative final int i) {
       return ics.get(i);
     }
 
     /**
-     * TODO
+     * Fetch a specific ExecutionChain from the queue.
      *
-     * @param i
-     * @return
+     * @param i the index of the item to be fetched
+     * @return the indicated ExecutionChain
      */
     public ArrayList<InstructionContext> getEC(@NonNegative final int i) {
       return ecs.get(i);
     }
 
     /**
-     * TODO
+     * Get the size of the InstructionContext queue.
      *
-     * @return
+     * @return the size of the InstructionQueue
      */
     public int size() {
       return ics.size();
@@ -258,8 +258,11 @@ public final class StackVer {
         Frame f = u.getOutFrame(oldchain);
         stack_types.set(theSuccessor.getInstruction().getPosition(), f);
         if (theSuccessor.execute(f, newchain, icv, ev)) {
-          // This makes 5.0 grumpy: icq.add(theSuccessor, (ArrayList) newchain.clone());
-          icq.add(theSuccessor, new ArrayList<InstructionContext>(newchain));
+          @SuppressWarnings(
+              "unchecked") // newchain is already of type ArrayList<InstructionContext>
+          final ArrayList<InstructionContext> newchainClone =
+              (ArrayList<InstructionContext>) newchain.clone();
+          icq.add(theSuccessor, newchainClone);
         }
       } else { // "not a ret"
 
@@ -269,8 +272,11 @@ public final class StackVer {
           Frame f = u.getOutFrame(oldchain);
           stack_types.set(v.getInstruction().getPosition(), f);
           if (v.execute(f, newchain, icv, ev)) {
-            // This makes 5.0 grumpy: icq.add(v, (ArrayList) newchain.clone());
-            icq.add(v, new ArrayList<InstructionContext>(newchain));
+            @SuppressWarnings(
+                "unchecked") // newchain is already of type ArrayList<InstructionContext>
+            final ArrayList<InstructionContext> newchainClone =
+                (ArrayList<InstructionContext>) newchain.clone();
+            icq.add(v, newchainClone);
           }
         }
       } // end "not a ret"
