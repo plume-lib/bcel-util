@@ -657,7 +657,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Get existing StackMapTable from the MethodGen arguments. If there is none, create a new empty
+   * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
    * one. Sets both smta and stack_map_table. Must be called prior to any other methods that
    * manipulate the stack_map_table!
    *
@@ -863,20 +863,22 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Add a new argument to the method. This will be added after last current argument and before the
+   * Add a new parameter to the method. This will be added after last current parameter and before the
    * first local variable. This might have the side effect of causing us to rewrite the method byte
    * codes to adjust the offsets for the local variables - see below for details.
    *
    * <p>Must call fix_local_variable_table (just once per method) before calling this routine.
    *
    * @param mgen MethodGen to be modified
-   * @param arg_name name of new argument
-   * @param arg_type type of new argument
-   * @return a LocalVariableGen for the new argument
+   * @param arg_name name of new parameter
+   * @param arg_type type of new parameter
+   * @return a LocalVariableGen for the new parameter
    */
+  // TODO: change method name same time as correspoinding change in daikon/java/daikon/dcomp/DCInstrument.java
+  // protected final LocalVariableGen add_new_parameter(
   protected final LocalVariableGen add_new_argument(
       MethodGen mgen, String arg_name, Type arg_type) {
-    // We add a new argument, after any current ones, and then
+    // We add a new parameter, after any current ones, and then
     // we need to make a pass over the byte codes to update the local
     // offset values of all the locals we just shifted up.  This may have
     // a 'knock on' effect if we are forced to change an instruction that
@@ -898,7 +900,7 @@ public abstract class StackMapUtils {
 
     if (has_code) {
       if (!mgen.isStatic()) {
-        // Skip the 'this' pointer argument.
+        // Skip the 'this' pointer.
         new_index++;
         new_offset++; // size of 'this' is 1
       }
@@ -919,7 +921,7 @@ public abstract class StackMapUtils {
     }
     initial_locals_count++;
 
-    // Update the method's argument information.
+    // Update the method's parameter information.
     arg_types = BcelUtil.postpendToArray(arg_types, arg_type);
     String[] arg_names = add_string(mgen.getArgumentNames(), arg_name);
     mgen.setArgumentTypes(arg_types);
@@ -1137,7 +1139,7 @@ public abstract class StackMapUtils {
     first_local_index = arg_types.length;
 
     if (!mgen.isStatic()) {
-      // Add the 'this' pointer argument back in.
+      // Add the 'this' pointer back in.
       l = locals[0];
       new_lvg = mgen.addLocalVariable(l.getName(), l.getType(), l.getIndex(), null, null);
       debug_instrument.log(
@@ -1148,13 +1150,13 @@ public abstract class StackMapUtils {
       first_local_index++;
     }
 
-    // Loop through each argument
+    // Loop through each parameter
     for (int ii = 0; ii < arg_types.length; ii++) {
 
       // If this parameter doesn't have a matching local
       if ((loc_index >= locals.length) || (offset != locals[loc_index].getIndex())) {
 
-        // Create a local variable to describe the missing argument
+        // Create a local variable to describe the missing parameter
         new_lvg = mgen.addLocalVariable("$hidden$" + offset, arg_types[ii], offset, null, null);
       } else {
         l = locals[loc_index];
@@ -1169,7 +1171,7 @@ public abstract class StackMapUtils {
 
     // At this point the LocalVaraibles contain:
     //   the 'this' pointer (if present)
-    //   the arguments to the method
+    //   the parameters to the method
     // This will be used to construct the initial state of the
     // StackMapTypes.
     LocalVariableGen[] initial_locals = mgen.getLocalVariables();
