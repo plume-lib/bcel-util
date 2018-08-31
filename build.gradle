@@ -20,7 +20,10 @@ apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
 apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
 dependencies {
-  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.2.0.1'
+  implementation 'org.plumelib:signature-util:0.0.6'
+  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.2.0.2'
+  // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
+  // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
   testImplementation 'junit:junit:4.12'
   errorprone 'com.google.errorprone:error_prone_core:2.3.1'
 }
@@ -50,7 +53,7 @@ configurations {
   requireJavadoc
 }
 dependencies {
-  implementation group: 'org.plumelib', name: 'require-javadoc', version: '0.0.8'
+  implementation group: 'org.plumelib', name: 'require-javadoc', version: '0.1.0'
 }
 task requireJavadoc(type: Javadoc) {
   destinationDir.deleteDir()

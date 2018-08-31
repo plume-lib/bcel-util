@@ -54,6 +54,14 @@ package org.plumelib.bcelutil;
  * <http://www.apache.org/>.
  */
 
+/*
+ * This file was created by modifying a version of the Apache BCEL file
+ * src/main/java/org/apache/bcel/verifier/structural/InstConstraintVisitor.java
+ * as it existed cicra 2005.  It has been heavily modified and other than some
+ * of the boiler plate towards the beginning of the file, there is no longer
+ * much similarity between the two files.
+ */
+
 import org.apache.bcel.generic.*;
 import org.apache.bcel.verifier.structurals.Frame;
 import org.apache.bcel.verifier.structurals.InstConstraintVisitor;

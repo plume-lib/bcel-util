@@ -5,20 +5,24 @@ import java.util.StringTokenizer;
 import org.checkerframework.checker.index.qual.Positive;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
+import org.checkerframework.checker.signature.qual.DotSeparatedIdentifiers;
 import org.checkerframework.checker.signature.qual.FieldDescriptor;
-import org.checkerframework.checker.signature.qual.SourceNameForNonArrayNonInner;
 
 /**
  * Utility functions for working with the JVM.
  *
  * <p>Currently contains conversion utilities between Java and JVM string formats, for types and
  * signatures.
+ *
+ * @deprecated Use Signatures
  */
+@Deprecated
 public final class JvmUtil {
 
-  private static HashMap<@SourceNameForNonArrayNonInner String, @FieldDescriptor String>
+  /** A map from Java primitive data types to the corresponding field descriptor letter. */
+  private static HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>
       primitiveClassesJvm =
-          new HashMap<@SourceNameForNonArrayNonInner String, @FieldDescriptor String>(8);
+          new HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>(8);
 
   static {
     primitiveClassesJvm.put("boolean", "Z");
@@ -119,8 +123,7 @@ public final class JvmUtil {
     StringTokenizer argsTokenizer = new StringTokenizer(commaSepArgs, ",", false);
     while (argsTokenizer.hasMoreTokens()) {
       @SuppressWarnings("signature") // substring
-      @BinaryName
-      String arg = argsTokenizer.nextToken().trim();
+      @BinaryName String arg = argsTokenizer.nextToken().trim();
       result += binaryNameToFieldDescriptor(arg);
     }
     result += ")";
@@ -128,6 +131,7 @@ public final class JvmUtil {
     return result;
   }
 
+  /** A map from field descriptor letters to the corresponding Java primitive data type. */
   private static HashMap<String, String> primitiveClassesFromJvm = new HashMap<String, String>(8);
 
   static {

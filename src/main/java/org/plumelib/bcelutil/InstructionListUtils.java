@@ -152,6 +152,12 @@ public abstract class InstructionListUtils extends StackMapUtils {
     modify_stack_maps_for_switches(new_start, il);
   }
 
+  /**
+   * Print a BCEL instruction list to the debug_instrument log.
+   *
+   * @param start start of the instruction list
+   * @param label a descriptive string for the instruction list
+   */
   private void print_il(InstructionHandle start, String label) {
     if (debug_instrument.enabled()) {
       print_stack_map_table(label);

@@ -30,10 +30,10 @@ import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
 import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.signature.qual.BinaryName;
-import org.checkerframework.checker.signature.qual.BinaryNameForNonArray;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.InternalForm;
 import org.checkerframework.common.value.qual.MinLen;
+import org.plumelib.signature.Signatures;
 
 /** Static utility methods for working with BCEL. */
 public final class BcelUtil {
@@ -613,7 +613,7 @@ public final class BcelUtil {
    */
   public static @ClassGetName String typeToClassgetname(Type type) {
     String signature = type.getSignature();
-    return JvmUtil.fieldDescriptorToClassGetName(signature);
+    return Signatures.fieldDescriptorToClassGetName(signature);
   }
 
   /**
@@ -677,16 +677,7 @@ public final class BcelUtil {
    */
   public static Type classnameToType(@BinaryName String classname) {
 
-    // Get the array depth (if any)
-    int arrayDepth = 0;
-    while (classname.endsWith("[]")) {
-      @SuppressWarnings("signature") // removing trailing "[]" leaves the string a binary name
-      @BinaryName String sansArray = classname.substring(0, classname.length() - 2);
-      classname = sansArray;
-      arrayDepth++;
-    }
-    @SuppressWarnings("signature") // test of no trailing "[]" => has type @BinaryNameForNonArray
-    @BinaryNameForNonArray String tmp = classname;
+    @BinaryName String tmp = classname;
     classname = tmp.intern();
 
     // Get the base type
@@ -711,11 +702,6 @@ public final class BcelUtil {
       t = new ObjectType(classname);
     }
 
-    // If there was an array, build the array type
-    if (arrayDepth > 0) {
-      t = new ArrayType(t, arrayDepth);
-    }
-
     return t;
   }
 
@@ -736,7 +722,7 @@ public final class BcelUtil {
   // TODO: This method is a private copy (but protected to permit testing).  We made a copy because
   // the method is in plume-util and because plume-util depends on bcel-util and; therefore,
   // bcel-util cannot depend on plume-util.  In the future, this should probably be moved into a
-  // common dependency, such as the checker-framework's SignatureUtil class.
+  // common dependency, such as the checker-framework's Signatures class.
   /**
    * Like {@link Class#forName(String)}, but also works when the string represents a primitive type
    * or a fully-qualified name (as opposed to a binary name).
