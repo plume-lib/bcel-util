@@ -2,8 +2,6 @@ package org.plumelib.bcelutil;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.util.Formatter;
-import java.util.HashMap;
 import java.util.Iterator;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
@@ -15,7 +13,6 @@ import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
-import org.apache.bcel.generic.ArrayType;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.CodeExceptionGen;
 import org.apache.bcel.generic.ConstantPoolGen;
@@ -32,8 +29,8 @@ import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.InternalForm;
-import org.checkerframework.common.value.qual.MinLen;
-import org.plumelib.signature.Signatures;
+import org.plumelib.reflection.ReflectionPlume;
+import org.plumelib.reflection.Signatures;
 
 /** Static utility methods for working with BCEL. */
 public final class BcelUtil {
@@ -42,7 +39,7 @@ public final class BcelUtil {
     throw new Error("do not instantiate");
   }
 
-  /** Controls whether the checks in {@link #checkMgen} are actually performed. */
+  /** Controls whether the checks in {@link #checkMgen} are performed. */
   public static boolean skipChecks = false;
 
   /** The type that represents String[]. */
@@ -50,6 +47,7 @@ public final class BcelUtil {
 
   // 'ToString' methods
 
+  // TODO: Giving a concrete example would be helpful in the documentation.
   /**
    * Returns a string describing a method declaration. It contains the access flags (public,
    * private, static, etc), the return type, the method name, and the types of each of its
@@ -65,17 +63,21 @@ public final class BcelUtil {
     if (flags != null && !flags.isEmpty()) {
       sb.append(String.format("%s ", flags));
     }
-    sb.append(String.format("%s %s (", m.getReturnType(), m.getName()));
+    sb.append(String.format("%s %s(", m.getReturnType(), m.getName()));
     for (Type at : m.getArgumentTypes()) {
       sb.append(String.format("%s, ", at));
     }
     sb.append(")");
+    // TODO: It's ineffecient to convert to a string before doing the removal.  It's more efficient
+    //   to use `sb.delete(...)` or `return sb.substring(...)`.  Or use StringJoiner or String.join
+    //   to avoid putting the characters in sb in the first place.
     // remove extra ", " after last parameter
     return sb.toString().replace(", )", ")");
   }
 
   /**
-   * Return a string representation of the access flags of method m.
+   * Return a string representation of the access flags of method m. In the string, the flags are
+   * space-separated and in a canonical order.
    *
    * @param m the method whose access flags to retrieve
    * @return a string representation of the access flags of method m
@@ -110,13 +112,11 @@ public final class BcelUtil {
    * @param pool the constant pool the instructions refer to
    * @return a printed representation of the instructions in {@code il}
    */
-  @SuppressWarnings("rawtypes")
   public static String instructionListToString(InstructionList il, ConstantPoolGen pool) {
 
     StringBuilder out = new StringBuilder();
-    // not generic because BCEL is not generic
-    for (Iterator i = il.iterator(); i.hasNext(); ) {
-      InstructionHandle handle = (InstructionHandle) i.next();
+    for (Iterator<InstructionHandle> i = il.iterator(); i.hasNext(); ) {
+      InstructionHandle handle = i.next();
       out.append(handle.getInstruction().toString(pool.getConstantPool()) + "\n");
     }
     return out.toString();
@@ -142,8 +142,8 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the attribute name for the specified attribute.
-   * (from the original class file ConstantPool)
+   * Return the attribute name for the specified attribute, looked up in the original class file
+   * ConstantPool.
    *
    * @param a the attribute
    * @return the attribute name for the specified attribute
@@ -158,8 +158,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the attribute name for the specified attribute.
-   * (from an internally generated ConstantPoolGen)
+   * Return the attribute name for the specified attribute, looked up in the given ConstantPoolGen.
    *
    * @param a the attribute
    * @param pool the constant pool
@@ -175,9 +174,10 @@ public final class BcelUtil {
 
   // 'is' (boolean test) methods
 
+  // TODO: I don't understand the parenthetical comment.  Is there a precondition on mg that must
+  // hold?
   /**
-   * Returns whether or not the method is a constructor.
-   * (from an internally generated method)
+   * Returns whether or not the method is a constructor. (from an internally generated method)
    *
    * @param mg the method to test
    * @return true iff the method is a constructor
@@ -189,9 +189,10 @@ public final class BcelUtil {
     return mg.getName().equals("<init>");
   }
 
+  // TODO: I don't understand the parenthetical comment.  Is there a precondition on m that must
+  // hold?
   /**
-   * Returns whether or not the method is a constructor.
-   * (from an original class file method)
+   * Returns whether or not the method is a constructor. (from an original class file method)
    *
    * @param m the method to test
    * @return true iff the method is a constructor
@@ -288,8 +289,8 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not this is a standard main method (static, void, name is 'main', and one formal
-   * parameter: a string array).
+   * Returns whether or not this is a standard main method (static, void, name is 'main', and one
+   * formal parameter: a string array).
    *
    * @param mg the method to check
    * @return true iff the method is a main method
@@ -341,7 +342,9 @@ public final class BcelUtil {
     } catch (Throwable t) {
       Error e =
           new Error(
-              String.format("failure in method %s.%s%n", mgen.getClassName(), mgen.getName()), t);
+              String.format(
+                  "failure while checking method %s.%s%n", mgen.getClassName(), mgen.getName()),
+              t);
       e.printStackTrace();
       throw e;
     }
@@ -368,6 +371,7 @@ public final class BcelUtil {
 
     // Diagnostic output
     if (false) {
+      // TODO: Abstract out all but the last line of this body, into a separate method.
       Throwable t = new Throwable();
       t.fillInStackTrace();
       StackTraceElement[] ste = t.getStackTrace();
@@ -440,6 +444,7 @@ public final class BcelUtil {
       if ((inames != null) && (inames.length > 0)) {
         p.printf("   ");
         for (String iname : inames) {
+          // TODO: Why is the word "implements" repeated?
           p.printf("implements %s ", iname);
         }
         p.printf("%n");
@@ -476,12 +481,15 @@ public final class BcelUtil {
       p.close();
 
     } catch (Exception e) {
-      throw new Error("Unexpected error dumping JavaClass: " + jc.getClassName() + " to " + dumpDir.getName(), e);
+      throw new Error(
+          "Unexpected error dumping JavaClass: " + jc.getClassName() + " to " + dumpDir.getName(),
+          e);
     }
   }
 
   // miscellaneous methods
 
+  // TODO: What is the mnemonic for the variable name `nl`?
   /**
    * Adds instructions to the start of a method.
    *
@@ -532,22 +540,21 @@ public final class BcelUtil {
   }
 
   /**
-   * Sets the locals to the formal parameters. Any other locals are removed. An instruction list
+   * Sets the locals to be the formal parameters. Any other locals are removed. An instruction list
    * with at least one instruction must exist.
    *
    * @param mg the method whose locals to set
    */
+  // TODO: Can you make the method name more descriptive of what this does?
   public static void setupInitLocals(MethodGen mg) {
 
     // Get the parameter types and names.
-    @SuppressWarnings(
-        "nullness" // The arguments to the annotation aren't necessarily initialized before they
-    // are written here. Since annotations are erased at runtime, this is safe.
+    @SuppressWarnings("nullness" // The annotation arguments might not be initialized yet.
+    // Since the arguments are not executed at run time, there is no null pointer exception.
     )
     Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
-    @SuppressWarnings(
-        "nullness" // The arguments to the annotation aren't necessarily initialized before they
-    // are written here. Since annotations are erased at runtime, this is safe.
+    @SuppressWarnings("nullness" // The annotation arguments might not be initialized yet.
+    // Since the arguments are not executed at run time, there is no null pointer exception.
     )
     String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
         argNames = mg.getArgumentNames();
@@ -626,8 +633,7 @@ public final class BcelUtil {
 
     String classname = typeToClassgetname(type);
     try {
-      Class<?> c = classForName(classname);
-      return c;
+      return ReflectionPlume.classForName(classname);
     } catch (Exception e) {
       throw new RuntimeException("can't find class for " + classname, e);
     }
@@ -647,8 +653,7 @@ public final class BcelUtil {
     Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 0, types.length);
     newTypes[types.length] = newType;
-    Type[] newTypesCast = newTypes;
-    return newTypesCast;
+    return newTypes;
   }
 
   /**
@@ -662,11 +667,10 @@ public final class BcelUtil {
     if (types.length == Integer.MAX_VALUE) {
       throw new Error("array " + types + " is too large to extend");
     }
-    Type [] newTypes = new Type[types.length + 1];
+    Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 1, types.length);
     newTypes[0] = newType;
-    Type[] newTypesCast = newTypes;
-    return newTypesCast;
+    return newTypes;
   }
 
   /**
@@ -677,93 +681,26 @@ public final class BcelUtil {
    */
   public static Type classnameToType(@BinaryName String classname) {
 
-    @BinaryName String tmp = classname;
-    classname = tmp.intern();
+    classname = classname.intern();
 
-    // Get the base type
-    Type t = null;
     if (classname == "int") { // interned
-      t = Type.INT;
+      return Type.INT;
     } else if (classname == "boolean") { // interned
-      t = Type.BOOLEAN;
+      return Type.BOOLEAN;
     } else if (classname == "byte") { // interned
-      t = Type.BYTE;
+      return Type.BYTE;
     } else if (classname == "char") { // interned
-      t = Type.CHAR;
+      return Type.CHAR;
     } else if (classname == "double") { // interned
-      t = Type.DOUBLE;
+      return Type.DOUBLE;
     } else if (classname == "float") { // interned
-      t = Type.FLOAT;
+      return Type.FLOAT;
     } else if (classname == "long") { // interned
-      t = Type.LONG;
+      return Type.LONG;
     } else if (classname == "short") { // interned
-      t = Type.SHORT;
+      return Type.SHORT;
     } else { // must be a non-primitive
-      t = new ObjectType(classname);
-    }
-
-    return t;
-  }
-
-  /** Used by {@link #classForName}. */
-  private static HashMap<String, Class<?>> primitiveClasses = new HashMap<String, Class<?>>(8);
-
-  static {
-    primitiveClasses.put("boolean", Boolean.TYPE);
-    primitiveClasses.put("byte", Byte.TYPE);
-    primitiveClasses.put("char", Character.TYPE);
-    primitiveClasses.put("double", Double.TYPE);
-    primitiveClasses.put("float", Float.TYPE);
-    primitiveClasses.put("int", Integer.TYPE);
-    primitiveClasses.put("long", Long.TYPE);
-    primitiveClasses.put("short", Short.TYPE);
-  }
-
-  // TODO: This method is a private copy (but protected to permit testing).  We made a copy because
-  // the method is in plume-util and because plume-util depends on bcel-util and; therefore,
-  // bcel-util cannot depend on plume-util.  In the future, this should probably be moved into a
-  // common dependency, such as the checker-framework's Signatures class.
-  /**
-   * Like {@link Class#forName(String)}, but also works when the string represents a primitive type
-   * or a fully-qualified name (as opposed to a binary name).
-   *
-   * <p>If the given name can't be found, this method changes the last '.' to a dollar sign ($) and
-   * tries again. This accounts for inner classes that are incorrectly passed in in fully-qualified
-   * format instead of binary format. (It should try multiple dollar signs, not just at the last
-   * position.)
-   *
-   * <p>Recall the rather odd specification for {@link Class#forName(String)}: the argument is a
-   * binary name for non-arrays, but a field descriptor for arrays. This method uses the same rules,
-   * but additionally handles primitive types and, for non-arrays, fully-qualified names.
-   *
-   * @param className name of the class
-   * @return the Class corresponding to className
-   * @throws ClassNotFoundException if the class is not found
-   */
-  // The annotation encourages proper use, even though this can take a
-  // fully-qualified name (only for a non-array).
-  // TODO: protected
-  public static Class<?> classForName(@ClassGetName String className)
-      throws ClassNotFoundException {
-    Class<?> result = primitiveClasses.get(className);
-    if (result != null) {
-      return result;
-    } else {
-      try {
-        return Class.forName(className);
-      } catch (ClassNotFoundException e) {
-        int pos = className.lastIndexOf('.');
-        if (pos < 0) {
-          throw e;
-        }
-        @SuppressWarnings("signature") // checked below & exception is handled
-        @ClassGetName String innerName = className.substring(0, pos) + "$" + className.substring(pos + 1);
-        try {
-          return Class.forName(innerName);
-        } catch (ClassNotFoundException ee) {
-          throw e;
-        }
-      }
+      return new ObjectType(classname);
     }
   }
 }

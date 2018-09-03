@@ -33,26 +33,33 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.dataflow.qual.Pure;
 
+// TODO: What does this class represent?  If it's just a collection of methods, then it should never
+// be instantiatied, and it should have a private constructor to prevent instantiation, and it
+// should not be abstract.  Otherwise, document what it represents.
+// TODO: Also document how to use it.
 /**
- * This class provides methods to manipulate the StackMapTable. It is used to maintain and modify
- * the StackMap for a method.
+ * This class provides methods to maintain and modify the StackMapTable for a method.
  *
- * <p>BCEL should automatically build and maintain the StackMapTable in a manner similar to the
+ * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
  */
 @SuppressWarnings("nullness")
 public abstract class StackMapUtils {
 
+  // TODO: What is an "item"?
+  // TODO: What is a "runtime address"?
   /*
    * NOMENCLATURE
    *
    * 'index' is an item's subscript into a data structure.
    *
-   * 'offset' is an item's runtime address as an offset (for example)
-   * from the start of a method's byte codes or from the start
-   * of a method's stack frame. The Java Virtual Machine Specification
-   * uses 'index into the local variable array of the current frame'
-   * or 'slot number' to describe this later case.
+   * 'offset' is an item's runtime address as an offset
+   *   * from the start of a method's byte codes, or
+   *   * from the start of a method's stack frame.
+   *     The Java Virtual Machine Specification
+   *     uses 'index into the local variable array of the current frame'
+   *     or 'slot number' to describe this case.
+   *   * other offsets too?
    *
    * Unfortunately, BCEL uses the method names getIndex and setIndex
    * to refer to 'offset's into the local stack frame.
@@ -60,9 +67,11 @@ public abstract class StackMapUtils {
    * the byte codes.
    */
 
+  // TODO: How and when should a client set this?
   /** The pool for the method currently being processed. Must be set by the client. */
   protected @Nullable ConstantPoolGen pool = null;
 
+  // TODO: Java style dictates using CamelCase instead of snake_case.
   /** A log to which to print debugging information about program instrumentation. */
   protected SimpleLog debug_instrument = new SimpleLog(false);
 
@@ -78,9 +87,13 @@ public abstract class StackMapUtils {
   /** Initial state of StackMapTypes for locals on method entry. */
   protected StackMapType[] initial_type_list;
 
+  // TODO: What is "this method"?  I suspect this has to do with the way that this class is intended
+  // to be used, which needs to be documented.
   /** The number of local variables in this method prior to any modifications. */
   protected int initial_locals_count;
 
+  // TODO: What is "the current StackMap of interest"?  Documenting how the class is supposed to be
+  // used may help to clarify this.
   /**
    * The number of live local variables according to the current StackMap of interest. Set by
    * update_stack_map_offset, find_stack_map_equal, find_stack_map_index_before, or
@@ -863,9 +876,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Add a new parameter to the method. This will be added after last current parameter and before the
-   * first local variable. This might have the side effect of causing us to rewrite the method byte
-   * codes to adjust the offsets for the local variables - see below for details.
+   * Add a new parameter to the method. This will be added after last current parameter and before
+   * the first local variable. This might have the side effect of causing us to rewrite the method
+   * byte codes to adjust the offsets for the local variables - see below for details.
    *
    * <p>Must call fix_local_variable_table (just once per method) before calling this routine.
    *
@@ -874,7 +887,8 @@ public abstract class StackMapUtils {
    * @param arg_type type of new parameter
    * @return a LocalVariableGen for the new parameter
    */
-  // TODO: change method name same time as correspoinding change in daikon/java/daikon/dcomp/DCInstrument.java
+  // TODO: change method name same time as correspoinding change in
+  // daikon/java/daikon/dcomp/DCInstrument.java
   // protected final LocalVariableGen add_new_parameter(
   protected final LocalVariableGen add_new_argument(
       MethodGen mgen, String arg_name, Type arg_type) {
