@@ -35,7 +35,6 @@ import org.apache.bcel.generic.ReturnaddressType;
 import org.apache.bcel.generic.Type;
 import org.apache.bcel.verifier.VerificationResult;
 import org.apache.bcel.verifier.exc.AssertionViolatedException;
-import org.apache.bcel.verifier.exc.StructuralCodeConstraintException;
 import org.apache.bcel.verifier.exc.VerifierConstraintViolatedException;
 import org.apache.bcel.verifier.structurals.ControlFlowGraph;
 import org.apache.bcel.verifier.structurals.ExceptionHandler;
@@ -57,7 +56,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * pass on the JDK. This version also provides the ability to get the contents of the stack for each
  * instruction in the method.
  *
- * This PassVerifier verifies a method of class file according to pass 3, so-called structural
+ * <p>This PassVerifier verifies a method of class file according to pass 3, so-called structural
  * verification as described in The Java Virtual Machine Specification, 2nd edition. More detailed
  * information is to be found at the do_verify() method's documentation.
  *
@@ -81,7 +80,10 @@ public final class StackVer {
    * about its symbolic execution predecessors.
    */
   private static final class InstructionContextQueue {
+    // The following two fields together represent the queue.
+    /** The first elements from pairs in the queue. */
     private final List<InstructionContext> ics = new Vector<>();
+    /** The second elements from pairs in the queue. */
     private final List<ArrayList<InstructionContext>> ecs = new Vector<>();
     /**
      * Add an (InstructionContext, ExecutionChain) pair to their respective queues.
@@ -212,7 +214,7 @@ public final class StackVer {
       newchain.add(u);
 
       if ((u.getInstruction().getInstruction()) instanceof RET) {
-        //System.err.println(u);
+        // System.err.println(u);
         // We can only follow _one_ successor, the one after the
         // JSR that was recently executed.
         final RET ret = (RET) (u.getInstruction().getInstruction());
@@ -294,9 +296,10 @@ public final class StackVer {
         // mean we're in a subroutine if we go to the exception handler.
         // We should address this problem later; by now we simply "cut" the chain
         // by using an empty chain for the exception handlers.
-        //if (v.execute(new Frame(u.getOutFrame(oldchain).getLocals(),
+        // if (v.execute(new Frame(u.getOutFrame(oldchain).getLocals(),
         // new OperandStack (u.getOutFrame().getStack().maxStack(),
-        // (exc_hds[s].getExceptionType()==null? Type.THROWABLE : exc_hds[s].getExceptionType())) ), newchain), icv, ev) {
+        // (exc_hds[s].getExceptionType()==null? Type.THROWABLE : exc_hds[s].getExceptionType())) ),
+        // newchain), icv, ev) {
         // icq.add(v, (ArrayList) newchain.clone());
         Frame f =
             new Frame(
@@ -346,7 +349,7 @@ public final class StackVer {
     } while ((ih = ih.getNext()) != null);
   }
 
- /**
+  /**
    * Throws an exception indicating the returned type is not compatible with the return type of the
    * given method
    *
@@ -373,21 +376,21 @@ public final class StackVer {
    * @see org.apache.bcel.verifier.statics.Pass2Verifier#getLocalVariablesInfo(int)
    */
   public VerificationResult do_stack_ver(MethodGen mg) {
-  /* This code is not needed for StackVer.
-    if (!myOwner.doPass3a(method_no).equals(VerificationResult.VR_OK)) {
-      return VerificationResult.VR_NOTYET;
-    }
+    /* This code is not needed for StackVer.
+      if (!myOwner.doPass3a(method_no).equals(VerificationResult.VR_OK)) {
+        return VerificationResult.VR_NOTYET;
+      }
 
-    // Pass 3a ran before, so it's safe to assume the JavaClass object is
-    // in the BCEL repository.
-    JavaClass jc;
-    try {
-      jc = Repository.lookupClass(myOwner.getClassName());
-    } catch (final ClassNotFoundException e) {
-      // FIXME: maybe not the best way to handle this
-      throw new AssertionViolatedException("Missing class: " + e, e);
-    }
-  */
+      // Pass 3a ran before, so it's safe to assume the JavaClass object is
+      // in the BCEL repository.
+      JavaClass jc;
+      try {
+        jc = Repository.lookupClass(myOwner.getClassName());
+      } catch (final ClassNotFoundException e) {
+        // FIXME: maybe not the best way to handle this
+        throw new AssertionViolatedException("Missing class: " + e, e);
+      }
+    */
 
     final ConstantPoolGen constantPoolGen = mg.getConstantPool();
     // Init Visitors
