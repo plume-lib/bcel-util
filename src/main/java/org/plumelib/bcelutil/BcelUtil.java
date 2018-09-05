@@ -2,7 +2,6 @@ package org.plumelib.bcelutil;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.util.Formatter;
 import java.util.Iterator;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
@@ -30,7 +29,6 @@ import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.InternalForm;
-import org.checkerframework.common.value.qual.MinLen;
 import org.plumelib.reflection.ReflectionPlume;
 import org.plumelib.reflection.Signatures;
 
@@ -41,7 +39,7 @@ public final class BcelUtil {
     throw new Error("do not instantiate");
   }
 
-  /** Controls whether the checks in {@link #checkMgen} are actually performed. */
+  /** Controls whether the checks in {@link #checkMgen} are performed. */
   public static boolean skipChecks = false;
 
   /** The type that represents String[]. */
@@ -49,6 +47,7 @@ public final class BcelUtil {
 
   // 'ToString' methods
 
+  // TODO: Giving a concrete example would be helpful in the documentation.
   /**
    * Returns a string describing a method declaration. It contains the access flags (public,
    * private, static, etc), the return type, the method name, and the types of each of its
@@ -64,17 +63,21 @@ public final class BcelUtil {
     if (flags != null && !flags.isEmpty()) {
       sb.append(String.format("%s ", flags));
     }
-    sb.append(String.format("%s %s (", m.getReturnType(), m.getName()));
+    sb.append(String.format("%s %s(", m.getReturnType(), m.getName()));
     for (Type at : m.getArgumentTypes()) {
       sb.append(String.format("%s, ", at));
     }
     sb.append(")");
+    // TODO: It's ineffecient to convert to a string before doing the removal.  It's more efficient
+    //   to use `sb.delete(...)` or `return sb.substring(...)`.  Or use StringJoiner or String.join
+    //   to avoid putting the characters in sb in the first place.
     // remove extra ", " after last parameter
     return sb.toString().replace(", )", ")");
   }
 
   /**
-   * Return a string representation of the access flags of method m.
+   * Return a string representation of the access flags of method m. In the string, the flags are
+   * space-separated and in a canonical order.
    *
    * @param m the method whose access flags to retrieve
    * @return a string representation of the access flags of method m
@@ -109,13 +112,11 @@ public final class BcelUtil {
    * @param pool the constant pool the instructions refer to
    * @return a printed representation of the instructions in {@code il}
    */
-  @SuppressWarnings("rawtypes")
   public static String instructionListToString(InstructionList il, ConstantPoolGen pool) {
 
     StringBuilder out = new StringBuilder();
-    // not generic because BCEL is not generic
-    for (Iterator i = il.iterator(); i.hasNext(); ) {
-      InstructionHandle handle = (InstructionHandle) i.next();
+    for (Iterator<InstructionHandle> i = il.iterator(); i.hasNext(); ) {
+      InstructionHandle handle = i.next();
       out.append(handle.getInstruction().toString(pool.getConstantPool()) + "\n");
     }
     return out.toString();
@@ -141,8 +142,8 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the attribute name for the specified attribute.
-   * (from the original class file ConstantPool)
+   * Return the attribute name for the specified attribute, looked up in the original class file
+   * ConstantPool.
    *
    * @param a the attribute
    * @return the attribute name for the specified attribute
@@ -157,8 +158,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the attribute name for the specified attribute.
-   * (from an internally generated ConstantPoolGen)
+   * Return the attribute name for the specified attribute, looked up in the given ConstantPoolGen.
    *
    * @param a the attribute
    * @param pool the constant pool
@@ -174,9 +174,10 @@ public final class BcelUtil {
 
   // 'is' (boolean test) methods
 
+  // TODO: I don't understand the parenthetical comment.  Is there a precondition on mg that must
+  // hold?
   /**
-   * Returns whether or not the method is a constructor.
-   * (from an internally generated method)
+   * Returns whether or not the method is a constructor. (from an internally generated method)
    *
    * @param mg the method to test
    * @return true iff the method is a constructor
@@ -188,9 +189,10 @@ public final class BcelUtil {
     return mg.getName().equals("<init>");
   }
 
+  // TODO: I don't understand the parenthetical comment.  Is there a precondition on m that must
+  // hold?
   /**
-   * Returns whether or not the method is a constructor.
-   * (from an original class file method)
+   * Returns whether or not the method is a constructor. (from an original class file method)
    *
    * @param m the method to test
    * @return true iff the method is a constructor
@@ -287,8 +289,8 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not this is a standard main method (static, void, name is 'main', and one formal
-   * parameter: a string array).
+   * Returns whether or not this is a standard main method (static, void, name is 'main', and one
+   * formal parameter: a string array).
    *
    * @param mg the method to check
    * @return true iff the method is a main method
@@ -340,7 +342,9 @@ public final class BcelUtil {
     } catch (Throwable t) {
       Error e =
           new Error(
-              String.format("failure in method %s.%s%n", mgen.getClassName(), mgen.getName()), t);
+              String.format(
+                  "failure while checking method %s.%s%n", mgen.getClassName(), mgen.getName()),
+              t);
       e.printStackTrace();
       throw e;
     }
@@ -367,6 +371,7 @@ public final class BcelUtil {
 
     // Diagnostic output
     if (false) {
+      // TODO: Abstract out all but the last line of this body, into a separate method.
       Throwable t = new Throwable();
       t.fillInStackTrace();
       StackTraceElement[] ste = t.getStackTrace();
@@ -439,6 +444,7 @@ public final class BcelUtil {
       if ((inames != null) && (inames.length > 0)) {
         p.printf("   ");
         for (String iname : inames) {
+          // TODO: Why is the word "implements" repeated?
           p.printf("implements %s ", iname);
         }
         p.printf("%n");
@@ -475,12 +481,15 @@ public final class BcelUtil {
       p.close();
 
     } catch (Exception e) {
-      throw new Error("Unexpected error dumping JavaClass: " + jc.getClassName() + " to " + dumpDir.getName(), e);
+      throw new Error(
+          "Unexpected error dumping JavaClass: " + jc.getClassName() + " to " + dumpDir.getName(),
+          e);
     }
   }
 
   // miscellaneous methods
 
+  // TODO: What is the mnemonic for the variable name `nl`?
   /**
    * Adds instructions to the start of a method.
    *
@@ -531,22 +540,21 @@ public final class BcelUtil {
   }
 
   /**
-   * Sets the locals to the formal parameters. Any other locals are removed. An instruction list
+   * Sets the locals to be the formal parameters. Any other locals are removed. An instruction list
    * with at least one instruction must exist.
    *
    * @param mg the method whose locals to set
    */
+  // TODO: Can you make the method name more descriptive of what this does?
   public static void setupInitLocals(MethodGen mg) {
 
     // Get the parameter types and names.
-    @SuppressWarnings(
-        "nullness" // The arguments to the annotation aren't necessarily initialized before they
-    // are written here. Since annotations are erased at runtime, this is safe.
+    @SuppressWarnings("nullness" // The annotation arguments might not be initialized yet.
+    // Since the arguments are not executed at run time, there is no null pointer exception.
     )
     Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
-    @SuppressWarnings(
-        "nullness" // The arguments to the annotation aren't necessarily initialized before they
-    // are written here. Since annotations are erased at runtime, this is safe.
+    @SuppressWarnings("nullness" // The annotation arguments might not be initialized yet.
+    // Since the arguments are not executed at run time, there is no null pointer exception.
     )
     String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
         argNames = mg.getArgumentNames();
@@ -645,8 +653,7 @@ public final class BcelUtil {
     Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 0, types.length);
     newTypes[types.length] = newType;
-    Type[] newTypesCast = newTypes;
-    return newTypesCast;
+    return newTypes;
   }
 
   /**
@@ -660,11 +667,10 @@ public final class BcelUtil {
     if (types.length == Integer.MAX_VALUE) {
       throw new Error("array " + types + " is too large to extend");
     }
-    Type [] newTypes = new Type[types.length + 1];
+    Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 1, types.length);
     newTypes[0] = newType;
-    Type[] newTypesCast = newTypes;
-    return newTypesCast;
+    return newTypes;
   }
 
   /**
