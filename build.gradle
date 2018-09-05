@@ -38,7 +38,8 @@ targetCompatibility = 1.8
 // Turn Javadoc warnings into errors.
 javadoc {
   options.addStringOption('Xwerror', '-Xdoclint:all')
-  // This cannot be enabled because StackVer.java lacks some documentation.
+  // Can't use `-private` because StackVer.java (which is copied from elsewhere) lacks some
+  // documentation.
   // options.addStringOption('private', '-quiet')
 }
 
@@ -62,7 +63,6 @@ task requireJavadoc(type: Javadoc) {
   options.memberLevel = JavadocMemberLevel.PRIVATE
   options.docletpath = project.sourceSets.main.compileClasspath as List
   options.doclet = "org.plumelib.javadoc.RequireJavadoc"
-  options.addStringOption('skip', 'WeakIdentityHashMap|WeakHasherMap')
 }
 
 task installGitHooks(type: Copy) {
