@@ -3,7 +3,6 @@ package org.plumelib.bcelutil;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Formatter;
-import java.util.HashMap;
 import java.util.Iterator;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
@@ -15,7 +14,6 @@ import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
-import org.apache.bcel.generic.ArrayType;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.CodeExceptionGen;
 import org.apache.bcel.generic.ConstantPoolGen;
@@ -33,7 +31,8 @@ import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.InternalForm;
 import org.checkerframework.common.value.qual.MinLen;
-import org.plumelib.signature.Signatures;
+import org.plumelib.reflection.ReflectionPlume;
+import org.plumelib.reflection.Signatures;
 
 /** Static utility methods for working with BCEL. */
 public final class BcelUtil {
@@ -626,8 +625,7 @@ public final class BcelUtil {
 
     String classname = typeToClassgetname(type);
     try {
-      Class<?> c = classForName(classname);
-      return c;
+      return ReflectionPlume.classForName(classname);
     } catch (Exception e) {
       throw new RuntimeException("can't find class for " + classname, e);
     }
@@ -677,93 +675,26 @@ public final class BcelUtil {
    */
   public static Type classnameToType(@BinaryName String classname) {
 
-    @BinaryName String tmp = classname;
-    classname = tmp.intern();
+    classname = classname.intern();
 
-    // Get the base type
-    Type t = null;
     if (classname == "int") { // interned
-      t = Type.INT;
+      return Type.INT;
     } else if (classname == "boolean") { // interned
-      t = Type.BOOLEAN;
+      return Type.BOOLEAN;
     } else if (classname == "byte") { // interned
-      t = Type.BYTE;
+      return Type.BYTE;
     } else if (classname == "char") { // interned
-      t = Type.CHAR;
+      return Type.CHAR;
     } else if (classname == "double") { // interned
-      t = Type.DOUBLE;
+      return Type.DOUBLE;
     } else if (classname == "float") { // interned
-      t = Type.FLOAT;
+      return Type.FLOAT;
     } else if (classname == "long") { // interned
-      t = Type.LONG;
+      return Type.LONG;
     } else if (classname == "short") { // interned
-      t = Type.SHORT;
+      return Type.SHORT;
     } else { // must be a non-primitive
-      t = new ObjectType(classname);
-    }
-
-    return t;
-  }
-
-  /** Used by {@link #classForName}. */
-  private static HashMap<String, Class<?>> primitiveClasses = new HashMap<String, Class<?>>(8);
-
-  static {
-    primitiveClasses.put("boolean", Boolean.TYPE);
-    primitiveClasses.put("byte", Byte.TYPE);
-    primitiveClasses.put("char", Character.TYPE);
-    primitiveClasses.put("double", Double.TYPE);
-    primitiveClasses.put("float", Float.TYPE);
-    primitiveClasses.put("int", Integer.TYPE);
-    primitiveClasses.put("long", Long.TYPE);
-    primitiveClasses.put("short", Short.TYPE);
-  }
-
-  // TODO: This method is a private copy (but protected to permit testing).  We made a copy because
-  // the method is in plume-util and because plume-util depends on bcel-util and; therefore,
-  // bcel-util cannot depend on plume-util.  In the future, this should probably be moved into a
-  // common dependency, such as the checker-framework's Signatures class.
-  /**
-   * Like {@link Class#forName(String)}, but also works when the string represents a primitive type
-   * or a fully-qualified name (as opposed to a binary name).
-   *
-   * <p>If the given name can't be found, this method changes the last '.' to a dollar sign ($) and
-   * tries again. This accounts for inner classes that are incorrectly passed in in fully-qualified
-   * format instead of binary format. (It should try multiple dollar signs, not just at the last
-   * position.)
-   *
-   * <p>Recall the rather odd specification for {@link Class#forName(String)}: the argument is a
-   * binary name for non-arrays, but a field descriptor for arrays. This method uses the same rules,
-   * but additionally handles primitive types and, for non-arrays, fully-qualified names.
-   *
-   * @param className name of the class
-   * @return the Class corresponding to className
-   * @throws ClassNotFoundException if the class is not found
-   */
-  // The annotation encourages proper use, even though this can take a
-  // fully-qualified name (only for a non-array).
-  // TODO: protected
-  public static Class<?> classForName(@ClassGetName String className)
-      throws ClassNotFoundException {
-    Class<?> result = primitiveClasses.get(className);
-    if (result != null) {
-      return result;
-    } else {
-      try {
-        return Class.forName(className);
-      } catch (ClassNotFoundException e) {
-        int pos = className.lastIndexOf('.');
-        if (pos < 0) {
-          throw e;
-        }
-        @SuppressWarnings("signature") // checked below & exception is handled
-        @ClassGetName String innerName = className.substring(0, pos) + "$" + className.substring(pos + 1);
-        try {
-          return Class.forName(innerName);
-        } catch (ClassNotFoundException ee) {
-          throw e;
-        }
-      }
+      return new ObjectType(classname);
     }
   }
 }

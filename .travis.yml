@@ -10,15 +10,14 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.m2/
 
 jdk:
   - oraclejdk8
 
 # Add "verGJF" task when google-java-format handles type annotations better;
 # see https://github.com/google/google-java-format/issues/5
-## Temporarily remove requireJavadoc because it is failing.
-# script: ./gradlew build javadoc && ./gradlew requireJavadoc
-script: ./gradlew build javadoc
+script: ./gradlew build javadoc && ./gradlew requireJavadoc
 
 git:
   depth: 9

@@ -20,7 +20,7 @@ apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
 apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
 dependencies {
-  implementation 'org.plumelib:signature-util:0.0.6'
+  implementation 'org.plumelib:reflection-util:0.0.1'
   api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.2.0.2'
   // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
@@ -38,7 +38,8 @@ targetCompatibility = 1.8
 // Turn Javadoc warnings into errors.
 javadoc {
   options.addStringOption('Xwerror', '-Xdoclint:all')
-  // This cannot be enabled because StackVer.java lacks some documentation.
+  // Can't use `-private` because StackVer.java (which is copied from elsewhere) lacks some
+  // documentation.
   // options.addStringOption('private', '-quiet')
 }
 
@@ -59,11 +60,9 @@ task requireJavadoc(type: Javadoc) {
   destinationDir.deleteDir()
   source = sourceSets.main.allJava
   classpath = project.sourceSets.main.compileClasspath
-  // TODO: uncomment.  "requireJavadoc" has no effect over "javadoc" while this line is commented.
   options.memberLevel = JavadocMemberLevel.PRIVATE
   options.docletpath = project.sourceSets.main.compileClasspath as List
   options.doclet = "org.plumelib.javadoc.RequireJavadoc"
-  options.addStringOption('skip', 'WeakIdentityHashMap|WeakHasherMap')
 }
 
 task installGitHooks(type: Copy) {
