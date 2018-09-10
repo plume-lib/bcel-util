@@ -20,6 +20,24 @@ import org.apache.bcel.generic.TABLESWITCH;
 import org.apache.bcel.verifier.structurals.OperandStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+// TODO: The example code is very useful, thanks.  However, it never mentions InstructionListUtils.
+// So, a client doesn't know how to use it.  A user will assume one should instantiate an
+// InstructionListUtils object and then program against it.  However, I think you told me that a
+// client should extend InstructionListUtils instead.  Anyway, please make this clear in the
+// documentation.
+// TODO: It's inconsistent that
+//   pool = cg.getConstantPool();
+// is hoisted out of the loop, but cg.getClassName() is not.  I would treat them the same  --
+// probably hoisting neither in the example code, for simplicity, unless it's important that
+// cg.getConstantPool() is hoisted, in which case that surprising fact should be explained.
+// TODO: The code
+//        } catch (Exception e) {
+//          throw e;
+// doeesn't do anything.  Do you mean for it to `throw new RuntimeException(e)`?
+// TODO: The example code has a lot of boilerplate (8 calls from
+// update_uninitialized_NEW_offsets(il) to remove_local_variable_type_table(mg).  Should that be
+// replaced by a single method that does all the necessary cleanup work?  I think that would be
+// simpler, clearer, and less error-prone.
 /**
  * This class provides utility methods to maintain and modify a method's InstructionList within a
  * Java class file. It is a subclass of {@link org.plumelib.bcelutil.StackMapUtils} and thus handles
@@ -142,7 +160,9 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
     // Ignore methods with no instructions
     InstructionList il = mg.getInstructionList();
-    if (il == null) return;
+    if (il == null) {
+      return;
+    }
     insert_before_handle(mg, il.getStart(), new_il, false);
   }
 
@@ -162,11 +182,15 @@ public abstract class InstructionListUtils extends StackMapUtils {
       @Nullable InstructionList new_il,
       boolean redirect_branches) {
 
-    if (new_il == null) return;
+    if (new_il == null) {
+      return;
+    }
 
     // Ignore methods with no instructions
     InstructionList il = mg.getInstructionList();
-    if (il == null) return;
+    if (il == null) {
+      return;
+    }
 
     boolean at_start = (ih.getPrev() == null);
     new_il.setPositions();
@@ -380,7 +404,9 @@ public abstract class InstructionListUtils extends StackMapUtils {
   protected final void replace_instructions(
       MethodGen mg, InstructionList il, InstructionHandle ih, @Nullable InstructionList new_il) {
 
-    if (new_il == null) return;
+    if (new_il == null) {
+      return;
+    }
 
     InstructionHandle new_end;
     InstructionHandle new_start;
