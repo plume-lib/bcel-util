@@ -49,24 +49,32 @@ import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+// TODO: "This version also provides the ability to get the contents of the stack for each
+//  * instruction in the method."  Please say how, such as with a cross-reference to a specific
+// method.
 /**
  * This is a slightly modified version of Pass3bVerifier from BCEL. It uses LimitedConstaintVisitor
  * rather than InstConstraintVisitor to implement the constraints. The LimitedConstraintVisitor
  * doesn't do any checking outside of the current class and removes some checks so that this will
- * pass on the JDK. This version also provides the ability to get the contents of the stack for each
- * instruction in the method.
+ * pass on the JDK. This version also provides method {@link #get_stack_types()}, which gets the
+ * contents of the stack for each instruction in the method.
+ *
+ * <p>To see the diffs, <code>
+ * wget https://raw.githubusercontent.com/apache/commons-bcel/trunk/src/main/java/org/apache/bcel/verifier/structurals/Pass3bVerifier.java
+ * </code> then run google-java-format on the downloaded file.
+ *
+ * <p>The original documentation follows.
  *
  * <p>This PassVerifier verifies a method of class file according to pass 3, so-called structural
  * verification as described in The Java Virtual Machine Specification, 2nd edition. More detailed
  * information is to be found at the do_verify() method's documentation.
  *
  * @version $Id$
- * @author <A HREF="http://www.inf.fu-berlin.de/~ehaase">Enver Haase</A>
- * @see #get_stack_types()
+ * @see #do_stack_ver()
  */
 @SuppressWarnings({"rawtypes", "nullness", "interning"}) // third-party code
 public final class StackVer {
-  /* TODO:	Throughout pass 3b, upper halves of LONG and DOUBLE
+  /* TODO:    Throughout pass 3b, upper halves of LONG and DOUBLE
   are represented by Type.UNKNOWN. This should be changed
   in favour of LONG_Upper and DOUBLE_Upper as in pass 2. */
 
@@ -178,6 +186,7 @@ public final class StackVer {
    * existence of a fix point of frame merging.
    */
   private void circulationPump(
+      final MethodGen m,
       final ControlFlowGraph cfg,
       final InstructionContext start,
       final Frame vanillaFrame,
@@ -187,9 +196,9 @@ public final class StackVer {
     final InstructionContextQueue icq = new InstructionContextQueue();
 
     stack_types.set(start.getInstruction().getPosition(), vanillaFrame);
-    // new ArrayList() <=>	no Instruction was executed before
     start.execute(vanillaFrame, new ArrayList<InstructionContext>(), icv, ev);
-    //	=> Top-Level routine (no jsr call before)
+    // new ArrayList() <=>    no Instruction was executed before
+    //                                    => Top-Level routine (no jsr call before)
     icq.add(start, new ArrayList<InstructionContext>());
 
     // LOOP!
@@ -345,6 +354,8 @@ public final class StackVer {
                     + "'.");
           }
         }
+        // TODO: There is a block of code in Pass3bVerifier.java that is missing here.
+        // Why?  Should it be inserted?
       }
     } while ((ih = ih.getNext()) != null);
   }
@@ -367,29 +378,31 @@ public final class StackVer {
   */
 
   /**
-   * Implements the pass 3b data flow analysis as described in the Java Virtual Machine
-   * Specification, Second Edition. As it is doing so it keeps track of the stack and local
-   * variables at each instruction.
+   * Pass 3b implements the data flow analysis as described in the Java Virtual Machine
+   * Specification, Second Edition. Later versions will use LocalVariablesInfo objects to verify if
+   * the verifier-inferred types and the class file's debug information (LocalVariables attributes)
+   * match [TODO].
    *
    * @param mg MethodGen for the method to be verified
    * @return the VerificationResult
+   * @see org.apache.bcel.verifier.statics.LocalVariablesInfo
    * @see org.apache.bcel.verifier.statics.Pass2Verifier#getLocalVariablesInfo(int)
    */
   public VerificationResult do_stack_ver(MethodGen mg) {
     /* This code is not needed for StackVer.
-      if (!myOwner.doPass3a(method_no).equals(VerificationResult.VR_OK)) {
-        return VerificationResult.VR_NOTYET;
-      }
+    if (!myOwner.doPass3a(method_no).equals(VerificationResult.VR_OK)) {
+      return VerificationResult.VR_NOTYET;
+    }
 
-      // Pass 3a ran before, so it's safe to assume the JavaClass object is
-      // in the BCEL repository.
-      JavaClass jc;
-      try {
-        jc = Repository.lookupClass(myOwner.getClassName());
-      } catch (final ClassNotFoundException e) {
-        // FIXME: maybe not the best way to handle this
-        throw new AssertionViolatedException("Missing class: " + e, e);
-      }
+    // Pass 3a ran before, so it's safe to assume the JavaClass object is
+    // in the BCEL repository.
+    JavaClass jc;
+    try {
+      jc = Repository.lookupClass(myOwner.getClassName());
+    } catch (final ClassNotFoundException e) {
+      // FIXME: maybe not the best way to handle this
+      throw new AssertionViolatedException("Missing class: " + e, e);
+    }
     */
 
     final ConstantPoolGen constantPoolGen = mg.getConstantPool();
@@ -439,7 +452,7 @@ public final class StackVer {
             f.getLocals().set(twoslotoffset + j + (mg.isStatic() ? 0 : 1), Type.UNKNOWN);
           }
         }
-        circulationPump(cfg, cfg.contextOf(mg.getInstructionList().getStart()), f, icv, ev);
+        circulationPump(mg, cfg, cfg.contextOf(mg.getInstructionList().getStart()), f, icv, ev);
       }
     } catch (final VerifierConstraintViolatedException ce) {
       ce.extendMessage("Constraint violated in method '" + mg + "':\n", "");
@@ -458,7 +471,8 @@ public final class StackVer {
               + mg
               + "'. Original RuntimeException's stack trace:\n---\n"
               + sw
-              + "---\n");
+              + "---\n",
+          re);
     }
     return VerificationResult.VR_OK;
   }

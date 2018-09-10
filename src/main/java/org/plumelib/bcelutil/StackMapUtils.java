@@ -34,29 +34,16 @@ import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.dataflow.qual.Pure;
 
 /**
- * This class provides utility methods to maintain and modify a method's StackMapTable
- * within a Java class file. It can be thought of as an extention to BCEL.
- * <p>
- * The Byte Code Engineering Library (Apache Commons BCEL™) is intended
- * to give users a convenient way to analyze, create, and manipulate (binary)
- * Java class files (those ending with .class). Classes are represented by
- * objects which contain all the symbolic information of the given class:
- * methods, fields and byte code instructions, in particular.
- * Such objects can be read from an existing file, be transformed by a
- * program (e.g. a class loader at run-time) and written to a file again.
- * BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
- * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
- * <p>
- * This class cannot be a set of static  methods (like BcelUtil) as is maintains
- * state during the client's processing of a method that must be available on a per thread basis.
- * Thus it is an abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}.
- * A client would not normally extend this class directly.
- * <p>
- * See {@link org.plumelib.bcelutil.BcelUtil} for notes on inspecting a Java class file.<br>
- * See {@link org.plumelib.bcelutil.InstructionListUtils} for notes on modifing a Java class file.
+ * This class provides utility methods to maintain and modify a method's StackMapTable within a Java
+ * class file. It can be thought of as an extention to BCEL.
  *
- * <p>See the <a href="https://commons.apache.org/proper/commons-bcel/index.html">Commons BCEL</a>
- * web site for further details about the BCEL library.
+ * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
+ * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
+ *
+ * <p>This class cannot be a set of static methods (like BcelUtil) as is maintains state during the
+ * client's processing of a method that must be available on a per thread basis. Thus it is an
+ * abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}. A client would not
+ * normally extend this class directly.
  */
 @SuppressWarnings("nullness")
 public abstract class StackMapUtils {
@@ -104,11 +91,10 @@ public abstract class StackMapUtils {
   protected int initial_locals_count;
 
   /**
-   * A number of methods in this class search and locate a particular StackMap within
-   * the current method.  This variable contains the number of live local variables
-   * within the range of byte code instructions covered by this StackMap. Set by
-   * update_stack_map_offset, find_stack_map_equal, find_stack_map_index_before, or
-   * find_stack_map_index_after.
+   * A number of methods in this class search and locate a particular StackMap within the current
+   * method. This variable contains the number of live local variables within the range of byte code
+   * instructions covered by this StackMap. Set by update_stack_map_offset, find_stack_map_equal,
+   * find_stack_map_index_before, or find_stack_map_index_after.
    */
   protected @NonNegative int number_active_locals;
 

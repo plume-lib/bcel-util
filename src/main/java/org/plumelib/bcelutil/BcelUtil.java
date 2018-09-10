@@ -34,16 +34,9 @@ import org.plumelib.reflection.Signatures;
 
 /**
  * Static utility methods for working with BCEL.
- * The Byte Code Engineering Library (Apache Commons BCEL™) is intended
- * to give users a convenient way to analyze, create, and manipulate (binary)
- * Java class files (those ending with .class). Classes are represented by
- * objects which contain all the symbolic information of the given class:
- * methods, fields and byte code instructions, in particular.
- * Such objects can be read from an existing file, be transformed by a
- * program (e.g. a class loader at run-time) and written to a file again.
  *
- * <p>If one wishes to inspect a Java class file, a rough program template
- * would be as follows:
+ * <p>If one wishes to inspect a Java class file, a rough program template would be as follows:
+ *
  * <pre>
  *   import org.apache.bcel.classfile.*;
  *
@@ -55,14 +48,10 @@ import org.plumelib.reflection.Signatures;
  *     throw new RuntimeException("Unexpected error", e);
  *   }
  * </pre>
- * At this point one would use the methods of {@link org.apache.bcel.classfile.JavaClass}
- * and the other members of the {@link org.apache.bcel.classfile} package to explore
- * the class file of interest.
  *
- * <p>See {@link org.plumelib.bcelutil.InstructionListUtils} for notes on modifing a Java class file.
- *
- * <p>See the <a href="https://commons.apache.org/proper/commons-bcel/index.html">Commons BCEL</a>
- * web site for further details about the BCEL library.
+ * At this point one would use the methods of {@link org.apache.bcel.classfile.JavaClass} and the
+ * other members of the {@link org.apache.bcel.classfile} package to explore the class file of
+ * interest.
  */
 public final class BcelUtil {
   /** This class is a collection of methods; it does not represent anything. */
@@ -83,10 +72,9 @@ public final class BcelUtil {
    * private, static, etc), the return type, the method name, and the types of each of its
    * parameters.
    *
-   * <p>For example, if the orignal Java source declarationwas:
-   *   private final String constantToString (int index)
-   * Then the output of methodDeclarationToString would be:
-   *   private final java.lang.String constantToString (int)
+   * <p>For example, if the orignal Java source declarationwas: private final String
+   * constantToString (int index) Then the output of methodDeclarationToString would be: private
+   * final java.lang.String constantToString (int)
    *
    * @param m the method
    * @return a string describing the method declaration
@@ -105,7 +93,7 @@ public final class BcelUtil {
       argsExist = true;
     }
     if (argsExist) {
-      sb.setLength(sb.length() - 2);  // remove trailing ", "
+      sb.setLength(sb.length() - 2); // remove trailing ", "
     }
     sb.append(")");
     return sb.toString();
@@ -408,13 +396,9 @@ public final class BcelUtil {
     }
   }
 
-
   // 'dump' methods
 
-  /**
-   * Print the current java call stack
-   *
-   */
+  /** Print the current java call stack */
   public static void dumpStackTrace() {
 
     StackTraceElement[] ste = Thread.currentThread().getStackTrace();
