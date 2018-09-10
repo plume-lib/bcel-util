@@ -43,7 +43,8 @@ javadoc {
   // options.addStringOption('private', '-quiet')
   options.with {
     linksOffline 'https://docs.oracle.com/javase/8/docs/api/', 'https://docs.oracle.com/javase/8/docs/api/'
-    linksOffline 'https://commons.apache.org/proper/commons-bcel/apidocs/', 'https://commons.apache.org/proper/commons-bcel/apidocs/'
+    // this works locally but not on Travis?
+    //linksOffline 'https://commons.apache.org/proper/commons-bcel/apidocs/', 'https://commons.apache.org/proper/commons-bcel/apidocs/'
   }
 }
 
