@@ -627,7 +627,7 @@ public final class BcelUtil {
    *
    * @param mg the method to clear out
    */
-  public static void emptyMethod(MethodGen mg) {
+  public static void makeMethodBodyEmpty(MethodGen mg) {
 
     mg.setInstructionList(new InstructionList(new RETURN()));
     mg.removeExceptionHandlers();
