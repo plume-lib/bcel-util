@@ -33,33 +33,46 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.dataflow.qual.Pure;
 
-// TODO: What does this class represent?  If it's just a collection of methods, then it should never
-// be instantiatied, and it should have a private constructor to prevent instantiation, and it
-// should not be abstract.  Otherwise, document what it represents.
-// TODO: Also document how to use it.
 /**
- * This class provides methods to maintain and modify the StackMapTable for a method.
- *
- * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
+ * This class provides utility methods to maintain and modify a method's StackMapTable
+ * within a Java class file. It can be thought of as an extention to BCEL.
+ * <p>
+ * The Byte Code Engineering Library (Apache Commons BCEL™) is intended
+ * to give users a convenient way to analyze, create, and manipulate (binary)
+ * Java class files (those ending with .class). Classes are represented by
+ * objects which contain all the symbolic information of the given class:
+ * methods, fields and byte code instructions, in particular.
+ * Such objects can be read from an existing file, be transformed by a
+ * program (e.g. a class loader at run-time) and written to a file again.
+ * BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
+ * <p>
+ * This class cannot be a set of static  methods (like BcelUtil) as is maintains
+ * state during the client's processing of a method that must be available on a per thread basis.
+ * Thus it is an abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}.
+ * A client would not normally extend this class directly.
+ * <p>
+ * See {@link org.plumelib.bcelutil.BcelUtil} for notes on inspecting a Java class file.<br>
+ * See {@link org.plumelib.bcelutil.InstructionListUtils} for notes on modifing a Java class file.
+ *
+ * <p>See the <a href="https://commons.apache.org/proper/commons-bcel/index.html">Commons BCEL</a>
+ * web site for further details about the BCEL library.
  */
 @SuppressWarnings("nullness")
 public abstract class StackMapUtils {
 
-  // TODO: What is an "item"?
-  // TODO: What is a "runtime address"?
   /*
    * NOMENCLATURE
    *
    * 'index' is an item's subscript into a data structure.
    *
-   * 'offset' is an item's runtime address as an offset
-   *   * from the start of a method's byte codes, or
-   *   * from the start of a method's stack frame.
-   *     The Java Virtual Machine Specification
-   *     uses 'index into the local variable array of the current frame'
-   *     or 'slot number' to describe this case.
-   *   * other offsets too?
+   * 'offset' is used to describe two different address types:
+   *   * the offset of a byte code from the start of a method's byte codes
+   *   * the offset of a variable from the start of a method's stack frame
+   *
+   *     The Java Virtual Machine Specification uses
+   *     'index into the local variable array of the current frame'
+   *     or 'slot number' to describe this second case.
    *
    * Unfortunately, BCEL uses the method names getIndex and setIndex
    * to refer to 'offset's into the local stack frame.
@@ -87,15 +100,13 @@ public abstract class StackMapUtils {
   /** Initial state of StackMapTypes for locals on method entry. */
   protected StackMapType[] initial_type_list;
 
-  // TODO: What is "this method"?  I suspect this has to do with the way that this class is intended
-  // to be used, which needs to be documented.
-  /** The number of local variables in this method prior to any modifications. */
+  /** The number of local variables in the current method prior to any modifications. */
   protected int initial_locals_count;
 
-  // TODO: What is "the current StackMap of interest"?  Documenting how the class is supposed to be
-  // used may help to clarify this.
   /**
-   * The number of live local variables according to the current StackMap of interest. Set by
+   * A number of methods in this class search and locate a particular StackMap within
+   * the current method.  This variable contains the number of live local variables
+   * within the range of byte code instructions covered by this StackMap. Set by
    * update_stack_map_offset, find_stack_map_equal, find_stack_map_index_before, or
    * find_stack_map_index_after.
    */

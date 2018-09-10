@@ -32,7 +32,38 @@ import org.checkerframework.checker.signature.qual.InternalForm;
 import org.plumelib.reflection.ReflectionPlume;
 import org.plumelib.reflection.Signatures;
 
-/** Static utility methods for working with BCEL. */
+/**
+ * Static utility methods for working with BCEL.
+ * The Byte Code Engineering Library (Apache Commons BCEL™) is intended
+ * to give users a convenient way to analyze, create, and manipulate (binary)
+ * Java class files (those ending with .class). Classes are represented by
+ * objects which contain all the symbolic information of the given class:
+ * methods, fields and byte code instructions, in particular.
+ * Such objects can be read from an existing file, be transformed by a
+ * program (e.g. a class loader at run-time) and written to a file again.
+ *
+ * <p>If one wishes to inspect a Java class file, a rough program template
+ * would be as follows:
+ * <pre>
+ *   import org.apache.bcel.classfile.*;
+ *
+ *   try {
+ *     // Parse the bytes of the classfile, die on any errors
+ *     ClassParser parser = new ClassParser("path to class file of interest");
+ *     JavaClass jc = parser.parse();
+ *   } catch (Exception e) {
+ *     throw new RuntimeException("Unexpected error", e);
+ *   }
+ * </pre>
+ * At this point one would use the methods of {@link org.apache.bcel.classfile.JavaClass}
+ * and the other members of the {@link org.apache.bcel.classfile} package to explore
+ * the class file of interest.
+ *
+ * <p>See {@link org.plumelib.bcelutil.InstructionListUtils} for notes on modifing a Java class file.
+ *
+ * <p>See the <a href="https://commons.apache.org/proper/commons-bcel/index.html">Commons BCEL</a>
+ * web site for further details about the BCEL library.
+ */
 public final class BcelUtil {
   /** This class is a collection of methods; it does not represent anything. */
   private BcelUtil() {
@@ -47,11 +78,15 @@ public final class BcelUtil {
 
   // 'ToString' methods
 
-  // TODO: Giving a concrete example would be helpful in the documentation.
   /**
    * Returns a string describing a method declaration. It contains the access flags (public,
    * private, static, etc), the return type, the method name, and the types of each of its
    * parameters.
+   *
+   * <p>For example, if the orignal Java source declarationwas:
+   *   private final String constantToString (int index)
+   * Then the output of methodDeclarationToString would be:
+   *   private final java.lang.String constantToString (int)
    *
    * @param m the method
    * @return a string describing the method declaration
@@ -60,19 +95,20 @@ public final class BcelUtil {
 
     StringBuilder sb = new StringBuilder();
     String flags = accessFlagsToString(m);
+    boolean argsExist = false;
     if (flags != null && !flags.isEmpty()) {
       sb.append(String.format("%s ", flags));
     }
     sb.append(String.format("%s %s(", m.getReturnType(), m.getName()));
     for (Type at : m.getArgumentTypes()) {
       sb.append(String.format("%s, ", at));
+      argsExist = true;
+    }
+    if (argsExist) {
+      sb.setLength(sb.length() - 2);  // remove trailing ", "
     }
     sb.append(")");
-    // TODO: It's ineffecient to convert to a string before doing the removal.  It's more efficient
-    //   to use `sb.delete(...)` or `return sb.substring(...)`.  Or use StringJoiner or String.join
-    //   to avoid putting the characters in sb in the first place.
-    // remove extra ", " after last parameter
-    return sb.toString().replace(", )", ")");
+    return sb.toString();
   }
 
   /**
@@ -174,12 +210,10 @@ public final class BcelUtil {
 
   // 'is' (boolean test) methods
 
-  // TODO: I don't understand the parenthetical comment.  Is there a precondition on mg that must
-  // hold?
   /**
-   * Returns whether or not the method is a constructor. (from an internally generated method)
+   * Returns whether or not the method is a constructor.
    *
-   * @param mg the method to test
+   * @param mg the MethodGen to test
    * @return true iff the method is a constructor
    */
   public static boolean isConstructor(MethodGen mg) {
@@ -189,12 +223,10 @@ public final class BcelUtil {
     return mg.getName().equals("<init>");
   }
 
-  // TODO: I don't understand the parenthetical comment.  Is there a precondition on m that must
-  // hold?
   /**
-   * Returns whether or not the method is a constructor. (from an original class file method)
+   * Returns whether or not the method is a constructor.
    *
-   * @param m the method to test
+   * @param m the Method to test
    * @return true iff the method is a constructor
    */
   public static boolean isConstructor(Method m) {
@@ -371,30 +403,39 @@ public final class BcelUtil {
 
     // Diagnostic output
     if (false) {
-      // TODO: Abstract out all but the last line of this body, into a separate method.
-      Throwable t = new Throwable();
-      t.fillInStackTrace();
-      StackTraceElement[] ste = t.getStackTrace();
-      if (ste.length < 2) {
-        System.out.println("No stack trace information available");
-      } else {
-        StackTraceElement caller = ste[1];
-        System.out.printf(
-            "%s.%s (%s line %d)",
-            caller.getClassName(),
-            caller.getMethodName(),
-            caller.getFileName(),
-            caller.getLineNumber());
-        for (int ii = 2; ii < ste.length; ii++) {
-          System.out.printf(" [%s line %d]", ste[ii].getFileName(), ste[ii].getLineNumber());
-        }
-        System.out.printf("%n");
-      }
+      dumpStackTrace();
       dumpMethods(gen);
     }
   }
 
+
   // 'dump' methods
+
+  /**
+   * Print the current java call stack
+   *
+   */
+  public static void dumpStackTrace() {
+
+    StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+    // [0] is getStackTrace
+    // [1] is dumpStackTrace
+    if (ste.length < 3) {
+      System.out.println("No stack trace information available");
+    } else {
+      StackTraceElement caller = ste[2];
+      System.out.printf(
+          "%s.%s (%s line %d)",
+          caller.getClassName(),
+          caller.getMethodName(),
+          caller.getFileName(),
+          caller.getLineNumber());
+      for (int ii = 3; ii < ste.length; ii++) {
+        System.out.printf(" [%s line %d]", ste[ii].getFileName(), ste[ii].getLineNumber());
+      }
+      System.out.printf("%n");
+    }
+  }
 
   /**
    * Print the methods in the class, to standard output.
@@ -441,11 +482,13 @@ public final class BcelUtil {
       // Print the class, superclass, and interfaces
       p.printf("class %s extends %s%n", jc.getClassName(), jc.getSuperclassName());
       String[] inames = jc.getInterfaceNames();
+      boolean first = true;
       if ((inames != null) && (inames.length > 0)) {
-        p.printf("   ");
+        p.printf("   implements ");
         for (String iname : inames) {
-          // TODO: Why is the word "implements" repeated?
-          p.printf("implements %s ", iname);
+          if (!first) p.printf(", ");
+          p.printf("%s", iname);
+          first = false;
         }
         p.printf("%n");
       }
@@ -489,19 +532,18 @@ public final class BcelUtil {
 
   // miscellaneous methods
 
-  // TODO: What is the mnemonic for the variable name `nl`?
   /**
    * Adds instructions to the start of a method.
    *
    * @param mg method to be augmented
-   * @param nl instructions to prepend to the method
+   * @param newList instructions to prepend to the method
    */
-  public static void addToStart(MethodGen mg, InstructionList nl) {
+  public static void addToStart(MethodGen mg, InstructionList newList) {
 
     // Add the code before the first instruction
     InstructionList il = mg.getInstructionList();
     InstructionHandle oldStart = il.getStart();
-    InstructionHandle newStart = il.insert(nl);
+    InstructionHandle newStart = il.insert(newList);
 
     // Move any LineNumbers and local variables that currently point to
     // the first instruction to include the new instructions. Other
@@ -545,8 +587,7 @@ public final class BcelUtil {
    *
    * @param mg the method whose locals to set
    */
-  // TODO: Can you make the method name more descriptive of what this does?
-  public static void setupInitLocals(MethodGen mg) {
+  public static void resetLocalsToFormals(MethodGen mg) {
 
     // Get the parameter types and names.
     @SuppressWarnings("nullness" // The annotation arguments might not be initialized yet.

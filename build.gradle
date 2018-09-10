@@ -41,6 +41,10 @@ javadoc {
   // Can't use `-private` because StackVer.java (which is copied from elsewhere) lacks some
   // documentation.
   // options.addStringOption('private', '-quiet')
+  options.with {
+    linksOffline 'https://docs.oracle.com/javase/8/docs/api/', 'https://docs.oracle.com/javase/8/docs/api/'
+    linksOffline 'https://commons.apache.org/proper/commons-bcel/apidocs/', 'https://commons.apache.org/proper/commons-bcel/apidocs/'
+  }
 }
 
 task javadocWeb(type: Javadoc) {
