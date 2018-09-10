@@ -70,6 +70,8 @@ import org.apache.bcel.verifier.structurals.OperandStack;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
+// TODO: What is the mnemonic for "Limited"?  If there are no checks at all performed, then please
+// make that clear in the name.
 /**
  * A Visitor class testing for valid preconditions of JVM instructions. No checks are actually
  * implemented. This overrides the class in BCEL which incorrectly fails on many valid class files.
@@ -90,6 +92,10 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
    * @see #stack()
    */
   private @MonotonicNonNull Frame frame = null;
+
+  // TODO: LimitedConstraintVisitor has a bunch of commented-out code.  I think it should be removed
+  // throughout, to make the code smaller and easier to understand.  Then, I suppose the two leading
+  // comments (the ones before the first import statement) can be removed too.
 
   /**
    * The ConstantPoolGen we're working on.
@@ -255,35 +261,31 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   @Override
   public void visitLoadClass(LoadClass o) {}
 
-  /** Ensures the general preconditions of a StackConsumer instance. */
   @Override
   public void visitStackConsumer(StackConsumer o) {}
 
-  /** Ensures the general preconditions of a StackProducer instance. */
   @Override
   public void visitStackProducer(StackProducer o) {}
 
-  /** ************************************************************ */
+  /* ************************************************************ */
   /* "generic" visitYYYY methods where YYYY is a superclass.     */
   /* Therefore, we know the order of visiting; we know           */
   /* these methods are called after the visitXXXX methods above. */
-  /** ************************************************************ */
-  /** Ensures the general preconditions of a CPInstruction instance. */
+  /* ************************************************************ */
   @Override
   public void visitCPInstruction(CPInstruction o) {}
 
-  /** Ensures the general preconditions of a FieldInstruction instance. */
   @Override
   public void visitFieldInstruction(FieldInstruction o) {}
 
-  /** Ensures the general preconditions of an InvokeInstruction instance. */
   @Override
   public void visitInvokeInstruction(InvokeInstruction o) {}
 
-  /** Ensures the general preconditions of a StackInstruction instance. */
   @Override
   public void visitStackInstruction(StackInstruction o) {}
 
+  // TODO: Is this really what this does?  The implementation doesn't look like it does that, and
+  // this documentation is in conflict with the class documentation that says no checks are done.
   /**
    * Assures the generic preconditions of a LocalVariableInstruction instance. That is, the index of
    * the local variable must be valid.
@@ -291,131 +293,100 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   @Override
   public void visitLocalVariableInstruction(LocalVariableInstruction o) {}
 
-  /** Assures the generic preconditions of a LoadInstruction instance. */
   @Override
   public void visitLoadInstruction(LoadInstruction o) {}
 
-  /** Assures the generic preconditions of a StoreInstruction instance. */
   @Override
   public void visitStoreInstruction(StoreInstruction o) {}
 
-  /** Assures the generic preconditions of a ReturnInstruction instance. */
   @Override
   public void visitReturnInstruction(ReturnInstruction o) {}
 
-  /** ************************************************************ */
+  /* ************************************************************ */
   /* "special "visitXXXX methods for one type of instruction each */
-  /** ************************************************************ */
+  /* ************************************************************ */
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitAALOAD(AALOAD o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitAASTORE(AASTORE o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitACONST_NULL(ACONST_NULL o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitALOAD(ALOAD o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitANEWARRAY(ANEWARRAY o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitARETURN(ARETURN o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitARRAYLENGTH(ARRAYLENGTH o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitASTORE(ASTORE o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitATHROW(ATHROW o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitBALOAD(BALOAD o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitBASTORE(BASTORE o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitBIPUSH(BIPUSH o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitBREAKPOINT(BREAKPOINT o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitCALOAD(CALOAD o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitCASTORE(CASTORE o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitCHECKCAST(CHECKCAST o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitD2F(D2F o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitD2I(D2I o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitD2L(D2L o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitDADD(DADD o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitDALOAD(DALOAD o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitDASTORE(DASTORE o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitDCMPG(DCMPG o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitDCMPL(DCMPL o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitDCONST(DCONST o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitDDIV(DDIV o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitDLOAD(DLOAD o) {}
 
-  /** Ensures the specific preconditions of the said instruction. */
   @Override
   public void visitDMUL(DMUL o) {}
 

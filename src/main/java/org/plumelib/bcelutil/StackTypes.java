@@ -17,9 +17,11 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
  */
 public final class StackTypes {
 
+  // TODO: Are the indices byte code offets?  Please say what they are explicitly.
   /** The state of the operand stack at each instruction location. */
   OperandStack @SameLen("loc_arr") [] os_arr;
 
+  // TODO: Are the indices byte code offets?  Please say what they are explicitly.
   /** The state of the live local variables at each instruction location. */
   LocalVariables @SameLen("os_arr") [] loc_arr;
 
@@ -31,14 +33,14 @@ public final class StackTypes {
    */
   public StackTypes(MethodGen mg) {
     InstructionList il = mg.getInstructionList();
-    int size = 0;
-    if (il != null) size = il.getEnd().getPosition();
+    int size = (il == null) ? 0 : il.getEnd().getPosition();
     os_arr = new OperandStack[size + 1];
     loc_arr = new LocalVariables[size + 1];
   }
 
   /**
-   * Sets the stack for the instruction at the specified offset.
+   * Sets the stack for the instruction at the specified offset to a copy of the information in the
+   * given frame.
    *
    * @param offset the offset at which the instruction appears
    * @param f the stack frame to use for the instruction
@@ -77,7 +79,7 @@ public final class StackTypes {
       }
     }
 
-    return (sb.toString());
+    return sb.toString();
   }
 
   /**
@@ -101,7 +103,7 @@ public final class StackTypes {
       }
     }
 
-    return ("{" + buff + "}");
+    return "{" + buff + "}";
   }
 
   /**
@@ -124,6 +126,6 @@ public final class StackTypes {
         buff += t;
       }
     }
-    return ("{" + buff + "}");
+    return "{" + buff + "}";
   }
 }

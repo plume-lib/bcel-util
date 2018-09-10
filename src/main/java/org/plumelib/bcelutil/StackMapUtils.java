@@ -40,10 +40,10 @@ import org.checkerframework.dataflow.qual.Pure;
  * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
  *
- * <p>This class cannot be a set of static methods (like BcelUtil) as is maintains state during the
- * client's processing of a method that must be available on a per thread basis. Thus it is an
- * abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}. A client would not
- * normally extend this class directly.
+ * <p>This class cannot be a set of static methods (like {@link BcelUtil}) as it maintains state
+ * during the client's processing of a method that must be available on a per thread basis. Thus it
+ * is an abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}. A client
+ * would not normally extend this class directly.
  */
 @SuppressWarnings("nullness")
 public abstract class StackMapUtils {
@@ -67,11 +67,11 @@ public abstract class StackMapUtils {
    * the byte codes.
    */
 
-  // TODO: How and when should a client set this?
+  // TODO: How and when should a client set this?  Or, say that a client should not (and say who
+  // does).
   /** The pool for the method currently being processed. Must be set by the client. */
   protected @Nullable ConstantPoolGen pool = null;
 
-  // TODO: Java style dictates using CamelCase instead of snake_case.
   /** A log to which to print debugging information about program instrumentation. */
   protected SimpleLog debug_instrument = new SimpleLog(false);
 
@@ -159,7 +159,7 @@ public abstract class StackMapUtils {
    */
   @Pure
   protected final boolean is_local_variable_type_table(Attribute a) {
-    return (get_attribute_name(a).equals("LocalVariableTypeTable"));
+    return get_attribute_name(a).equals("LocalVariableTypeTable");
   }
 
   /**
@@ -170,7 +170,7 @@ public abstract class StackMapUtils {
    */
   @Pure
   protected final boolean is_stack_map_table(Attribute a) {
-    return (get_attribute_name(a).equals("StackMapTable"));
+    return get_attribute_name(a).equals("StackMapTable");
   }
 
   /**
@@ -286,7 +286,7 @@ public abstract class StackMapUtils {
           // back up offset to previous
           running_offset = running_offset - stack_map_table[i].getByteCodeOffset() - 1;
           // return previous
-          return (i - 1);
+          return i - 1;
         }
       }
 
@@ -343,7 +343,9 @@ public abstract class StackMapUtils {
     Instruction inst;
     short opcode;
 
-    if (!needStackMap) return;
+    if (!needStackMap) {
+      return;
+    }
 
     // Make sure all instruction offsets are uptodate.
     il.setPositions();
@@ -523,6 +525,7 @@ public abstract class StackMapUtils {
     return offset + min_size;
   }
 
+  // TODO: From the documentation, I am not sure what this method does or when it should be called.
   /**
    * We need to locate and remember any NEW instructions that create uninitialized objects. Their
    * offset may be contained in a StackMap entry and will probably need to be updated as we add
@@ -666,6 +669,14 @@ public abstract class StackMapUtils {
     }
   }
 
+  // TODO: I find this method name confusing.  With a name like "fetch", I expect it to return
+  // something.  Should it have a name like "set", because it is a setter (it sets the state of
+  // fields from arguments)?
+  // Or, should this be the constructor for this class (StackMapUtils)?
+  // Clients can call the constructor to create a StackMapUtils, then call instance methods on it
+  // rather than extending StackMapUtils.  That seems like a nicer programming model; would it work?
+  // (Maybe build_unitialized_NEW_map should be folded into the constructor too, but I don't
+  // understand what that method does.)
   /**
    * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
    * one. Sets both smta and stack_map_table. Must be called prior to any other methods that
@@ -721,8 +732,12 @@ public abstract class StackMapUtils {
    */
   protected final void create_new_stack_map_attribute(MethodGen mgen) throws IOException {
 
-    if (!needStackMap) return;
-    if (stack_map_table == empty_stack_map_table) return;
+    if (!needStackMap) {
+      return;
+    }
+    if (stack_map_table == empty_stack_map_table) {
+      return;
+    }
     print_stack_map_table("Final");
 
     // Build new StackMapTable attribute

@@ -32,6 +32,8 @@ import org.checkerframework.checker.signature.qual.InternalForm;
 import org.plumelib.reflection.ReflectionPlume;
 import org.plumelib.reflection.Signatures;
 
+// TODO: The "if one wishes" documentation is useful, but how is it relevant to the BcelUtil class?
+// It doesn't even mention BcelUtil.  Maybe package-info.java would be a better place for it.
 /**
  * Static utility methods for working with BCEL.
  *
@@ -178,7 +180,7 @@ public final class BcelUtil {
     int conIndex = a.getNameIndex();
     Constant c = pool.getConstant(conIndex);
     String attName = ((ConstantUtf8) c).getBytes();
-    return (attName);
+    return attName;
   }
 
   /**
