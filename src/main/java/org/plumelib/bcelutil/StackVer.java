@@ -195,8 +195,7 @@ public final class StackVer {
     final Random random = new Random();
     final InstructionContextQueue icq = new InstructionContextQueue();
 
-    stack_types.set(start.getInstruction().getPosition(), vanillaFrame);
-    start.execute(vanillaFrame, new ArrayList<InstructionContext>(), icv, ev);
+    execute(start, vanillaFrame, new ArrayList<InstructionContext>(), icv, ev);
     // new ArrayList() <=>    no Instruction was executed before
     //                                    => Top-Level routine (no jsr call before)
     icq.add(start, new ArrayList<InstructionContext>());
@@ -266,9 +265,7 @@ public final class StackVer {
                   + "'?");
         }
 
-        Frame f = u.getOutFrame(oldchain);
-        stack_types.set(theSuccessor.getInstruction().getPosition(), f);
-        if (theSuccessor.execute(f, newchain, icv, ev)) {
+        if (execute(theSuccessor, u.getOutFrame(oldchain), newchain, icv, ev)) {
           @SuppressWarnings(
               "unchecked") // newchain is already of type ArrayList<InstructionContext>
           final ArrayList<InstructionContext> newchainClone =
@@ -280,9 +277,7 @@ public final class StackVer {
         // Normal successors. Add them to the queue of successors.
         final InstructionContext[] succs = u.getSuccessors();
         for (final InstructionContext v : succs) {
-          Frame f = u.getOutFrame(oldchain);
-          stack_types.set(v.getInstruction().getPosition(), f);
-          if (v.execute(f, newchain, icv, ev)) {
+          if (execute(v, u.getOutFrame(oldchain), newchain, icv, ev)) {
             @SuppressWarnings(
                 "unchecked") // newchain is already of type ArrayList<InstructionContext>
             final ArrayList<InstructionContext> newchainClone =
@@ -305,21 +300,23 @@ public final class StackVer {
         // mean we're in a subroutine if we go to the exception handler.
         // We should address this problem later; by now we simply "cut" the chain
         // by using an empty chain for the exception handlers.
-        // if (v.execute(new Frame(u.getOutFrame(oldchain).getLocals(),
+        // if (execute(v, new Frame(u.getOutFrame(oldchain).getLocals(),
         // new OperandStack (u.getOutFrame().getStack().maxStack(),
         // (exc_hds[s].getExceptionType()==null? Type.THROWABLE : exc_hds[s].getExceptionType())) ),
         // newchain), icv, ev) {
         // icq.add(v, (ArrayList) newchain.clone());
-        Frame f =
+        if (execute(
+            v,
             new Frame(
                 u.getOutFrame(oldchain).getLocals(),
                 new OperandStack(
                     u.getOutFrame(oldchain).getStack().maxStack(),
                     exc_hd.getExceptionType() == null
                         ? Type.THROWABLE
-                        : exc_hd.getExceptionType()));
-        stack_types.set(v.getInstruction().getPosition(), f);
-        if (v.execute(f, new ArrayList<InstructionContext>(), icv, ev)) {
+                        : exc_hd.getExceptionType())),
+            new ArrayList<InstructionContext>(),
+            icv,
+            ev)) {
           icq.add(v, new ArrayList<InstructionContext>());
         }
       }
@@ -475,6 +472,17 @@ public final class StackVer {
           re);
     }
     return VerificationResult.VR_OK;
+  }
+
+  /** Like InstructionContext.execute, but also sets stack_types. */
+  boolean execute(
+      InstructionContext ic,
+      Frame inFrame,
+      ArrayList<InstructionContext> executionPredecessors,
+      InstConstraintVisitor icv,
+      ExecutionVisitor ev) {
+    stack_types.set(ic.getInstruction().getPosition(), inFrame);
+    return ic.execute(inFrame, executionPredecessors, icv, ev);
   }
 
   // Code from PassVerifier in BCEL so that we don't have to extend it
