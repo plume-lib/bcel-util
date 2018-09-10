@@ -70,7 +70,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * information is to be found at the do_verify() method's documentation.
  *
  * @version $Id$
- * @see #do_stack_ver()
+ * @see #do_stack_ver
  */
 @SuppressWarnings({"rawtypes", "nullness", "interning"}) // third-party code
 public final class StackVer {

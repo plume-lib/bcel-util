@@ -10,7 +10,7 @@
  * @see org.plumelib.bcelutil.BcelUtil BcelUtil for notes on inspecting a Java class file
  * @see org.plumelib.bcelutil.InstructionListUtils InstructionListUtils for notes on modifing a Java
  *     class file
- * @see the <a href="https://commons.apache.org/proper/commons-bcel/index.html">Commons BCEL</a> web
- *     site for details about the BCEL library
+ * @see <a href="https://commons.apache.org/proper/commons-bcel/index.html">Commons BCEL web site
+ *     for details about the BCEL library</a>
  */
 package org.plumelib.bcelutil;
