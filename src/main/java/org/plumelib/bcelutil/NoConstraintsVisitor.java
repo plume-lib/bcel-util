@@ -1,263 +1,31 @@
 package org.plumelib.bcelutil;
 
-/* ====================================================================
- * The Apache Software License, Version 1.1
- *
- * Copyright (c) 2001 The Apache Software Foundation.  All rights
- * reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution,
- *    if any, must include the following acknowledgment:
- *       "This product includes software developed by the
- *        Apache Software Foundation (http://www.apache.org/)."
- *    Alternately, this acknowledgment may appear in the software itself,
- *    if and wherever such third-party acknowledgments normally appear.
- *
- * 4. The names "Apache" and "Apache Software Foundation" and
- *    "Apache BCEL" must not be used to endorse or promote products
- *    derived from this software without prior written permission. For
- *    written permission, please contact apache@apache.org.
- *
- * 5. Products derived from this software may not be called "Apache",
- *    "Apache BCEL", nor may "Apache" appear in their name, without
- *    prior written permission of the Apache Software Foundation.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
- */
-
-/*
- * This file was created by modifying a version of the Apache BCEL file
- * src/main/java/org/apache/bcel/verifier/structural/InstConstraintVisitor.java
- * as it existed cicra 2005.  It has been heavily modified and other than some
- * of the boiler plate towards the beginning of the file, there is no longer
- * much similarity between the two files.
- */
-
 import org.apache.bcel.generic.*;
 import org.apache.bcel.verifier.structurals.Frame;
 import org.apache.bcel.verifier.structurals.InstConstraintVisitor;
-import org.apache.bcel.verifier.structurals.LocalVariables;
-import org.apache.bcel.verifier.structurals.OperandStack;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 
-// TODO: What is the mnemonic for "Limited"?  If there are no checks at all performed, then please
-// make that clear in the name.
 /**
- * A Visitor class testing for valid preconditions of JVM instructions. No checks are actually
- * implemented. This overrides the class in BCEL which incorrectly fails on many valid class files.
+ * This class is dummy instruction constraint visitor that does no constraint checking at all.
+ * It is used by StackVer as a replacement for org.apache.bcel.verifier.structurals.InstConstraintVisitor.
+ * InstConstraintVisitor appears to be quite out of date and incorrectly fails on many valid
+ * class files.  Hence, StackVer assumes the method is valid and is only interested in the result
+ * of the symbolic execution in order to capture the state of the local variables and stack at
+ * the start of each byte code instruction.
  */
-public class LimitedConstraintVisitor extends InstConstraintVisitor {
-
-  // private static ObjectType GENERIC_ARRAY = new
-  // ObjectType("org.apache.bcel.verifier.structurals.GenericArray");
+public class NoConstraintsVisitor extends InstConstraintVisitor {
 
   /** The constructor. Constructs a new instance of this class. */
-  public LimitedConstraintVisitor() {}
+  public NoConstraintsVisitor() {}
 
-  /**
-   * The Execution Frame we're working on.
-   *
-   * @see #setFrame(Frame f)
-   * @see #locals()
-   * @see #stack()
-   */
-  private @MonotonicNonNull Frame frame = null;
-
-  // TODO: LimitedConstraintVisitor has a bunch of commented-out code.  I think it should be removed
-  // throughout, to make the code smaller and easier to understand.  Then, I suppose the two leading
-  // comments (the ones before the first import statement) can be removed too.
-
-  /**
-   * The ConstantPoolGen we're working on.
-   *
-   * @see #setConstantPoolGen(ConstantPoolGen cpg)
-   */
-  // private ConstantPoolGen cpg = null;
-
-  /**
-   * The MethodGen we're working on.
-   *
-   * @see #setMethodGen(MethodGen mg)
-   */
-  // private MethodGen mg = null;
-
-  /**
-   * The OperandStack we're working on.
-   *
-   * @return the OperandStack we're working on
-   * @see #setFrame(Frame f)
-   */
-  @RequiresNonNull("frame")
-  private OperandStack stack() {
-    return frame.getStack();
-  }
-
-  /**
-   * The LocalVariables we're working on.
-   *
-   * @return the LocalVariables we're working on
-   * @see #setFrame(Frame f)
-   */
-  @RequiresNonNull("frame")
-  private LocalVariables locals() {
-    return frame.getLocals();
-  }
-
-  /**
-   * This method is called by the visitXXX() to notify the acceptor of this InstConstraintVisitor
-   * that a constraint violation has occured. This is done by throwing an instance of a
-   * StructuralCodeConstraintException.
-   *
-   * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException always.
-   */
-  //	private void constraintViolated(Instruction violator, String description) {
-  //		String fq_classname = violator.getClass().getName();
-  //		throw new StructuralCodeConstraintException("Instruction "+
-  // fq_classname.substring(fq_classname.lastIndexOf('.')+1) +" constraint violated: " +
-  // description);
-  //	}
-
-  /**
-   * This returns the single instance of the InstConstraintVisitor class. To operate correctly,
-   * other values must have been set before actually using the instance. Use this method for
-   * performance reasons.
-   *
-   * @see #setConstantPoolGen(ConstantPoolGen cpg)
-   * @see #setMethodGen(MethodGen mg)
-   */
   @Override
-  public void setFrame(Frame f) {
-    this.frame = f;
-    // if (singleInstance.mg == null || singleInstance.cpg == null) throw new
-    // AssertionViolatedException("Forgot to set important values first.");
-  }
+  public void setFrame(Frame f) {}
 
-  /** Sets the ConstantPoolGen instance needed for constraint checking prior to execution. */
   @Override
-  public void setConstantPoolGen(ConstantPoolGen cpg) {
-    // this.cpg = cpg;
-  }
+  public void setConstantPoolGen(ConstantPoolGen cpg) {}
 
-  /** Sets the MethodGen instance needed for constraint checking prior to execution. */
   @Override
-  public void setMethodGen(MethodGen mg) {
-    // this.mg = mg;
-  }
+  public void setMethodGen(MethodGen mg) {}
 
-  //	/**
-  //	 * Assures index is of type INT.
-  //	 * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException if the above
-  //         constraint is not satisfied.
-  //	 */
-  //	private void indexOfInt(Instruction o, Type index) {
-  //		if (! index.equals(Type.INT))
-  //				constraintViolated(o, "The 'index' is not of type int but of type "+index+".");
-  //	}
-  //
-  //	/**
-  //	 * Assures the ReferenceType r is initialized (or Type.NULL).
-  //	 * Formally, this means (!(r instanceof UninitializedObjectType)), because
-  //	 * there are no uninitialized array types.
-  //	 * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException if the above
-  //         constraint is not satisfied.
-  //	 */
-  //	private void referenceTypeIsInitialized(Instruction o, ReferenceType r) {
-  //		if (r instanceof UninitializedObjectType) {
-  //			constraintViolated(o, "Working on an uninitialized object '"+r+"'.");
-  //		}
-  //	}
-  //
-  //	/** Assures value is of type INT. */
-  //	private void valueOfInt(Instruction o, Type value) {
-  //		if (! value.equals(Type.INT))
-  //				constraintViolated(o, "The 'value' is not of type int but of type "+value+".");
-  //	}
-  //
-  //	/**
-  //	 * Assures arrayref is of ArrayType or NULL;
-  //	 * returns true if and only if arrayref is non-NULL.
-  //	 * @throws org.apache.bcel.verifier.exc.StructuralCodeConstraintException if the above
-  //         constraint is violated.
-  // 	 */
-  //	private boolean arrayrefOfArrayType(Instruction o, Type arrayref) {
-  //		if (! ((arrayref instanceof ArrayType) || arrayref.equals(Type.NULL)) )
-  //				constraintViolated(o, "The 'arrayref' does not refer to an array but is of type
-  // "+arrayref+".");
-  //		return (arrayref instanceof ArrayType);
-  //	}
-
-  /** ************************************************************ */
-  /* MISC                                                        */
-  /** ************************************************************ */
-  /**
-   * Ensures the general preconditions of an instruction that accesses the stack. This method is
-   * here because BCEL has no such superinterface for the stack accessing instructions; and there
-   * are funny unexpected exceptions in the semantices of the superinterfaces and superclasses
-   * provided. E.g. SWAP is a StackConsumer, but DUP_X1 is not a StackProducer. Therefore, this
-   * method is called by all StackProducer, StackConsumer, and StackInstruction instances via their
-   * visitXXX() method. Unfortunately, as the superclasses and superinterfaces overlap, some
-   * instructions cause this method to be called two or three times. [TODO: Fix this.]
-   *
-   * @see #visitStackConsumer(StackConsumer o)
-   * @see #visitStackProducer(StackProducer o)
-   * @see #visitStackInstruction(StackInstruction o)
-   */
-  //	private void _visitStackAccessor(Instruction o) {
-  //        // System.out.println ("visitStackAccessor: " + o);
-  //		int consume = o.consumeStack(cpg); // Stack values are always consumed first; then produced.
-  //		if (consume > stack().slotsUsed()) {
-  //			constraintViolated((Instruction) o, "Cannot consume "+consume+" stack slots: only
-  // "+stack().slotsUsed()+" slot(s) left on stack!\nStack:\n"+stack());
-  //		}
-  //
-  //    // Stack values are always consumed first; then produced.
-  //		int produce = o.produceStack(cpg) - ((Instruction) o).consumeStack(cpg);
-  //		if ( produce + stack().slotsUsed() > stack().maxStack() ) {
-  //			constraintViolated((Instruction) o, "Cannot produce "+produce+" stack slots: only
-  // "+(stack().maxStack()-stack().slotsUsed())+" free stack slot(s) left.\nStack:\n"+stack());
-  //		}
-  //	}
-
-  /** ************************************************************ */
-  /* "generic"visitXXXX methods where XXXX is an interface.      */
-  /* Therefore, we don't know the order of visiting; but we know */
-  /* these methods are called before the visitYYYY methods below. */
-  /** ************************************************************ */
-
-  /**
-   * Assures the generic preconditions of a LoadClass instance. The referenced class is loaded and
-   * pass2-verified.
-   */
   @Override
   public void visitLoadClass(LoadClass o) {}
 
@@ -267,11 +35,6 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   @Override
   public void visitStackProducer(StackProducer o) {}
 
-  /* ************************************************************ */
-  /* "generic" visitYYYY methods where YYYY is a superclass.     */
-  /* Therefore, we know the order of visiting; we know           */
-  /* these methods are called after the visitXXXX methods above. */
-  /* ************************************************************ */
   @Override
   public void visitCPInstruction(CPInstruction o) {}
 
@@ -284,12 +47,6 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   @Override
   public void visitStackInstruction(StackInstruction o) {}
 
-  // TODO: Is this really what this does?  The implementation doesn't look like it does that, and
-  // this documentation is in conflict with the class documentation that says no checks are done.
-  /**
-   * Assures the generic preconditions of a LocalVariableInstruction instance. That is, the index of
-   * the local variable must be valid.
-   */
   @Override
   public void visitLocalVariableInstruction(LocalVariableInstruction o) {}
 
@@ -301,10 +58,6 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
 
   @Override
   public void visitReturnInstruction(ReturnInstruction o) {}
-
-  /* ************************************************************ */
-  /* "special "visitXXXX methods for one type of instruction each */
-  /* ************************************************************ */
 
   @Override
   public void visitAALOAD(AALOAD o) {}
@@ -768,7 +521,3 @@ public class LimitedConstraintVisitor extends InstConstraintVisitor {
   @Override
   public void visitTABLESWITCH(TABLESWITCH o) {}
 }
-
-// Local Variables:
-// tab-width: 2
-// End:

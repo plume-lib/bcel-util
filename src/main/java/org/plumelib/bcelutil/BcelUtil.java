@@ -32,28 +32,9 @@ import org.checkerframework.checker.signature.qual.InternalForm;
 import org.plumelib.reflection.ReflectionPlume;
 import org.plumelib.reflection.Signatures;
 
-// TODO: The "if one wishes" documentation is useful, but how is it relevant to the BcelUtil class?
-// It doesn't even mention BcelUtil.  Maybe package-info.java would be a better place for it.
 /**
  * Static utility methods for working with BCEL.
  *
- * <p>If one wishes to inspect a Java class file, a rough program template would be as follows:
- *
- * <pre>
- *   import org.apache.bcel.classfile.*;
- *
- *   try {
- *     // Parse the bytes of the classfile, die on any errors
- *     ClassParser parser = new ClassParser("path to class file of interest");
- *     JavaClass jc = parser.parse();
- *   } catch (Exception e) {
- *     throw new RuntimeException("Unexpected error", e);
- *   }
- * </pre>
- *
- * At this point one would use the methods of {@link org.apache.bcel.classfile.JavaClass} and the
- * other members of the {@link org.apache.bcel.classfile} package to explore the class file of
- * interest.
  */
 public final class BcelUtil {
   /** This class is a collection of methods; it does not represent anything. */

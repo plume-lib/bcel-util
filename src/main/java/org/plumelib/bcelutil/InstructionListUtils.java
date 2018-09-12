@@ -20,34 +20,22 @@ import org.apache.bcel.generic.TABLESWITCH;
 import org.apache.bcel.verifier.structurals.OperandStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-// TODO: The example code is very useful, thanks.  However, it never mentions InstructionListUtils.
-// So, a client doesn't know how to use it.  A user will assume one should instantiate an
-// InstructionListUtils object and then program against it.  However, I think you told me that a
-// client should extend InstructionListUtils instead.  Anyway, please make this clear in the
-// documentation.
-// TODO: It's inconsistent that
-//   pool = cg.getConstantPool();
-// is hoisted out of the loop, but cg.getClassName() is not.  I would treat them the same  --
-// probably hoisting neither in the example code, for simplicity, unless it's important that
-// cg.getConstantPool() is hoisted, in which case that surprising fact should be explained.
-// TODO: The code
-//        } catch (Exception e) {
-//          throw e;
-// doeesn't do anything.  Do you mean for it to `throw new RuntimeException(e)`?
 // TODO: The example code has a lot of boilerplate (8 calls from
 // update_uninitialized_NEW_offsets(il) to remove_local_variable_type_table(mg).  Should that be
 // replaced by a single method that does all the necessary cleanup work?  I think that would be
 // simpler, clearer, and less error-prone.
+
 /**
  * This class provides utility methods to maintain and modify a method's InstructionList within a
  * Java class file. It is a subclass of {@link org.plumelib.bcelutil.StackMapUtils} and thus handles
  * all the StackMap side effects of InstructionList modification. It can be thought of as an
- * extention to BCEL.
+ * extension to BCEL.
  *
  * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
  *
- * <p>If one wishes to modify a Java class file, a rough program template would be as follows:
+ * <p>If one wishes to modify a Java class file, you should create a subclass of InstructionListUtils
+ * to do the modifications.  Then a rough program template for that class would be:
  *
  * <pre>
  *   import org.apache.bcel.classfile.*;
@@ -67,12 +55,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  *  void modifyClass(JavaClass jc) {
  *    ClassGen cg = new ClassGen(jc);
+ *    String classname = cg.getClassName();
  *    //save ConstantPool for use by StackMapUtils
  *    pool = cg.getConstantPool();
  *
  *    for (Method m : cg.getMethods()) {
  *      try {
- *        MethodGen mg = new MethodGen(m, cg.getClassName(), pool);
+ *        MethodGen mg = new MethodGen(m, classname, pool);
  *        // Get the instruction list and skip methods with no instructions
  *        InstructionList il = mg.getInstructionList();
  *        if (il == null) {
@@ -80,15 +69,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *        }
  *
  *        // Get existing StackMapTable (if present)
- *        fetch_current_stack_map_table(mg, cg.getMajor());
+ *        set_current_stack_map_table(mg, cg.getMajor());
  *        fix_local_variable_table(mg);
  *
  *        // Create a map of Uninitialized_variable_info offsets to
  *        // InstructionHandles.
  *        build_unitialized_NEW_map(il);
  *
- *        // This is where you would insert your
- *        // code to modify the method 'mg'.
+ * This is where you would insert your code to modify the current method (mg).
+ * Most often this is done with members of the {@link org.apache.bcel.generic}
+ * package.  However, you should use the members of InstrutionListUtils to update
+ * the byte code instructions of mg rather than similar methods in the BCEL
+ * generic package in order to maintain the integrity of the method's StackMapTable.
  *
  *        // Update the Uninitialized_variable_info offsets before
  *        // we write out the new StackMapTable.
@@ -107,11 +99,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *        remove_local_variable_type_table(mg);
  *
  *        // Update the method in the class
- *        try {
- *          cg.replaceMethod(m, mg.getMethod());
- *        } catch (Exception e) {
- *          throw e;
- *        }
+ *        cg.replaceMethod(m, mg.getMethod());
+ *
  *      } catch (Throwable t) {
  *        throw new Error("Unexpected error processing " + classname + "." + m.getName(), t);
  *      }

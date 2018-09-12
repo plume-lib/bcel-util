@@ -17,12 +17,16 @@ import org.checkerframework.dataflow.qual.SideEffectFree;
  */
 public final class StackTypes {
 
-  // TODO: Are the indices byte code offets?  Please say what they are explicitly.
-  /** The state of the operand stack at each instruction location. */
+  /**
+   * The state of the operand stack at each instruction location.
+   * The instruction's byte code offset is used as the index.
+   */
   OperandStack @SameLen("loc_arr") [] os_arr;
 
-  // TODO: Are the indices byte code offets?  Please say what they are explicitly.
-  /** The state of the live local variables at each instruction location. */
+  /**
+   * The state of the live local variables at each instruction location.
+   * The instruction's byte code offset is used as the index.
+   */
   LocalVariables @SameLen("os_arr") [] loc_arr;
 
   /**

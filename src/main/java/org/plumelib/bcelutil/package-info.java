@@ -7,7 +7,24 @@
  * code instructions, in particular. Such objects can be read from an existing file, be transformed
  * by a program (e.g., a class loader at run time) and written to a file again.
  *
- * @see org.plumelib.bcelutil.BcelUtil BcelUtil for notes on inspecting a Java class file
+ * <p>If one wishes to inspect a Java class file, a rough program template would be as follows:
+ *
+ * <pre>
+ *   import org.apache.bcel.classfile.*;
+ *
+ *   try {
+ *     // Parse the bytes of the classfile, die on any errors
+ *     ClassParser parser = new ClassParser("path to class file of interest");
+ *     JavaClass jc = parser.parse();
+ *   } catch (Exception e) {
+ *     throw new RuntimeException("Unexpected error", e);
+ *   }
+ * </pre>
+ *
+ * At this point one would use the methods of {@link org.apache.bcel.classfile.JavaClass},
+ * the other members of the {@link org.apache.bcel.classfile} package and
+ * {@link org.plumelib.bcelutil.BcelUtil} to explore the class file of interest.
+ *<p>
  * @see org.plumelib.bcelutil.InstructionListUtils InstructionListUtils for notes on modifing a Java
  *     class file
  * @see <a href="https://commons.apache.org/proper/commons-bcel/index.html">Commons BCEL web site

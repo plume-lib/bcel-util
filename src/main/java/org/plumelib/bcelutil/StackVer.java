@@ -29,12 +29,14 @@ import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.JsrInstruction;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.ObjectType;
+import org.apache.bcel.generic.ReferenceType;
 import org.apache.bcel.generic.RET;
 import org.apache.bcel.generic.ReturnInstruction;
 import org.apache.bcel.generic.ReturnaddressType;
 import org.apache.bcel.generic.Type;
 import org.apache.bcel.verifier.VerificationResult;
 import org.apache.bcel.verifier.exc.AssertionViolatedException;
+import org.apache.bcel.verifier.exc.StructuralCodeConstraintException;
 import org.apache.bcel.verifier.exc.VerifierConstraintViolatedException;
 import org.apache.bcel.verifier.structurals.ControlFlowGraph;
 import org.apache.bcel.verifier.structurals.ExceptionHandler;
@@ -49,15 +51,12 @@ import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-// TODO: "This version also provides the ability to get the contents of the stack for each
-//  * instruction in the method."  Please say how, such as with a cross-reference to a specific
-// method.
 /**
- * This is a slightly modified version of Pass3bVerifier from BCEL. It uses LimitedConstaintVisitor
- * rather than InstConstraintVisitor to implement the constraints. The LimitedConstraintVisitor
- * doesn't do any checking outside of the current class and removes some checks so that this will
- * pass on the JDK. This version also provides method {@link #get_stack_types()}, which gets the
- * contents of the stack for each instruction in the method.
+ * This is a slightly modified version of Pass3bVerifier from BCEL. It uses NoConstaintsVisitor
+ * as InstConstraintVisitor appears to be quite out of date and incorrectly fails on many valid
+ * class files.  Hence, StackVer assumes the method is valid and is only interested in the result
+ * of the symbolic execution in order to capture the state of the local variables and stack at
+ * the start of each byte code instruction.
  *
  * <p>To see the diffs, <code>
  * wget https://raw.githubusercontent.com/apache/commons-bcel/trunk/src/main/java/org/apache/bcel/verifier/structurals/Pass3bVerifier.java
@@ -351,8 +350,31 @@ public final class StackVer {
                     + "'.");
           }
         }
-        // TODO: There is a block of code in Pass3bVerifier.java that is missing here.
-        // Why?  Should it be inserted?
+/* This code from Pass3bVerifier incorrectly fails on some valid class files.
+        // see JVM $4.8.2
+        Type returnedType = null;
+        final OperandStack inStack = ic.getInFrame().getStack();
+        if (inStack.size() >= 1) {
+          returnedType = inStack.peek();
+        } else {
+          returnedType = Type.VOID;
+        }
+
+        if (returnedType != null) {
+          if (returnedType instanceof ReferenceType) {
+            try {
+              if (!((ReferenceType) returnedType).isCastableTo(m.getReturnType())) {
+                invalidReturnTypeError(returnedType, m);
+              }
+            } catch (final ClassNotFoundException e) {
+              // Don't know what do do now, so raise RuntimeException
+              throw new RuntimeException(e);
+            }
+          } else if (!returnedType.equals(m.getReturnType().normalizeForStackOrLocal())) {
+            invalidReturnTypeError(returnedType, m);
+          }
+        }
+*/
       }
     } while ((ih = ih.getNext()) != null);
   }
@@ -361,10 +383,12 @@ public final class StackVer {
    * Throws an exception indicating the returned type is not compatible with the return type of the
    * given method
    *
+   * @param returnedType the type of the returned expression
+   * @param m the method we are processing
+   *
    * @throws StructuralCodeConstraintException always
    * @since 6.0
    */
-  /* This code is not needed for StackVer.
   public void invalidReturnTypeError(final Type returnedType, final MethodGen m) {
     throw new StructuralCodeConstraintException(
         "Returned type "
@@ -372,7 +396,6 @@ public final class StackVer {
             + " does not match Method's return type "
             + m.getReturnType());
   }
-  */
 
   /**
    * Pass 3b implements the data flow analysis as described in the Java Virtual Machine
@@ -404,7 +427,7 @@ public final class StackVer {
 
     final ConstantPoolGen constantPoolGen = mg.getConstantPool();
     // Init Visitors
-    final InstConstraintVisitor icv = new LimitedConstraintVisitor();
+    final InstConstraintVisitor icv = new NoConstraintsVisitor();
     icv.setConstantPoolGen(constantPoolGen);
 
     final ExecutionVisitor ev = new ExecutionVisitor();

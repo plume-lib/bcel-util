@@ -35,7 +35,7 @@ import org.checkerframework.dataflow.qual.Pure;
 
 /**
  * This class provides utility methods to maintain and modify a method's StackMapTable within a Java
- * class file. It can be thought of as an extention to BCEL.
+ * class file. It can be thought of as an extension to BCEL.
  *
  * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
@@ -67,9 +67,10 @@ public abstract class StackMapUtils {
    * the byte codes.
    */
 
-  // TODO: How and when should a client set this?  Or, say that a client should not (and say who
-  // does).
-  /** The pool for the method currently being processed. Must be set by the client. */
+  /**
+   * The pool for the method currently being processed. Must be set by the client.
+   * See the sample code in {@link InstructionListUtils} for when and how to set this value.
+   */
   protected @Nullable ConstantPoolGen pool = null;
 
   /** A log to which to print debugging information about program instrumentation. */
@@ -78,10 +79,10 @@ public abstract class StackMapUtils {
   /** Whether or not the current method needs a StackMap. */
   protected boolean needStackMap = false;
 
-  /** Working copy of StackMapTable; set by fetch_current_stack_map_table. */
+  /** Working copy of StackMapTable; set by set_current_stack_map_table. */
   protected StackMapEntry @Nullable [] stack_map_table = null;
 
-  /** Original stack map table attribute; set by fetch_current_stack_map_table. */
+  /** Original stack map table attribute; set by set_current_stack_map_table. */
   protected @Nullable StackMap smta = null;
 
   /** Initial state of StackMapTypes for locals on method entry. */
@@ -669,14 +670,6 @@ public abstract class StackMapUtils {
     }
   }
 
-  // TODO: I find this method name confusing.  With a name like "fetch", I expect it to return
-  // something.  Should it have a name like "set", because it is a setter (it sets the state of
-  // fields from arguments)?
-  // Or, should this be the constructor for this class (StackMapUtils)?
-  // Clients can call the constructor to create a StackMapUtils, then call instance methods on it
-  // rather than extending StackMapUtils.  That seems like a nicer programming model; would it work?
-  // (Maybe build_unitialized_NEW_map should be folded into the constructor too, but I don't
-  // understand what that method does.)
   /**
    * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
    * one. Sets both smta and stack_map_table. Must be called prior to any other methods that
@@ -686,6 +679,10 @@ public abstract class StackMapUtils {
    * @param java_class_version Java version for the classfile; stack_map_table is optional before
    *     Java 1.7 (= classfile version 51)
    */
+  // TODO: change method name same time as correspoinding changes in
+  // daikon/java/daikon/chicory/Instrument.java and
+  // daikon/java/daikon/dcomp/DCInstrument.java
+  // protected final void set_current_stack_map_table(MethodGen mgen, int java_class_version) {
   @EnsuresNonNull({"stack_map_table"})
   protected final void fetch_current_stack_map_table(MethodGen mgen, int java_class_version) {
 
