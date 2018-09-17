@@ -670,7 +670,16 @@ public abstract class StackMapUtils {
     }
   }
 
-  /** @deprecated use {@link #set_current_stack_map_table} */
+  /**
+   * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
+   * one. Sets both smta and stack_map_table. Must be called prior to any other methods that
+   * manipulate the stack_map_table!
+   *
+   * @param mgen MethodGen to search
+   * @param java_class_version Java version for the classfile; stack_map_table is optional before
+   *     Java 1.7 (= classfile version 51)
+   * @deprecated use {@link #set_current_stack_map_table}
+   */
   @Deprecated // use set_current_stack_map_table() */
   protected final void fetch_current_stack_map_table(MethodGen mgen, int java_class_version) {
     set_current_stack_map_table(mgen, java_class_version);
@@ -886,7 +895,19 @@ public abstract class StackMapUtils {
     }
   }
 
-  /** @deprecated use {@link #add_new_parameter} */
+  /**
+   * Add a new parameter to the method. This will be added after last current parameter and before
+   * the first local variable. This might have the side effect of causing us to rewrite the method
+   * byte codes to adjust the offsets for the local variables - see below for details.
+   *
+   * <p>Must call fix_local_variable_table (just once per method) before calling this routine.
+   *
+   * @param mgen MethodGen to be modified
+   * @param arg_name name of new parameter
+   * @param arg_type type of new parameter
+   * @return a LocalVariableGen for the new parameter
+   * @deprecated use {@link #add_new_parameter}
+   */
   @Deprecated // use add_new_parameter()
   protected final LocalVariableGen add_new_argument(
       MethodGen mgen, String arg_name, Type arg_type) {
