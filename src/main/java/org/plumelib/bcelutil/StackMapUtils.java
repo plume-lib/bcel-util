@@ -670,6 +670,12 @@ public abstract class StackMapUtils {
     }
   }
 
+  /** @deprecated use {@link #set_current_stack_map_table} */
+  @Deprecated // use set_current_stack_map_table() */
+  protected final void fetch_current_stack_map_table(MethodGen mgen, int java_class_version) {
+    set_current_stack_map_table(mgen, java_class_version);
+  }
+
   /**
    * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
    * one. Sets both smta and stack_map_table. Must be called prior to any other methods that
@@ -679,12 +685,8 @@ public abstract class StackMapUtils {
    * @param java_class_version Java version for the classfile; stack_map_table is optional before
    *     Java 1.7 (= classfile version 51)
    */
-  // TODO: change method name same time as correspoinding changes in
-  // daikon/java/daikon/chicory/Instrument.java and
-  // daikon/java/daikon/dcomp/DCInstrument.java
-  // protected final void set_current_stack_map_table(MethodGen mgen, int java_class_version) {
   @EnsuresNonNull({"stack_map_table"})
-  protected final void fetch_current_stack_map_table(MethodGen mgen, int java_class_version) {
+  protected final void set_current_stack_map_table(MethodGen mgen, int java_class_version) {
 
     smta = (StackMap) get_stack_map_table_attribute(mgen);
     if (smta != null) {
@@ -884,6 +886,13 @@ public abstract class StackMapUtils {
     }
   }
 
+  /** @deprecated use {@link #add_new_parameter} */
+  @Deprecated // use add_new_parameter()
+  protected final LocalVariableGen add_new_argument(
+      MethodGen mgen, String arg_name, Type arg_type) {
+    return add_new_parameter(mgen, arg_name, arg_type);
+  }
+
   /**
    * Add a new parameter to the method. This will be added after last current parameter and before
    * the first local variable. This might have the side effect of causing us to rewrite the method
@@ -896,10 +905,7 @@ public abstract class StackMapUtils {
    * @param arg_type type of new parameter
    * @return a LocalVariableGen for the new parameter
    */
-  // TODO: change method name same time as correspoinding change in
-  // daikon/java/daikon/dcomp/DCInstrument.java
-  // protected final LocalVariableGen add_new_parameter(
-  protected final LocalVariableGen add_new_argument(
+  protected final LocalVariableGen add_new_parameter(
       MethodGen mgen, String arg_name, Type arg_type) {
     // We add a new parameter, after any current ones, and then
     // we need to make a pass over the byte codes to update the local
