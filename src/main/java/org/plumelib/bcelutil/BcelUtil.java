@@ -32,10 +32,7 @@ import org.checkerframework.checker.signature.qual.InternalForm;
 import org.plumelib.reflection.ReflectionPlume;
 import org.plumelib.reflection.Signatures;
 
-/**
- * Static utility methods for working with BCEL.
- *
- */
+/** Static utility methods for working with BCEL. */
 public final class BcelUtil {
   /** This class is a collection of methods; it does not represent anything. */
   private BcelUtil() {

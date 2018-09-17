@@ -5,12 +5,12 @@ import org.apache.bcel.verifier.structurals.Frame;
 import org.apache.bcel.verifier.structurals.InstConstraintVisitor;
 
 /**
- * This class is dummy instruction constraint visitor that does no constraint checking at all.
- * It is used by StackVer as a replacement for org.apache.bcel.verifier.structurals.InstConstraintVisitor.
- * InstConstraintVisitor appears to be quite out of date and incorrectly fails on many valid
- * class files.  Hence, StackVer assumes the method is valid and is only interested in the result
- * of the symbolic execution in order to capture the state of the local variables and stack at
- * the start of each byte code instruction.
+ * This class is dummy instruction constraint visitor that does no constraint checking at all. It is
+ * used by StackVer as a replacement for org.apache.bcel.verifier.structurals.InstConstraintVisitor.
+ * InstConstraintVisitor appears to be quite out of date and incorrectly fails on many valid class
+ * files. Hence, StackVer assumes the method is valid and is only interested in the result of the
+ * symbolic execution in order to capture the state of the local variables and stack at the start of
+ * each byte code instruction.
  */
 public class NoConstraintsVisitor extends InstConstraintVisitor {
 

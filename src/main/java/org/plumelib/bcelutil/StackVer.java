@@ -29,7 +29,6 @@ import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.JsrInstruction;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.ObjectType;
-import org.apache.bcel.generic.ReferenceType;
 import org.apache.bcel.generic.RET;
 import org.apache.bcel.generic.ReturnInstruction;
 import org.apache.bcel.generic.ReturnaddressType;
@@ -52,11 +51,11 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * This is a slightly modified version of Pass3bVerifier from BCEL. It uses NoConstaintsVisitor
- * as InstConstraintVisitor appears to be quite out of date and incorrectly fails on many valid
- * class files.  Hence, StackVer assumes the method is valid and is only interested in the result
- * of the symbolic execution in order to capture the state of the local variables and stack at
- * the start of each byte code instruction.
+ * This is a slightly modified version of Pass3bVerifier from BCEL. It uses NoConstaintsVisitor as
+ * InstConstraintVisitor appears to be quite out of date and incorrectly fails on many valid class
+ * files. Hence, StackVer assumes the method is valid and is only interested in the result of the
+ * symbolic execution in order to capture the state of the local variables and stack at the start of
+ * each byte code instruction.
  *
  * <p>To see the diffs, <code>
  * wget https://raw.githubusercontent.com/apache/commons-bcel/trunk/src/main/java/org/apache/bcel/verifier/structurals/Pass3bVerifier.java
@@ -350,7 +349,7 @@ public final class StackVer {
                     + "'.");
           }
         }
-/* This code from Pass3bVerifier incorrectly fails on some valid class files.
+        /* This code from Pass3bVerifier incorrectly fails on some valid class files.
         // see JVM $4.8.2
         Type returnedType = null;
         final OperandStack inStack = ic.getInFrame().getStack();
@@ -374,7 +373,7 @@ public final class StackVer {
             invalidReturnTypeError(returnedType, m);
           }
         }
-*/
+        */
       }
     } while ((ih = ih.getNext()) != null);
   }
@@ -385,7 +384,6 @@ public final class StackVer {
    *
    * @param returnedType the type of the returned expression
    * @param m the method we are processing
-   *
    * @throws StructuralCodeConstraintException always
    * @since 6.0
    */

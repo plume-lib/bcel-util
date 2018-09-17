@@ -68,8 +68,8 @@ public abstract class StackMapUtils {
    */
 
   /**
-   * The pool for the method currently being processed. Must be set by the client.
-   * See the sample code in {@link InstructionListUtils} for when and how to set this value.
+   * The pool for the method currently being processed. Must be set by the client. See the sample
+   * code in {@link InstructionListUtils} for when and how to set this value.
    */
   protected @Nullable ConstantPoolGen pool = null;
 

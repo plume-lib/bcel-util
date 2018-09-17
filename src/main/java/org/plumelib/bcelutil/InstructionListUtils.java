@@ -34,8 +34,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
  *
- * <p>If one wishes to modify a Java class file, you should create a subclass of InstructionListUtils
- * to do the modifications.  Then a rough program template for that class would be:
+ * <p>If one wishes to modify a Java class file, you should create a subclass of
+ * InstructionListUtils to do the modifications. Then a rough program template for that class would
+ * be:
  *
  * <pre>
  *   import org.apache.bcel.classfile.*;
