@@ -20,11 +20,6 @@ import org.apache.bcel.generic.TABLESWITCH;
 import org.apache.bcel.verifier.structurals.OperandStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-// TODO: The example code has a lot of boilerplate (8 calls from
-// update_uninitialized_NEW_offsets(il) to remove_local_variable_type_table(mg).  Should that be
-// replaced by a single method that does all the necessary cleanup work?  I think that would be
-// simpler, clearer, and less error-prone.
-
 /**
  * This class provides utility methods to maintain and modify a method's InstructionList within a
  * Java class file. It is a subclass of {@link org.plumelib.bcelutil.StackMapUtils} and thus handles
