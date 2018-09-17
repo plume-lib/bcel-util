@@ -34,11 +34,16 @@ import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.dataflow.qual.Pure;
 
 /**
- * This class provides methods to manipulate the StackMapTable. It is used to maintain and modify
- * the StackMap for a method.
+ * This class provides utility methods to maintain and modify a method's StackMapTable within a Java
+ * class file. It can be thought of as an extension to BCEL.
  *
- * <p>BCEL should automatically build and maintain the StackMapTable in a manner similar to the
+ * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
+ *
+ * <p>This class cannot be a set of static methods (like {@link BcelUtil}) as it maintains state
+ * during the client's processing of a method that must be available on a per thread basis. Thus it
+ * is an abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}. A client
+ * would not normally extend this class directly.
  */
 @SuppressWarnings("nullness")
 public abstract class StackMapUtils {
@@ -48,11 +53,13 @@ public abstract class StackMapUtils {
    *
    * 'index' is an item's subscript into a data structure.
    *
-   * 'offset' is an item's runtime address as an offset (for example)
-   * from the start of a method's byte codes or from the start
-   * of a method's stack frame. The Java Virtual Machine Specification
-   * uses 'index into the local variable array of the current frame'
-   * or 'slot number' to describe this later case.
+   * 'offset' is used to describe two different address types:
+   *   * the offset of a byte code from the start of a method's byte codes
+   *   * the offset of a variable from the start of a method's stack frame
+   *
+   *     The Java Virtual Machine Specification uses
+   *     'index into the local variable array of the current frame'
+   *     or 'slot number' to describe this second case.
    *
    * Unfortunately, BCEL uses the method names getIndex and setIndex
    * to refer to 'offset's into the local stack frame.
@@ -60,7 +67,10 @@ public abstract class StackMapUtils {
    * the byte codes.
    */
 
-  /** The pool for the method currently being processed. Must be set by the client. */
+  /**
+   * The pool for the method currently being processed. Must be set by the client. See the sample
+   * code in {@link InstructionListUtils} for when and how to set this value.
+   */
   protected @Nullable ConstantPoolGen pool = null;
 
   /** A log to which to print debugging information about program instrumentation. */
@@ -69,22 +79,23 @@ public abstract class StackMapUtils {
   /** Whether or not the current method needs a StackMap. */
   protected boolean needStackMap = false;
 
-  /** Working copy of StackMapTable; set by fetch_current_stack_map_table. */
+  /** Working copy of StackMapTable; set by set_current_stack_map_table. */
   protected StackMapEntry @Nullable [] stack_map_table = null;
 
-  /** Original stack map table attribute; set by fetch_current_stack_map_table. */
+  /** Original stack map table attribute; set by set_current_stack_map_table. */
   protected @Nullable StackMap smta = null;
 
   /** Initial state of StackMapTypes for locals on method entry. */
   protected StackMapType[] initial_type_list;
 
-  /** The number of local variables in this method prior to any modifications. */
+  /** The number of local variables in the current method prior to any modifications. */
   protected int initial_locals_count;
 
   /**
-   * The number of live local variables according to the current StackMap of interest. Set by
-   * update_stack_map_offset, find_stack_map_equal, find_stack_map_index_before, or
-   * find_stack_map_index_after.
+   * A number of methods in this class search and locate a particular StackMap within the current
+   * method. This variable contains the number of live local variables within the range of byte code
+   * instructions covered by this StackMap. Set by update_stack_map_offset, find_stack_map_equal,
+   * find_stack_map_index_before, or find_stack_map_index_after.
    */
   protected @NonNegative int number_active_locals;
 
@@ -149,7 +160,7 @@ public abstract class StackMapUtils {
    */
   @Pure
   protected final boolean is_local_variable_type_table(Attribute a) {
-    return (get_attribute_name(a).equals("LocalVariableTypeTable"));
+    return get_attribute_name(a).equals("LocalVariableTypeTable");
   }
 
   /**
@@ -160,7 +171,7 @@ public abstract class StackMapUtils {
    */
   @Pure
   protected final boolean is_stack_map_table(Attribute a) {
-    return (get_attribute_name(a).equals("StackMapTable"));
+    return get_attribute_name(a).equals("StackMapTable");
   }
 
   /**
@@ -276,7 +287,7 @@ public abstract class StackMapUtils {
           // back up offset to previous
           running_offset = running_offset - stack_map_table[i].getByteCodeOffset() - 1;
           // return previous
-          return (i - 1);
+          return i - 1;
         }
       }
 
@@ -333,7 +344,9 @@ public abstract class StackMapUtils {
     Instruction inst;
     short opcode;
 
-    if (!needStackMap) return;
+    if (!needStackMap) {
+      return;
+    }
 
     // Make sure all instruction offsets are uptodate.
     il.setPositions();
@@ -513,6 +526,7 @@ public abstract class StackMapUtils {
     return offset + min_size;
   }
 
+  // TODO: From the documentation, I am not sure what this method does or when it should be called.
   /**
    * We need to locate and remember any NEW instructions that create uninitialized objects. Their
    * offset may be contained in a StackMap entry and will probably need to be updated as we add
@@ -657,7 +671,22 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Get existing StackMapTable from the MethodGen arguments. If there is none, create a new empty
+   * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
+   * one. Sets both smta and stack_map_table. Must be called prior to any other methods that
+   * manipulate the stack_map_table!
+   *
+   * @param mgen MethodGen to search
+   * @param java_class_version Java version for the classfile; stack_map_table is optional before
+   *     Java 1.7 (= classfile version 51)
+   * @deprecated use {@link #set_current_stack_map_table}
+   */
+  @Deprecated // use set_current_stack_map_table() */
+  protected final void fetch_current_stack_map_table(MethodGen mgen, int java_class_version) {
+    set_current_stack_map_table(mgen, java_class_version);
+  }
+
+  /**
+   * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
    * one. Sets both smta and stack_map_table. Must be called prior to any other methods that
    * manipulate the stack_map_table!
    *
@@ -666,7 +695,7 @@ public abstract class StackMapUtils {
    *     Java 1.7 (= classfile version 51)
    */
   @EnsuresNonNull({"stack_map_table"})
-  protected final void fetch_current_stack_map_table(MethodGen mgen, int java_class_version) {
+  protected final void set_current_stack_map_table(MethodGen mgen, int java_class_version) {
 
     smta = (StackMap) get_stack_map_table_attribute(mgen);
     if (smta != null) {
@@ -711,8 +740,12 @@ public abstract class StackMapUtils {
    */
   protected final void create_new_stack_map_attribute(MethodGen mgen) throws IOException {
 
-    if (!needStackMap) return;
-    if (stack_map_table == empty_stack_map_table) return;
+    if (!needStackMap) {
+      return;
+    }
+    if (stack_map_table == empty_stack_map_table) {
+      return;
+    }
     print_stack_map_table("Final");
 
     // Build new StackMapTable attribute
@@ -863,20 +896,39 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Add a new argument to the method. This will be added after last current argument and before the
-   * first local variable. This might have the side effect of causing us to rewrite the method byte
-   * codes to adjust the offsets for the local variables - see below for details.
+   * Add a new parameter to the method. This will be added after last current parameter and before
+   * the first local variable. This might have the side effect of causing us to rewrite the method
+   * byte codes to adjust the offsets for the local variables - see below for details.
    *
    * <p>Must call fix_local_variable_table (just once per method) before calling this routine.
    *
    * @param mgen MethodGen to be modified
-   * @param arg_name name of new argument
-   * @param arg_type type of new argument
-   * @return a LocalVariableGen for the new argument
+   * @param arg_name name of new parameter
+   * @param arg_type type of new parameter
+   * @return a LocalVariableGen for the new parameter
+   * @deprecated use {@link #add_new_parameter}
    */
+  @Deprecated // use add_new_parameter()
   protected final LocalVariableGen add_new_argument(
       MethodGen mgen, String arg_name, Type arg_type) {
-    // We add a new argument, after any current ones, and then
+    return add_new_parameter(mgen, arg_name, arg_type);
+  }
+
+  /**
+   * Add a new parameter to the method. This will be added after last current parameter and before
+   * the first local variable. This might have the side effect of causing us to rewrite the method
+   * byte codes to adjust the offsets for the local variables - see below for details.
+   *
+   * <p>Must call fix_local_variable_table (just once per method) before calling this routine.
+   *
+   * @param mgen MethodGen to be modified
+   * @param arg_name name of new parameter
+   * @param arg_type type of new parameter
+   * @return a LocalVariableGen for the new parameter
+   */
+  protected final LocalVariableGen add_new_parameter(
+      MethodGen mgen, String arg_name, Type arg_type) {
+    // We add a new parameter, after any current ones, and then
     // we need to make a pass over the byte codes to update the local
     // offset values of all the locals we just shifted up.  This may have
     // a 'knock on' effect if we are forced to change an instruction that
@@ -898,7 +950,7 @@ public abstract class StackMapUtils {
 
     if (has_code) {
       if (!mgen.isStatic()) {
-        // Skip the 'this' pointer argument.
+        // Skip the 'this' pointer.
         new_index++;
         new_offset++; // size of 'this' is 1
       }
@@ -919,7 +971,7 @@ public abstract class StackMapUtils {
     }
     initial_locals_count++;
 
-    // Update the method's argument information.
+    // Update the method's parameter information.
     arg_types = BcelUtil.postpendToArray(arg_types, arg_type);
     String[] arg_names = add_string(mgen.getArgumentNames(), arg_name);
     mgen.setArgumentTypes(arg_types);
@@ -1137,7 +1189,7 @@ public abstract class StackMapUtils {
     first_local_index = arg_types.length;
 
     if (!mgen.isStatic()) {
-      // Add the 'this' pointer argument back in.
+      // Add the 'this' pointer back in.
       l = locals[0];
       new_lvg = mgen.addLocalVariable(l.getName(), l.getType(), l.getIndex(), null, null);
       debug_instrument.log(
@@ -1148,13 +1200,13 @@ public abstract class StackMapUtils {
       first_local_index++;
     }
 
-    // Loop through each argument
+    // Loop through each parameter
     for (int ii = 0; ii < arg_types.length; ii++) {
 
       // If this parameter doesn't have a matching local
       if ((loc_index >= locals.length) || (offset != locals[loc_index].getIndex())) {
 
-        // Create a local variable to describe the missing argument
+        // Create a local variable to describe the missing parameter
         new_lvg = mgen.addLocalVariable("$hidden$" + offset, arg_types[ii], offset, null, null);
       } else {
         l = locals[loc_index];
@@ -1169,7 +1221,7 @@ public abstract class StackMapUtils {
 
     // At this point the LocalVaraibles contain:
     //   the 'this' pointer (if present)
-    //   the arguments to the method
+    //   the parameters to the method
     // This will be used to construct the initial state of the
     // StackMapTypes.
     LocalVariableGen[] initial_locals = mgen.getLocalVariables();

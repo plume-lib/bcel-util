@@ -21,11 +21,91 @@ import org.apache.bcel.verifier.structurals.OperandStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * This class provides methods that manipulate BCEL InstructionLists while handling all the StackMap
- * side effects.
+ * This class provides utility methods to maintain and modify a method's InstructionList within a
+ * Java class file. It is a subclass of {@link org.plumelib.bcelutil.StackMapUtils} and thus handles
+ * all the StackMap side effects of InstructionList modification. It can be thought of as an
+ * extension to BCEL.
  *
- * <p>BCEL should automatically build and maintain the StackMapTable in a manner similar to the
- * LineNumberTable and the LocalVariableTable. However, for historical reasons it does not.
+ * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
+ * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
+ *
+ * <p>If one wishes to modify a Java class file, you should create a subclass of
+ * InstructionListUtils to do the modifications. Then a rough program template for that class would
+ * be:
+ *
+ * <pre>
+ *   import org.apache.bcel.classfile.*;
+ *   import org.apache.bcel.generic.*;
+ *
+ *  try {
+ *    // Parse the bytes of the classfile, die on any errors
+ *    ClassParser parser = new ClassParser(new ByteArrayInputStream(classfileBuffer), className);
+ *    JavaClass jc = parser.parse();
+ *
+ *    // Transform the file
+ *    modifyClass(jc);
+ *
+ *  } catch (Throwable e) {
+ *    throw new RuntimeException("Unexpected error", e);
+ *  }
+ *
+ *  void modifyClass(JavaClass jc) {
+ *    ClassGen cg = new ClassGen(jc);
+ *    String classname = cg.getClassName();
+ *    //save ConstantPool for use by StackMapUtils
+ *    pool = cg.getConstantPool();
+ *
+ *    for (Method m : cg.getMethods()) {
+ *      try {
+ *        MethodGen mg = new MethodGen(m, classname, pool);
+ *        // Get the instruction list and skip methods with no instructions
+ *        InstructionList il = mg.getInstructionList();
+ *        if (il == null) {
+ *          continue;
+ *        }
+ *
+ *        // Get existing StackMapTable (if present)
+ *        set_current_stack_map_table(mg, cg.getMajor());
+ *        fix_local_variable_table(mg);
+ *
+ *        // Create a map of Uninitialized_variable_info offsets to
+ *        // InstructionHandles.
+ *        build_unitialized_NEW_map(il);
+ *
+ * This is where you would insert your code to modify the current method (mg).
+ * Most often this is done with members of the {@link org.apache.bcel.generic}
+ * package.  However, you should use the members of InstrutionListUtils to update
+ * the byte code instructions of mg rather than similar methods in the BCEL
+ * generic package in order to maintain the integrity of the method's StackMapTable.
+ *
+ *        // Update the Uninitialized_variable_info offsets before
+ *        // we write out the new StackMapTable.
+ *        update_uninitialized_NEW_offsets(il);
+ *        create_new_stack_map_attribute(mg);
+ *
+ *        // Update the instruction list
+ *        mg.setInstructionList(il);
+ *        mg.update();
+ *
+ *        // Update the max stack
+ *        mg.setMaxStack();
+ *        mg.setMaxLocals();
+ *        mg.update();
+ *
+ *        remove_local_variable_type_table(mg);
+ *
+ *        // Update the method in the class
+ *        cg.replaceMethod(m, mg.getMethod());
+ *
+ *      } catch (Throwable t) {
+ *        throw new Error("Unexpected error processing " + classname + "." + m.getName(), t);
+ *      }
+ *    }
+ *  }
+ * </pre>
+ *
+ * It one only wishes to examine a class file, the use of this class is not necessary. See {@link
+ * org.plumelib.bcelutil.BcelUtil} for notes on inspecting a Java class file.
  */
 @SuppressWarnings("nullness")
 public abstract class InstructionListUtils extends StackMapUtils {
@@ -65,7 +145,9 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
     // Ignore methods with no instructions
     InstructionList il = mg.getInstructionList();
-    if (il == null) return;
+    if (il == null) {
+      return;
+    }
     insert_before_handle(mg, il.getStart(), new_il, false);
   }
 
@@ -85,11 +167,15 @@ public abstract class InstructionListUtils extends StackMapUtils {
       @Nullable InstructionList new_il,
       boolean redirect_branches) {
 
-    if (new_il == null) return;
+    if (new_il == null) {
+      return;
+    }
 
     // Ignore methods with no instructions
     InstructionList il = mg.getInstructionList();
-    if (il == null) return;
+    if (il == null) {
+      return;
+    }
 
     boolean at_start = (ih.getPrev() == null);
     new_il.setPositions();
@@ -303,7 +389,9 @@ public abstract class InstructionListUtils extends StackMapUtils {
   protected final void replace_instructions(
       MethodGen mg, InstructionList il, InstructionHandle ih, @Nullable InstructionList new_il) {
 
-    if (new_il == null) return;
+    if (new_il == null) {
+      return;
+    }
 
     InstructionHandle new_end;
     InstructionHandle new_start;

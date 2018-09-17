@@ -2,7 +2,6 @@ package org.plumelib.bcelutil;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.util.Formatter;
 import java.util.Iterator;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
@@ -30,7 +29,6 @@ import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.InternalForm;
-import org.checkerframework.common.value.qual.MinLen;
 import org.plumelib.reflection.ReflectionPlume;
 import org.plumelib.reflection.Signatures;
 
@@ -41,56 +39,59 @@ public final class BcelUtil {
     throw new Error("do not instantiate");
   }
 
-  /** Controls whether the checks in {@link #checkMgen} are actually performed. */
+  /** Controls whether the checks in {@link #checkMgen} are performed. */
   public static boolean skipChecks = false;
 
   /** The type that represents String[]. */
   private static final Type stringArray = Type.getType("[Ljava.lang.String;");
 
-  /**
-   * Prints method declarations to System.out.
-   *
-   * @param gen class whose methods to print
-   */
-  static void dumpMethodDeclarations(ClassGen gen) {
-    System.out.printf("method signatures for class %s%n", gen.getClassName());
-    for (Method m : gen.getMethods()) {
-      System.out.printf("  %s%n", getMethodDeclaration(m));
-    }
-  }
+  // 'ToString' methods
 
   /**
    * Returns a string describing a method declaration. It contains the access flags (public,
    * private, static, etc), the return type, the method name, and the types of each of its
-   * arguments.
+   * parameters.
+   *
+   * <p>For example, if the orignal Java source declarationwas: private final String
+   * constantToString (int index) Then the output of methodDeclarationToString would be: private
+   * final java.lang.String constantToString (int)
    *
    * @param m the method
    * @return a string describing the method declaration
    */
-  public static String getMethodDeclaration(Method m) {
+  public static String methodDeclarationToString(Method m) {
 
     StringBuilder sb = new StringBuilder();
-    Formatter f = new Formatter(sb);
-
-    f.format("%s %s %s (", getAccessFlags(m), m.getReturnType(), m.getName());
-    for (Type at : m.getArgumentTypes()) {
-      f.format("%s, ", at);
+    String flags = accessFlagsToString(m);
+    boolean argsExist = false;
+    if (flags != null && !flags.isEmpty()) {
+      sb.append(String.format("%s ", flags));
     }
-    f.format(")");
-    return (sb.toString().replace(", )", ")"));
+    sb.append(String.format("%s %s(", m.getReturnType(), m.getName()));
+    for (Type at : m.getArgumentTypes()) {
+      sb.append(String.format("%s, ", at));
+      argsExist = true;
+    }
+    if (argsExist) {
+      sb.setLength(sb.length() - 2); // remove trailing ", "
+    }
+    sb.append(")");
+    return sb.toString();
   }
 
   /**
-   * Return a string representation of the access flags of method m.
+   * Return a string representation of the access flags of method m. In the string, the flags are
+   * space-separated and in a canonical order.
    *
    * @param m the method whose access flags to retrieve
    * @return a string representation of the access flags of method m
    */
-  static String getAccessFlags(Method m) {
+  static String accessFlagsToString(Method m) {
 
     int flags = m.getAccessFlags();
 
     StringBuilder buf = new StringBuilder();
+    // Note that pow is a binary mask for the flag (= 2^i).
     for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG; i++) {
       if ((flags & pow) != 0) {
         if (buf.length() > 0) {
@@ -105,63 +106,102 @@ public final class BcelUtil {
       pow <<= 1;
     }
 
-    return (buf.toString());
+    return buf.toString();
   }
 
   /**
-   * Return the attribute name for the specified attribute.
+   * Return a printed description of the given instructions.
+   *
+   * @param il the instructions to describe
+   * @param pool the constant pool the instructions refer to
+   * @return a printed representation of the instructions in {@code il}
+   */
+  public static String instructionListToString(InstructionList il, ConstantPoolGen pool) {
+
+    StringBuilder out = new StringBuilder();
+    for (Iterator<InstructionHandle> i = il.iterator(); i.hasNext(); ) {
+      InstructionHandle handle = i.next();
+      out.append(handle.getInstruction().toString(pool.getConstantPool()) + "\n");
+    }
+    return out.toString();
+  }
+
+  /**
+   * Return a description of the local variables (one per line).
+   *
+   * @param mg the method whose local variables to describe
+   * @return a description of the local variables (one per line)
+   */
+  public static String localVariablesToString(MethodGen mg) {
+
+    StringBuilder out = new StringBuilder();
+    out.append(String.format("Locals for %s [cnt %d]%n", mg, mg.getMaxLocals()));
+    LocalVariableGen[] lvgs = mg.getLocalVariables();
+    if ((lvgs != null) && (lvgs.length > 0)) {
+      for (LocalVariableGen lvg : lvgs) {
+        out.append(String.format("  %s [index %d]%n", lvg, lvg.getIndex()));
+      }
+    }
+    return out.toString();
+  }
+
+  /**
+   * Return the attribute name for the specified attribute, looked up in the original class file
+   * ConstantPool.
    *
    * @param a the attribute
    * @return the attribute name for the specified attribute
    */
-  public static String getAttributeName(Attribute a) {
+  public static String attributeNameToString(Attribute a) {
 
     ConstantPool pool = a.getConstantPool();
     int conIndex = a.getNameIndex();
     Constant c = pool.getConstant(conIndex);
     String attName = ((ConstantUtf8) c).getBytes();
-    return (attName);
+    return attName;
   }
 
   /**
-   * Returns the constant string at the specified offset.
+   * Return the attribute name for the specified attribute, looked up in the given ConstantPoolGen.
    *
+   * @param a the attribute
    * @param pool the constant pool
-   * @param index the index in the constant pool
-   * @return the constant string at the specified offset in the constant pool
+   * @return the attribute name for the specified attribute
    */
-  public static String getConstantStr(ConstantPool pool, int index) {
+  public static String attributeNameToString(Attribute a, ConstantPoolGen pool) {
 
-    Constant c = pool.getConstant(index);
-    assert c != null : "Bad index " + index + " into pool";
-    if (c instanceof ConstantUtf8) {
-      return ((ConstantUtf8) c).getBytes();
-    } else if (c instanceof ConstantClass) {
-      ConstantClass cc = (ConstantClass) c;
-      return cc.getBytes(pool) + " [" + cc.getNameIndex() + "]";
-    } else {
-      throw new Error("unexpected constant " + c + " of class " + c.getClass());
-    }
+    int conIndex = a.getNameIndex();
+    Constant c = pool.getConstant(conIndex);
+    String attName = ((ConstantUtf8) c).getBytes();
+    return attName;
   }
+
+  // 'is' (boolean test) methods
 
   /**
    * Returns whether or not the method is a constructor.
    *
-   * @param mg the method to test
+   * @param mg the MethodGen to test
    * @return true iff the method is a constructor
    */
   public static boolean isConstructor(MethodGen mg) {
-    return (mg.getName().equals("<init>") || mg.getName().equals(""));
+    if (mg.getName().equals("")) {
+      throw new Error("method name cannot be empty");
+    }
+    return mg.getName().equals("<init>");
   }
 
   /**
    * Returns whether or not the method is a constructor.
    *
-   * @param m the method to test
+   * @param m the Method to test
    * @return true iff the method is a constructor
    */
   public static boolean isConstructor(Method m) {
-    return (m.getName().equals("<init>") || m.getName().equals(""));
+    if (m.getName().equals("")) {
+      throw new Error("method name cannot be empty");
+    }
+    return m.getName().equals("<init>");
   }
 
   /**
@@ -171,7 +211,7 @@ public final class BcelUtil {
    * @return true iff the method is a class initializer
    */
   public static boolean isClinit(MethodGen mg) {
-    return (mg.getName().equals("<clinit>"));
+    return mg.getName().equals("<clinit>");
   }
 
   /**
@@ -181,7 +221,7 @@ public final class BcelUtil {
    * @return true iff the method is a class initializer
    */
   public static boolean isClinit(Method m) {
-    return (m.getName().equals("<clinit>"));
+    return m.getName().equals("<clinit>");
   }
 
   /**
@@ -191,7 +231,7 @@ public final class BcelUtil {
    * @return true iff the class is in a package that is in the JDK (rt.jar)
    */
   public static boolean inJdk(ClassGen gen) {
-    return (inJdk(gen.getClassName()));
+    return inJdk(gen.getClassName());
   }
 
   /**
@@ -238,17 +278,33 @@ public final class BcelUtil {
   }
 
   /**
-   * Print the methods in the class, to standard output.
+   * Returns whether or not the specified attribute is a local variable type table.
    *
-   * @param gen the class whose methods to print
+   * @param a the attribute
+   * @param pool the constant pool
+   * @return true iff the attribute is a local variable type table
    */
-  static void dumpMethods(ClassGen gen) {
-
-    System.out.printf("Class %s methods:%n", gen.getClassName());
-    for (Method m : gen.getMethods()) {
-      System.out.printf("  %s%n", m);
-    }
+  public static boolean isLocalVariableTypeTable(Attribute a, ConstantPoolGen pool) {
+    return attributeNameToString(a, pool).equals("LocalVariableTypeTable");
   }
+
+  /**
+   * Returns whether or not this is a standard main method (static, void, name is 'main', and one
+   * formal parameter: a string array).
+   *
+   * @param mg the method to check
+   * @return true iff the method is a main method
+   */
+  public static boolean isMain(MethodGen mg) {
+    Type[] argTypes = mg.getArgumentTypes();
+    return mg.isStatic()
+        && (mg.getReturnType() == Type.VOID)
+        && mg.getName().equals("main")
+        && (argTypes.length == 1)
+        && argTypes[0].equals(stringArray);
+  }
+
+  // consistency check methods
 
   /**
    * Checks the specified method for consistency.
@@ -286,7 +342,9 @@ public final class BcelUtil {
     } catch (Throwable t) {
       Error e =
           new Error(
-              String.format("failure in method %s.%s%n", mgen.getClassName(), mgen.getName()), t);
+              String.format(
+                  "failure while checking method %s.%s%n", mgen.getClassName(), mgen.getName()),
+              t);
       e.printStackTrace();
       throw e;
     }
@@ -313,54 +371,47 @@ public final class BcelUtil {
 
     // Diagnostic output
     if (false) {
-      Throwable t = new Throwable();
-      t.fillInStackTrace();
-      StackTraceElement[] ste = t.getStackTrace();
-      if (ste.length < 2) {
-        System.out.println("No stack trace information available");
-      } else {
-        StackTraceElement caller = ste[1];
-        System.out.printf(
-            "%s.%s (%s line %d)",
-            caller.getClassName(),
-            caller.getMethodName(),
-            caller.getFileName(),
-            caller.getLineNumber());
-        for (int ii = 2; ii < ste.length; ii++) {
-          System.out.printf(" [%s line %d]", ste[ii].getFileName(), ste[ii].getLineNumber());
-        }
-        System.out.printf("%n");
-      }
+      dumpStackTrace();
       dumpMethods(gen);
     }
   }
 
-  /**
-   * Adds instructions to the start of a method.
-   *
-   * @param mg method to be augmented
-   * @param nl instructions to prepend to the method
-   */
-  public static void addToStart(MethodGen mg, InstructionList nl) {
+  // 'dump' methods
 
-    // Add the code before the first instruction
-    InstructionList il = mg.getInstructionList();
-    InstructionHandle oldStart = il.getStart();
-    InstructionHandle newStart = il.insert(nl);
+  /** Print the current java call stack */
+  public static void dumpStackTrace() {
 
-    // Move any LineNumbers and local variables that currently point to
-    // the first instruction to include the new instructions. Other
-    // targeters (branches, exceptions) should not include the new code.
-    if (oldStart.hasTargeters()) {
-      // getTargeters() returns non-null because hasTargeters => true
-      for (InstructionTargeter it : oldStart.getTargeters()) {
-        if ((it instanceof LineNumberGen) || (it instanceof LocalVariableGen)) {
-          it.updateTarget(oldStart, newStart);
-        }
+    StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+    // [0] is getStackTrace
+    // [1] is dumpStackTrace
+    if (ste.length < 3) {
+      System.out.println("No stack trace information available");
+    } else {
+      StackTraceElement caller = ste[2];
+      System.out.printf(
+          "%s.%s (%s line %d)",
+          caller.getClassName(),
+          caller.getMethodName(),
+          caller.getFileName(),
+          caller.getLineNumber());
+      for (int ii = 3; ii < ste.length; ii++) {
+        System.out.printf(" [%s line %d]", ste[ii].getFileName(), ste[ii].getLineNumber());
       }
+      System.out.printf("%n");
     }
-    mg.setMaxStack();
-    mg.setMaxLocals();
+  }
+
+  /**
+   * Print the methods in the class, to standard output.
+   *
+   * @param gen the class whose methods to print
+   */
+  static void dumpMethods(ClassGen gen) {
+
+    System.out.printf("Class %s methods:%n", gen.getClassName());
+    for (Method m : gen.getMethods()) {
+      System.out.printf("  %s%n", m);
+    }
   }
 
   /**
@@ -395,10 +446,13 @@ public final class BcelUtil {
       // Print the class, superclass, and interfaces
       p.printf("class %s extends %s%n", jc.getClassName(), jc.getSuperclassName());
       String[] inames = jc.getInterfaceNames();
+      boolean first = true;
       if ((inames != null) && (inames.length > 0)) {
-        p.printf("   ");
+        p.printf("   implements ");
         for (String iname : inames) {
-          p.printf("implements %s ", iname);
+          if (!first) p.printf(", ");
+          p.printf("%s", iname);
+          first = false;
         }
         p.printf("%n");
       }
@@ -415,14 +469,11 @@ public final class BcelUtil {
         p.printf("  %s%n", m);
       }
 
-      // If this is not an interface, print the code for each method
-      if (!jc.isInterface()) {
-        for (Method m : jc.getMethods()) {
+      for (Method m : jc.getMethods()) {
+        Code code = m.getCode();
+        if (code != null) {
           p.printf("%nMethod %s%n", m);
-          Code code = m.getCode();
-          if (code != null) {
-            p.printf("  %s%n", code.toString().replace("\n", "\n  "));
-          }
+          p.printf("  %s%n", code.toString().replace("\n", "\n  "));
         }
       }
 
@@ -437,80 +488,78 @@ public final class BcelUtil {
       p.close();
 
     } catch (Exception e) {
-      throw new Error("Unexpected error dumping JavaClass", e);
+      throw new Error(
+          "Unexpected error dumping JavaClass: " + jc.getClassName() + " to " + dumpDir.getName(),
+          e);
     }
   }
 
-  /**
-   * Return a printed description of the given instructions.
-   *
-   * @param il the instructions to describe
-   * @param pool the constant pool the instructions refer to
-   * @return a printed representation of the instructions in {@code il}
-   */
-  @SuppressWarnings("rawtypes")
-  public static String instructionDescr(InstructionList il, ConstantPoolGen pool) {
-
-    StringBuilder out = new StringBuilder();
-    // not generic because BCEL is not generic
-    for (Iterator i = il.iterator(); i.hasNext(); ) {
-      InstructionHandle handle = (InstructionHandle) i.next();
-      out.append(handle.getInstruction().toString(pool.getConstantPool()) + "\n");
-    }
-    return (out.toString());
-  }
+  // miscellaneous methods
 
   /**
-   * Return a description of the local variables (one per line).
+   * Adds instructions to the start of a method.
    *
-   * @param mg the method whose local variables to describe
-   * @return a description of the local variables (one per line)
+   * @param mg method to be augmented
+   * @param newList instructions to prepend to the method
    */
-  public static String localVarDescr(MethodGen mg) {
+  public static void addToStart(MethodGen mg, InstructionList newList) {
 
-    StringBuilder out = new StringBuilder();
-    out.append(String.format("Locals for %s [cnt %d]%n", mg, mg.getMaxLocals()));
-    LocalVariableGen[] lvgs = mg.getLocalVariables();
-    if ((lvgs != null) && (lvgs.length > 0)) {
-      for (LocalVariableGen lvg : lvgs) {
-        out.append(String.format("  %s [index %d]%n", lvg, lvg.getIndex()));
+    // Add the code before the first instruction
+    InstructionList il = mg.getInstructionList();
+    InstructionHandle oldStart = il.getStart();
+    InstructionHandle newStart = il.insert(newList);
+
+    // Move any LineNumbers and local variables that currently point to
+    // the first instruction to include the new instructions. Other
+    // targeters (branches, exceptions) should not include the new code.
+    if (oldStart.hasTargeters()) {
+      // getTargeters() returns non-null because hasTargeters => true
+      for (InstructionTargeter it : oldStart.getTargeters()) {
+        if ((it instanceof LineNumberGen) || (it instanceof LocalVariableGen)) {
+          it.updateTarget(oldStart, newStart);
+        }
       }
     }
-    return (out.toString());
+    mg.setMaxStack();
+    mg.setMaxLocals();
   }
 
   /**
-   * Builds an array of line numbers for the specified instruction list. Each opcode is assigned the
-   * next source line number starting at 1000.
+   * Returns the constant string at the specified offset.
    *
-   * @param mg the method whose line numbers to extract
-   * @param il the instruction list to augment with line numbers
+   * @param pool the constant pool
+   * @param index the index in the constant pool
+   * @return the constant string at the specified offset in the constant pool
    */
-  public static void addLineNumbers(MethodGen mg, InstructionList il) {
+  public static String getConstantString(ConstantPool pool, int index) {
 
-    il.setPositions(true);
-    for (InstructionHandle ih : il.getInstructionHandles()) {
-      mg.addLineNumber(ih, 1000 + ih.getPosition());
+    Constant c = pool.getConstant(index);
+    assert c != null : "Bad index " + index + " into pool";
+    if (c instanceof ConstantUtf8) {
+      return ((ConstantUtf8) c).getBytes();
+    } else if (c instanceof ConstantClass) {
+      ConstantClass cc = (ConstantClass) c;
+      return cc.getBytes(pool) + " [" + cc.getNameIndex() + "]";
+    } else {
+      throw new Error("unexpected constant " + c + " of class " + c.getClass());
     }
   }
 
   /**
-   * Sets the locals to the formal parameters. Any other locals are removed. An instruction list
+   * Sets the locals to be the formal parameters. Any other locals are removed. An instruction list
    * with at least one instruction must exist.
    *
    * @param mg the method whose locals to set
    */
-  public static void setupInitLocals(MethodGen mg) {
+  public static void resetLocalsToFormals(MethodGen mg) {
 
     // Get the parameter types and names.
-    @SuppressWarnings(
-        "nullness" // The arguments to the annotation aren't necessarily initialized before they
-    // are written here. Since annotations are erased at runtime, this is safe.
+    @SuppressWarnings("nullness" // The annotation arguments might not be initialized yet.
+    // Since the arguments are not executed at run time, there is no null pointer exception.
     )
     Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
-    @SuppressWarnings(
-        "nullness" // The arguments to the annotation aren't necessarily initialized before they
-    // are written here. Since annotations are erased at runtime, this is safe.
+    @SuppressWarnings("nullness" // The annotation arguments might not be initialized yet.
+    // Since the arguments are not executed at run time, there is no null pointer exception.
     )
     String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
         argNames = mg.getArgumentNames();
@@ -542,7 +591,7 @@ public final class BcelUtil {
    *
    * @param mg the method to clear out
    */
-  public static void emptyMethod(MethodGen mg) {
+  public static void makeMethodBodyEmpty(MethodGen mg) {
 
     mg.setInstructionList(new InstructionList(new RETURN()));
     mg.removeExceptionHandlers();
@@ -565,47 +614,6 @@ public final class BcelUtil {
         mg.removeCodeAttribute(a);
       }
     }
-  }
-
-  /**
-   * Returns whether or not the specified attribute is a local variable type table.
-   *
-   * @param a the attribute
-   * @param pool the constant pool
-   * @return true iff the attribute is a local variable type table
-   */
-  public static boolean isLocalVariableTypeTable(Attribute a, ConstantPoolGen pool) {
-    return (getAttributeName(a, pool).equals("LocalVariableTypeTable"));
-  }
-
-  /**
-   * Return the attribute name for the specified attribute.
-   *
-   * @param a the attribute
-   * @param pool the constant pool
-   * @return the attribute name for the specified attribute
-   */
-  public static String getAttributeName(Attribute a, ConstantPoolGen pool) {
-
-    int conIndex = a.getNameIndex();
-    Constant c = pool.getConstant(conIndex);
-    String attName = ((ConstantUtf8) c).getBytes();
-    return (attName);
-  }
-
-  /**
-   * Returns whether or not this is a standard main method (static, name is 'main', and one formal
-   * parameter: a string array).
-   *
-   * @param mg the method to check
-   * @return true iff the method is a main method
-   */
-  public static boolean isMain(MethodGen mg) {
-    Type[] argTypes = mg.getArgumentTypes();
-    return (mg.isStatic()
-        && mg.getName().equals("main")
-        && (argTypes.length == 1)
-        && argTypes[0].equals(stringArray));
   }
 
   /**
@@ -644,11 +652,13 @@ public final class BcelUtil {
    * @return a new array, with newType at the end
    */
   public static Type[] postpendToArray(Type[] types, Type newType) {
+    if (types.length == Integer.MAX_VALUE) {
+      throw new Error("array " + types + " is too large to extend");
+    }
     Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 0, types.length);
     newTypes[types.length] = newType;
-    Type[] newTypesCast = newTypes;
-    return (newTypesCast);
+    return newTypes;
   }
 
   /**
@@ -659,17 +669,13 @@ public final class BcelUtil {
    * @return a new array, with newType at the beginning
    */
   public static Type[] prependToArray(Type newType, Type[] types) {
-    @SuppressWarnings({
-      "index", // newTypes is @MinLen(1) except in the presence of overflow,
-      // which the Value Checker accounts for, but the Index Checker does not.
-      "value" // newTypes is @MinLen(1) except in the presence of overflow,
-      // which the Value Checker accounts for, but the Index Checker does not.
-    })
-    Type @MinLen(1) [] newTypes = new Type[types.length + 1];
+    if (types.length == Integer.MAX_VALUE) {
+      throw new Error("array " + types + " is too large to extend");
+    }
+    Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 1, types.length);
     newTypes[0] = newType;
-    Type[] newTypesCast = newTypes;
-    return (newTypesCast);
+    return newTypes;
   }
 
   /**

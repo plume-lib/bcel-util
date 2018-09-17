@@ -35,6 +35,7 @@ import org.apache.bcel.generic.ReturnaddressType;
 import org.apache.bcel.generic.Type;
 import org.apache.bcel.verifier.VerificationResult;
 import org.apache.bcel.verifier.exc.AssertionViolatedException;
+import org.apache.bcel.verifier.exc.StructuralCodeConstraintException;
 import org.apache.bcel.verifier.exc.VerifierConstraintViolatedException;
 import org.apache.bcel.verifier.structurals.ControlFlowGraph;
 import org.apache.bcel.verifier.structurals.ExceptionHandler;
@@ -50,23 +51,28 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * This is a slightly modified version of Pass3bVerifier from BCEL. It uses LimitedConstaintVisitor
- * rather than InstConstraintVisitor to implement the constraints. The LimitedConstraintVisitor
- * doesn't do any checking outside of the current class and removes some checks so that this will
- * pass on the JDK. This version also provides the ability to get the contents of the stack for each
- * instruction in the method.
+ * This is a slightly modified version of Pass3bVerifier from BCEL. It uses NoConstaintsVisitor as
+ * InstConstraintVisitor appears to be quite out of date and incorrectly fails on many valid class
+ * files. Hence, StackVer assumes the method is valid and is only interested in the result of the
+ * symbolic execution in order to capture the state of the local variables and stack at the start of
+ * each byte code instruction.
+ *
+ * <p>To see the diffs, <code>
+ * wget https://raw.githubusercontent.com/apache/commons-bcel/trunk/src/main/java/org/apache/bcel/verifier/structurals/Pass3bVerifier.java
+ * </code> then run google-java-format on the downloaded file.
+ *
+ * <p>The original documentation follows.
  *
  * <p>This PassVerifier verifies a method of class file according to pass 3, so-called structural
  * verification as described in The Java Virtual Machine Specification, 2nd edition. More detailed
  * information is to be found at the do_verify() method's documentation.
  *
  * @version $Id$
- * @author <A HREF="http://www.inf.fu-berlin.de/~ehaase">Enver Haase</A>
- * @see #get_stack_types()
+ * @see #do_stack_ver
  */
 @SuppressWarnings({"rawtypes", "nullness", "interning"}) // third-party code
 public final class StackVer {
-  /* TODO:	Throughout pass 3b, upper halves of LONG and DOUBLE
+  /* TODO:    Throughout pass 3b, upper halves of LONG and DOUBLE
   are represented by Type.UNKNOWN. This should be changed
   in favour of LONG_Upper and DOUBLE_Upper as in pass 2. */
 
@@ -178,6 +184,7 @@ public final class StackVer {
    * existence of a fix point of frame merging.
    */
   private void circulationPump(
+      final MethodGen m,
       final ControlFlowGraph cfg,
       final InstructionContext start,
       final Frame vanillaFrame,
@@ -186,10 +193,9 @@ public final class StackVer {
     final Random random = new Random();
     final InstructionContextQueue icq = new InstructionContextQueue();
 
-    stack_types.set(start.getInstruction().getPosition(), vanillaFrame);
-    // new ArrayList() <=>	no Instruction was executed before
-    start.execute(vanillaFrame, new ArrayList<InstructionContext>(), icv, ev);
-    //	=> Top-Level routine (no jsr call before)
+    execute(start, vanillaFrame, new ArrayList<InstructionContext>(), icv, ev);
+    // new ArrayList() <=>    no Instruction was executed before
+    //                                    => Top-Level routine (no jsr call before)
     icq.add(start, new ArrayList<InstructionContext>());
 
     // LOOP!
@@ -257,9 +263,7 @@ public final class StackVer {
                   + "'?");
         }
 
-        Frame f = u.getOutFrame(oldchain);
-        stack_types.set(theSuccessor.getInstruction().getPosition(), f);
-        if (theSuccessor.execute(f, newchain, icv, ev)) {
+        if (execute(theSuccessor, u.getOutFrame(oldchain), newchain, icv, ev)) {
           @SuppressWarnings(
               "unchecked") // newchain is already of type ArrayList<InstructionContext>
           final ArrayList<InstructionContext> newchainClone =
@@ -271,9 +275,7 @@ public final class StackVer {
         // Normal successors. Add them to the queue of successors.
         final InstructionContext[] succs = u.getSuccessors();
         for (final InstructionContext v : succs) {
-          Frame f = u.getOutFrame(oldchain);
-          stack_types.set(v.getInstruction().getPosition(), f);
-          if (v.execute(f, newchain, icv, ev)) {
+          if (execute(v, u.getOutFrame(oldchain), newchain, icv, ev)) {
             @SuppressWarnings(
                 "unchecked") // newchain is already of type ArrayList<InstructionContext>
             final ArrayList<InstructionContext> newchainClone =
@@ -296,21 +298,23 @@ public final class StackVer {
         // mean we're in a subroutine if we go to the exception handler.
         // We should address this problem later; by now we simply "cut" the chain
         // by using an empty chain for the exception handlers.
-        // if (v.execute(new Frame(u.getOutFrame(oldchain).getLocals(),
+        // if (execute(v, new Frame(u.getOutFrame(oldchain).getLocals(),
         // new OperandStack (u.getOutFrame().getStack().maxStack(),
         // (exc_hds[s].getExceptionType()==null? Type.THROWABLE : exc_hds[s].getExceptionType())) ),
         // newchain), icv, ev) {
         // icq.add(v, (ArrayList) newchain.clone());
-        Frame f =
+        if (execute(
+            v,
             new Frame(
                 u.getOutFrame(oldchain).getLocals(),
                 new OperandStack(
                     u.getOutFrame(oldchain).getStack().maxStack(),
                     exc_hd.getExceptionType() == null
                         ? Type.THROWABLE
-                        : exc_hd.getExceptionType()));
-        stack_types.set(v.getInstruction().getPosition(), f);
-        if (v.execute(f, new ArrayList<InstructionContext>(), icv, ev)) {
+                        : exc_hd.getExceptionType())),
+            new ArrayList<InstructionContext>(),
+            icv,
+            ev)) {
           icq.add(v, new ArrayList<InstructionContext>());
         }
       }
@@ -345,6 +349,31 @@ public final class StackVer {
                     + "'.");
           }
         }
+        /* This code from Pass3bVerifier incorrectly fails on some valid class files.
+        // see JVM $4.8.2
+        Type returnedType = null;
+        final OperandStack inStack = ic.getInFrame().getStack();
+        if (inStack.size() >= 1) {
+          returnedType = inStack.peek();
+        } else {
+          returnedType = Type.VOID;
+        }
+
+        if (returnedType != null) {
+          if (returnedType instanceof ReferenceType) {
+            try {
+              if (!((ReferenceType) returnedType).isCastableTo(m.getReturnType())) {
+                invalidReturnTypeError(returnedType, m);
+              }
+            } catch (final ClassNotFoundException e) {
+              // Don't know what do do now, so raise RuntimeException
+              throw new RuntimeException(e);
+            }
+          } else if (!returnedType.equals(m.getReturnType().normalizeForStackOrLocal())) {
+            invalidReturnTypeError(returnedType, m);
+          }
+        }
+        */
       }
     } while ((ih = ih.getNext()) != null);
   }
@@ -353,10 +382,11 @@ public final class StackVer {
    * Throws an exception indicating the returned type is not compatible with the return type of the
    * given method
    *
+   * @param returnedType the type of the returned expression
+   * @param m the method we are processing
    * @throws StructuralCodeConstraintException always
    * @since 6.0
    */
-  /* This code is not needed for StackVer.
   public void invalidReturnTypeError(final Type returnedType, final MethodGen m) {
     throw new StructuralCodeConstraintException(
         "Returned type "
@@ -364,37 +394,38 @@ public final class StackVer {
             + " does not match Method's return type "
             + m.getReturnType());
   }
-  */
 
   /**
-   * Implements the pass 3b data flow analysis as described in the Java Virtual Machine
-   * Specification, Second Edition. As it is doing so it keeps track of the stack and local
-   * variables at each instruction.
+   * Pass 3b implements the data flow analysis as described in the Java Virtual Machine
+   * Specification, Second Edition. Later versions will use LocalVariablesInfo objects to verify if
+   * the verifier-inferred types and the class file's debug information (LocalVariables attributes)
+   * match [TODO].
    *
    * @param mg MethodGen for the method to be verified
    * @return the VerificationResult
+   * @see org.apache.bcel.verifier.statics.LocalVariablesInfo
    * @see org.apache.bcel.verifier.statics.Pass2Verifier#getLocalVariablesInfo(int)
    */
   public VerificationResult do_stack_ver(MethodGen mg) {
     /* This code is not needed for StackVer.
-      if (!myOwner.doPass3a(method_no).equals(VerificationResult.VR_OK)) {
-        return VerificationResult.VR_NOTYET;
-      }
+    if (!myOwner.doPass3a(method_no).equals(VerificationResult.VR_OK)) {
+      return VerificationResult.VR_NOTYET;
+    }
 
-      // Pass 3a ran before, so it's safe to assume the JavaClass object is
-      // in the BCEL repository.
-      JavaClass jc;
-      try {
-        jc = Repository.lookupClass(myOwner.getClassName());
-      } catch (final ClassNotFoundException e) {
-        // FIXME: maybe not the best way to handle this
-        throw new AssertionViolatedException("Missing class: " + e, e);
-      }
+    // Pass 3a ran before, so it's safe to assume the JavaClass object is
+    // in the BCEL repository.
+    JavaClass jc;
+    try {
+      jc = Repository.lookupClass(myOwner.getClassName());
+    } catch (final ClassNotFoundException e) {
+      // FIXME: maybe not the best way to handle this
+      throw new AssertionViolatedException("Missing class: " + e, e);
+    }
     */
 
     final ConstantPoolGen constantPoolGen = mg.getConstantPool();
     // Init Visitors
-    final InstConstraintVisitor icv = new LimitedConstraintVisitor();
+    final InstConstraintVisitor icv = new NoConstraintsVisitor();
     icv.setConstantPoolGen(constantPoolGen);
 
     final ExecutionVisitor ev = new ExecutionVisitor();
@@ -439,7 +470,7 @@ public final class StackVer {
             f.getLocals().set(twoslotoffset + j + (mg.isStatic() ? 0 : 1), Type.UNKNOWN);
           }
         }
-        circulationPump(cfg, cfg.contextOf(mg.getInstructionList().getStart()), f, icv, ev);
+        circulationPump(mg, cfg, cfg.contextOf(mg.getInstructionList().getStart()), f, icv, ev);
       }
     } catch (final VerifierConstraintViolatedException ce) {
       ce.extendMessage("Constraint violated in method '" + mg + "':\n", "");
@@ -458,9 +489,21 @@ public final class StackVer {
               + mg
               + "'. Original RuntimeException's stack trace:\n---\n"
               + sw
-              + "---\n");
+              + "---\n",
+          re);
     }
     return VerificationResult.VR_OK;
+  }
+
+  /** Like InstructionContext.execute, but also sets stack_types. */
+  boolean execute(
+      InstructionContext ic,
+      Frame inFrame,
+      ArrayList<InstructionContext> executionPredecessors,
+      InstConstraintVisitor icv,
+      ExecutionVisitor ev) {
+    stack_types.set(ic.getInstruction().getPosition(), inFrame);
+    return ic.execute(inFrame, executionPredecessors, icv, ev);
   }
 
   // Code from PassVerifier in BCEL so that we don't have to extend it
