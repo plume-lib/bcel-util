@@ -21,8 +21,7 @@ public final class JvmUtil {
 
   /** A map from Java primitive data types to the corresponding field descriptor letter. */
   private static HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>
-      primitiveClassesJvm =
-          new HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>(8);
+      primitiveClassesJvm = new HashMap<>(8);
 
   static {
     primitiveClassesJvm.put("boolean", "Z");
@@ -132,7 +131,7 @@ public final class JvmUtil {
   }
 
   /** A map from field descriptor letters to the corresponding Java primitive data type. */
-  private static HashMap<String, String> primitiveClassesFromJvm = new HashMap<String, String>(8);
+  private static HashMap<String, String> primitiveClassesFromJvm = new HashMap<>(8);
 
   static {
     primitiveClassesFromJvm.put("Z", "boolean");

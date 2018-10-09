@@ -509,7 +509,7 @@ public final class StackVer {
   // Code from PassVerifier in BCEL so that we don't have to extend it
 
   /** The (warning) messages. */
-  private ArrayList<String> messages = new ArrayList<String>();
+  private ArrayList<String> messages = new ArrayList<>();
 
   /**
    * This method adds a (warning) message to the message pool of this PassVerifier.

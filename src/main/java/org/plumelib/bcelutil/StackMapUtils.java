@@ -119,8 +119,7 @@ public abstract class StackMapUtils {
    * A map from instructions that create uninitialized NEW objects to the corresponding StackMap
    * entry. Set by build_unitialized_NEW_map.
    */
-  private Map<InstructionHandle, Integer> uninitialized_NEW_map =
-      new HashMap<InstructionHandle, Integer>();
+  private Map<InstructionHandle, Integer> uninitialized_NEW_map = new HashMap<>();
 
   /**
    * Returns a String array with new_string added to the end of arr.
