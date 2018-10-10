@@ -261,7 +261,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
   }
 
   /**
-   * Convenience function to build an instruction list
+   * Convenience function to build an instruction list.
    *
    * @param instructions a variable number of BCEL instructions
    * @return an InstructionList

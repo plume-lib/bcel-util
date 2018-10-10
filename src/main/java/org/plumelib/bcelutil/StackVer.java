@@ -157,7 +157,7 @@ public final class StackVer {
   /** The Verifier that created this. */
   // private final Verifier myOwner;
 
-  /** The types on the stack for each instruction by byte code offset */
+  /** The types on the stack for each instruction by byte code offset. */
   // Set by do_stack_ver().
   private @MonotonicNonNull StackTypes stack_types;
 
@@ -380,7 +380,7 @@ public final class StackVer {
 
   /**
    * Throws an exception indicating the returned type is not compatible with the return type of the
-   * given method
+   * given method.
    *
    * @param returnedType the type of the returned expression
    * @param m the method we are processing

@@ -378,7 +378,7 @@ public final class BcelUtil {
 
   // 'dump' methods
 
-  /** Print the current java call stack */
+  /** Print the current java call stack. */
   public static void dumpStackTrace() {
 
     StackTraceElement[] ste = Thread.currentThread().getStackTrace();
