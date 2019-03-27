@@ -116,7 +116,7 @@ public final class StackVer {
      *
      * @param i the index of the items to be removed
      */
-    public void remove(@NonNegative final int i) {
+    public void remove(final @NonNegative int i) {
       ics.remove(i);
       ecs.remove(i);
     }
@@ -127,7 +127,7 @@ public final class StackVer {
      * @param i the index of the item to be fetched
      * @return the indicated InstructionContext
      */
-    public InstructionContext getIC(@NonNegative final int i) {
+    public InstructionContext getIC(final @NonNegative int i) {
       return ics.get(i);
     }
 
@@ -137,7 +137,7 @@ public final class StackVer {
      * @param i the index of the item to be fetched
      * @return the indicated ExecutionChain
      */
-    public ArrayList<InstructionContext> getEC(@NonNegative final int i) {
+    public ArrayList<InstructionContext> getEC(final @NonNegative int i) {
       return ecs.get(i);
     }
 
