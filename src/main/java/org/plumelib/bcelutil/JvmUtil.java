@@ -14,7 +14,8 @@ import org.checkerframework.checker.signature.qual.FieldDescriptor;
  * <p>Currently contains conversion utilities between Java and JVM string formats, for types and
  * signatures.
  *
- * @deprecated Use org.plumelib.signature.Signatures
+ * @deprecated Use <a
+ *     href="http://plumelib.org/reflection-util/api/org/plumelib/reflection/Signatures.html">org.plumelib.reflection.Signatures</a>
  */
 @Deprecated
 public final class JvmUtil {
