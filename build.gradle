@@ -35,6 +35,14 @@ repositories {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+
+task compileAll() {
+  dependsOn compileJava
+  dependsOn compileTestJava
+}
+
+/// Javadoc
+
 // Turn Javadoc warnings into errors.
 javadoc {
   options.addStringOption('Xwerror', '-Xdoclint:all')
@@ -70,20 +78,21 @@ task requireJavadoc(type: Javadoc) {
   options.doclet = "org.plumelib.javadoc.RequireJavadoc"
 }
 
+
+/// Git hooks
+
 task installGitHooks(type: Copy) {
   description 'Copies git hooks to .git directory'
   from 'githooks'
   into '.git/hooks'
 }
 
-task compileAll() {
-  dependsOn compileJava
-  dependsOn compileTestJava
-}
-
 tasks.withType(JavaCompile) {
   dependsOn(':installGitHooks')
 }
+
+
+/// Emacs support
 
 /* Make Emacs TAGS table */
 task tags(type: Exec) {
