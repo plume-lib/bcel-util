@@ -3,6 +3,8 @@ plugins {
   id "com.github.johnrengelman.shadow" version "2.0.4"
   // Run the Error Prone linter.
   id "net.ltgt.errorprone-base" version "0.0.16"
+  // Checker Framework pluggable type-checking
+  id 'org.checkerframework' version '0.2.0'
   // Formating is disabled due to poor handling of type annotations; wait until
   // this issue is fixed: https://github.com/google/google-java-format/issues/5
   // // Code formatting with Google Java Format; defines targets "goJF" and "verJF".
@@ -12,9 +14,6 @@ plugins {
 }
 
 apply plugin: 'java-library'
-
-// Checker Framework pluggable type-checking
-apply from: "${buildscript.sourceFile.parent}/gradle/checkerframework.gradle"
 
 // To upload to Maven Central, see instructions in the file.
 apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
@@ -40,6 +39,25 @@ task compileAll() {
   dependsOn compileJava
   dependsOn compileTestJava
 }
+
+// Checker Framework pluggable type-checking
+apply plugin: 'org.checkerframework'
+
+checkerFramework {
+  checkers = [
+    'org.checkerframework.checker.formatter.FormatterChecker',
+    'org.checkerframework.checker.interning.InterningChecker',
+    'org.checkerframework.checker.lock.LockChecker',
+    'org.checkerframework.checker.nullness.NullnessChecker',
+    'org.checkerframework.checker.nullness.NullnessRawnessChecker',
+    'org.checkerframework.checker.regex.RegexChecker',
+    'org.checkerframework.checker.signature.SignatureChecker'
+  ]
+  extraJavacArgs = [
+    '-AcheckPurityAnnotations'
+  ]
+}
+
 
 /// Javadoc
 
