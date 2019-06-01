@@ -20,24 +20,27 @@ import org.checkerframework.checker.signature.qual.FieldDescriptor;
 @Deprecated
 public final class JvmUtil {
 
-  /** A map from Java primitive data types to the corresponding field descriptor letter. */
+  /** A map from Java primitive type name (such as "int") to field descriptor (such as "I"). */
   private static HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>
-      primitiveClassesJvm = new HashMap<>(8);
+      primitiveToFieldDescriptor = new HashMap<>(8);
 
   static {
-    primitiveClassesJvm.put("boolean", "Z");
-    primitiveClassesJvm.put("byte", "B");
-    primitiveClassesJvm.put("char", "C");
-    primitiveClassesJvm.put("double", "D");
-    primitiveClassesJvm.put("float", "F");
-    primitiveClassesJvm.put("int", "I");
-    primitiveClassesJvm.put("long", "J");
-    primitiveClassesJvm.put("short", "S");
+    primitiveToFieldDescriptor.put("boolean", "Z");
+    primitiveToFieldDescriptor.put("byte", "B");
+    primitiveToFieldDescriptor.put("char", "C");
+    primitiveToFieldDescriptor.put("double", "D");
+    primitiveToFieldDescriptor.put("float", "F");
+    primitiveToFieldDescriptor.put("int", "I");
+    primitiveToFieldDescriptor.put("long", "J");
+    primitiveToFieldDescriptor.put("short", "S");
   }
 
   /**
    * Convert a binary name to a field descriptor. For example, convert "java.lang.Object[]" to
-   * "[Ljava/lang/Object;" or "int" to "I".
+   * "[Ljava/lang/Object;" or "int" to "I" or "pkg.Outer$Inner" to "Lpkg/Outer$Inner;".
+   *
+   * <p>There are no binary names for primitives or array types. Nonetheless, this method works for
+   * them. It converts "java.lang.Object[]" to "[Ljava/lang/Object;" or "int" to "I".
    *
    * @param classname name of the class, in binary class name format
    * @return name of the class, in field descriptor format
@@ -50,7 +53,7 @@ public final class JvmUtil {
       dims++;
       sansArray = sansArray.substring(0, sansArray.length() - 2);
     }
-    String result = primitiveClassesJvm.get(sansArray);
+    String result = primitiveToFieldDescriptor.get(sansArray);
     if (result == null) {
       result = "L" + sansArray + ";";
     }
@@ -69,7 +72,7 @@ public final class JvmUtil {
    * @throws IllegalArgumentException if primitiveName is not a valid primitive type name
    */
   public static @FieldDescriptor String primitiveTypeNameToFieldDescriptor(String primitiveName) {
-    String result = primitiveClassesJvm.get(primitiveName);
+    String result = primitiveToFieldDescriptor.get(primitiveName);
     if (result == null) {
       throw new IllegalArgumentException("Not the name of a primitive type: " + primitiveName);
     }
@@ -78,6 +81,9 @@ public final class JvmUtil {
 
   /**
    * Convert from a BinaryName to the format of {@link Class#getName()}.
+   *
+   * <p>There are no binary names for primitives or array types. Nonetheless, this method works for
+   * them. It converts "java.lang.Object[]" to "[Ljava.lang.Object;" or "int" to "int".
    *
    * @param bn the binary name to convert
    * @return the class name, in Class.getName format
@@ -131,18 +137,18 @@ public final class JvmUtil {
     return result;
   }
 
-  /** A map from field descriptor letters to the corresponding Java primitive data type. */
-  private static HashMap<String, String> primitiveClassesFromJvm = new HashMap<>(8);
+  /** A map from field descriptor (sach as "I") to Java primitive type (such as "int"). */
+  private static HashMap<String, String> fieldDescriptorToPrimitive = new HashMap<>(8);
 
   static {
-    primitiveClassesFromJvm.put("Z", "boolean");
-    primitiveClassesFromJvm.put("B", "byte");
-    primitiveClassesFromJvm.put("C", "char");
-    primitiveClassesFromJvm.put("D", "double");
-    primitiveClassesFromJvm.put("F", "float");
-    primitiveClassesFromJvm.put("I", "int");
-    primitiveClassesFromJvm.put("J", "long");
-    primitiveClassesFromJvm.put("S", "short");
+    fieldDescriptorToPrimitive.put("Z", "boolean");
+    fieldDescriptorToPrimitive.put("B", "byte");
+    fieldDescriptorToPrimitive.put("C", "char");
+    fieldDescriptorToPrimitive.put("D", "double");
+    fieldDescriptorToPrimitive.put("F", "float");
+    fieldDescriptorToPrimitive.put("I", "int");
+    fieldDescriptorToPrimitive.put("J", "long");
+    fieldDescriptorToPrimitive.put("S", "short");
   }
 
   // does not convert "V" to "void".  Should it?
@@ -167,7 +173,7 @@ public final class JvmUtil {
     if (classname.startsWith("L") && classname.endsWith(";")) {
       result = classname.substring(1, classname.length() - 1);
     } else {
-      result = primitiveClassesFromJvm.get(classname);
+      result = fieldDescriptorToPrimitive.get(classname);
       if (result == null) {
         throw new Error("Malformed base class: " + classname);
       }
