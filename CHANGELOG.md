@@ -1,5 +1,9 @@
 # BCEL-Util change log
 
+## 1.1.5
+
+- Reduce dependencies
+
 ## 1.1.4
 
 - Use reflection-util package instead of signature-util
