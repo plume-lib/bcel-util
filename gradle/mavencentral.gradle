@@ -5,7 +5,7 @@
 //  * Browse to https://oss.sonatype.org/#stagingRepositories, complete the Maven Central release.
 //  * Stage changes.
 //  * Add a git tag:
-//    VER=1.1.4 && git commit -m "Version $VER" && git tag -a v$VER -m "Version $VER" && git push --tags
+//    VER=1.1.4 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push --tags
 //  * Make a GitHub release. Go to the GitHub releases page, make a release, attach the .jar file from ../build/libs/
 // Your ~/.gradle/gradle.properties file must contain:
 //   ossrhUsername=YOUR_USER_NAME_HERE
