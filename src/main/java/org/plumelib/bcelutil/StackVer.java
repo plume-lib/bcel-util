@@ -70,7 +70,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @version $Id$
  * @see #do_stack_ver
  */
-@SuppressWarnings({"rawtypes", "nullness", "interning"}) // third-party code
+@SuppressWarnings({"rawtypes", "nullness"}) // third-party code
 public final class StackVer {
   /* TODO:    Throughout pass 3b, upper halves of LONG and DOUBLE
   are represented by Type.UNKNOWN. This should be changed
