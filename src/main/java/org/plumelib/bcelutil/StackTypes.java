@@ -68,7 +68,7 @@ public final class StackTypes {
     return os_arr[offset];
   }
 
-  @SuppressWarnings({"purity", "lock"}) // local StringBuilder
+  @SuppressWarnings({"all:purity", "lock"}) // local StringBuilder
   @SideEffectFree
   @Override
   public String toString(@GuardSatisfied StackTypes this) {

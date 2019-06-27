@@ -54,7 +54,9 @@ checkerFramework {
     'org.checkerframework.checker.signature.SignatureChecker'
   ]
   extraJavacArgs = [
-    '-AcheckPurityAnnotations'
+    '-AcheckPurityAnnotations',
+    '-ArequirePrefixInWarningSuppressions',
+    '-AwarnUnneededSuppressions'
   ]
 }
 
