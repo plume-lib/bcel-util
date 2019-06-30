@@ -7,16 +7,27 @@ jobs:
 
     steps:
 
+      - restore_cache:
+          keys:
+            - source-v1-{{ .Branch }}-{{ .Revision }}
+            - source-v1-{{ .Branch }}-
+            - source-v1-
       - checkout
+      - save_cache:
+          key: source-v1-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ".git"
 
       - restore_cache:
-          key: bcel-util-gradle-cache-v1-{{ checksum "build.gradle" }}
+          keys:
+            # when lock file changes, use increasingly general patterns to restore cache
+            - gradle-v1-{{ .Branch }}-{{ checksum "gradle.cache" }}
+            - gradle-v1-{{ .Branch }}-
+            - gradle-v1-
 
       - run: ./gradlew build
 
-      - save_cache: # saves the project dependencies
+      - save_cache:
           paths:
             - ~/.gradle
-          key: bcel-util-gradle-cache-v1-{{ checksum "pom.xml" }}
-
-      - run: ./gradlew build
+          key: gradle-v1-{{ .Branch }}-{{ checksum "gradle.cache" }}
