@@ -554,13 +554,7 @@ public final class BcelUtil {
   public static void resetLocalsToFormals(MethodGen mg) {
 
     // Get the parameter types and names.
-    @SuppressWarnings("nullness" // The annotation arguments might not be initialized yet.
-    // Since the arguments are not executed at run time, there is no null pointer exception.
-    )
     Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
-    @SuppressWarnings("nullness" // The annotation arguments might not be initialized yet.
-    // Since the arguments are not executed at run time, there is no null pointer exception.
-    )
     String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
         argNames = mg.getArgumentNames();
 
