@@ -78,6 +78,7 @@ if (project.hasProperty("cfLocal")) {
 // Turn Javadoc warnings into errors.
 javadoc {
   options.addStringOption('Xwerror', '-Xdoclint:all')
+  options.addStringOption('source', '8')
   // Can't use `-private` because StackVer.java (which is copied from elsewhere) lacks some
   // documentation.
   // options.addStringOption('private', '-quiet')
