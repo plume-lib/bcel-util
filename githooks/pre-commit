@@ -1,5 +1,4 @@
 #!/bin/sh
-#
 
 # Verify all .java files compile prior to checkin.
 ./gradlew compileAll
