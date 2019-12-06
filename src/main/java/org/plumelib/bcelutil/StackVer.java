@@ -1,3 +1,5 @@
+// This is a modified version of BCEL's Pass3bVerifier.  See below for details.
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -67,7 +69,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * verification as described in The Java Virtual Machine Specification, 2nd edition. More detailed
  * information is to be found at the do_verify() method's documentation.
  *
- * @version $Id$
  * @see #do_stack_ver
  */
 @SuppressWarnings({"rawtypes", "nullness"}) // third-party code
@@ -494,6 +495,13 @@ public final class StackVer {
     }
     return VerificationResult.VR_OK;
   }
+
+  /** Returns the method number as supplied when instantiating. */
+  /* Removed from StackVer
+  public int getMethodNo() {
+    return method_no;
+  }
+  */
 
   /** Like InstructionContext.execute, but also sets stack_types. */
   boolean execute(

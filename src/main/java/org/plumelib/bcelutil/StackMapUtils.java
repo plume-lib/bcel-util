@@ -699,7 +699,7 @@ public abstract class StackMapUtils {
     smta = (StackMap) get_stack_map_table_attribute(mgen);
     if (smta != null) {
       // get a deep copy of the original StackMapTable.
-      stack_map_table = ((StackMap) (smta.copy(smta.getConstantPool()))).getStackMap();
+      stack_map_table = ((StackMap) smta.copy(smta.getConstantPool())).getStackMap();
       needStackMap = true;
 
       debug_instrument.log(
@@ -959,7 +959,7 @@ public abstract class StackMapUtils {
         new_index = new_index + arg_types.length;
         // new_index is now positive, because arg_types.length is
         last_arg = locals[new_index - 1];
-        new_offset = last_arg.getIndex() + (last_arg.getType()).getSize();
+        new_offset = last_arg.getIndex() + last_arg.getType().getSize();
       }
 
       // Insert our new local variable into existing table at 'new_offset'.
@@ -1160,7 +1160,7 @@ public abstract class StackMapUtils {
 
     // We need a deep copy
     for (int ii = 0; ii < locals.length; ii++) {
-      locals[ii] = (LocalVariableGen) (locals[ii].clone());
+      locals[ii] = (LocalVariableGen) locals[ii].clone();
     }
 
     // The arg types are correct and include all parameters.
@@ -1253,7 +1253,7 @@ public abstract class StackMapUtils {
         debug_instrument.log(
             "Added local  %s%n",
             new_lvg.getIndex() + ": " + new_lvg.getName() + ", " + new_lvg.getType());
-        offset = new_lvg.getIndex() + (new_lvg.getType()).getSize();
+        offset = new_lvg.getIndex() + new_lvg.getType().getSize();
       }
     }
 

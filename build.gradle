@@ -10,7 +10,7 @@ plugins {
   // id 'com.github.sherter.google-java-format' version '0.7.1'
 
   // Run the Error Prone linter.
-  id 'net.ltgt.errorprone-base' version '0.0.16'
+  id("net.ltgt.errorprone") version "1.1.1"
 
   // Checker Framework pluggable type-checking
   id 'org.checkerframework' version '0.4.9' apply false
@@ -29,7 +29,6 @@ dependencies {
   // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
   testImplementation 'junit:junit:4.12'
-  errorprone 'com.google.errorprone:error_prone_core:2.3.4'
 }
 
 // To upload to Maven Central, see instructions in the file.
@@ -41,6 +40,22 @@ targetCompatibility = 1.8
 task compileAll() {
   dependsOn compileJava
   dependsOn compileTestJava
+}
+
+/// Error Prone linter
+
+dependencies {
+  errorprone("com.google.errorprone:error_prone_core:2.3.4")
+  // JDK 8 support for Error Prone:
+  errorproneJavac("com.google.errorprone:javac:9+181-r4173-1")
+}
+tasks.withType(JavaCompile).configureEach {
+  options.compilerArgs << "-Xlint:all" << "-Werror"
+  options.errorprone {
+    disable("ReferenceEquality") // Use Interning Checker instead.
+    // Code copied from BCEL that we don't want to change gratuitously.
+    excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
+  }
 }
 
 /// Checker Framework pluggable type-checking
@@ -58,6 +73,7 @@ checkerFramework {
   ]
   extraJavacArgs = [
     '-Werror',
+    '-Xlint:-processing', // because of Error Prone's "No processor claimed any of these annotations"
     '-AcheckPurityAnnotations',
     '-ArequirePrefixInWarningSuppressions',
     '-AwarnUnneededSuppressions'

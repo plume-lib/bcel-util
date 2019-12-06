@@ -54,8 +54,8 @@ public final class StackTypes {
     OperandStack os = f.getStack();
     // logger.info ("stack[" + offset + "] = " + toString(os));
 
-    loc_arr[offset] = (LocalVariables) (f.getLocals().clone());
-    os_arr[offset] = (OperandStack) (os.clone());
+    loc_arr[offset] = (LocalVariables) f.getLocals().clone();
+    os_arr[offset] = (OperandStack) os.clone();
   }
 
   /**

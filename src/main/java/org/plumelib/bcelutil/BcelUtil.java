@@ -2,6 +2,7 @@ package org.plumelib.bcelutil;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Iterator;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
@@ -647,7 +648,7 @@ public final class BcelUtil {
    */
   public static Type[] postpendToArray(Type[] types, Type newType) {
     if (types.length == Integer.MAX_VALUE) {
-      throw new Error("array " + types + " is too large to extend");
+      throw new Error("array " + Arrays.toString(types) + " is too large to extend");
     }
     Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 0, types.length);
@@ -664,7 +665,7 @@ public final class BcelUtil {
    */
   public static Type[] prependToArray(Type newType, Type[] types) {
     if (types.length == Integer.MAX_VALUE) {
-      throw new Error("array " + types + " is too large to extend");
+      throw new Error("array " + Arrays.toString(types) + " is too large to extend");
     }
     Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 1, types.length);
