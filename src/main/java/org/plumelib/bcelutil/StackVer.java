@@ -93,7 +93,7 @@ public final class StackVer {
     /** The second elements from pairs in the queue. */
     private final List<ArrayList<InstructionContext>> ecs = new Vector<>();
     /**
-     * Add an (InstructionContext, ExecutionChain) pair to their respective queues.
+     * Adds an (InstructionContext, ExecutionChain) pair to this queue.
      *
      * @param ic the InstructionContext
      * @param executionChain the ExecutionChain
@@ -103,8 +103,9 @@ public final class StackVer {
       ics.add(ic);
       ecs.add(executionChain);
     }
+
     /**
-     * Test if InstructionContext queue is empty.
+     * Tests if InstructionContext queue is empty.
      *
      * @return true if the InstructionContext queue is empty.
      */
@@ -113,7 +114,7 @@ public final class StackVer {
     }
 
     /**
-     * Remove a specific (InstructionContext, ExecutionChain) pair from their respective queues.
+     * Removes a specific (InstructionContext, ExecutionChain) pair from their respective queues.
      *
      * @param i the index of the items to be removed
      */
@@ -123,7 +124,7 @@ public final class StackVer {
     }
 
     /**
-     * Fetch a specific InstructionContext from the queue.
+     * Gets a specific InstructionContext from the queue.
      *
      * @param i the index of the item to be fetched
      * @return the indicated InstructionContext
@@ -133,7 +134,7 @@ public final class StackVer {
     }
 
     /**
-     * Fetch a specific ExecutionChain from the queue.
+     * Gets a specific ExecutionChain from the queue.
      *
      * @param i the index of the item to be fetched
      * @return the indicated ExecutionChain
@@ -143,7 +144,7 @@ public final class StackVer {
     }
 
     /**
-     * Get the size of the InstructionContext queue.
+     * Gets the size of the InstructionContext queue.
      *
      * @return the size of the InstructionQueue
      */
@@ -156,7 +157,14 @@ public final class StackVer {
   private static final boolean DEBUG = true;
 
   /** The Verifier that created this. */
-  // private final Verifier myOwner;
+  /*
+  private final Verifier myOwner;
+  */
+
+  /** The method number to verify. */
+  /*
+  private final int method_no;
+  */
 
   /** The types on the stack for each instruction by byte code offset. */
   // Set by do_stack_ver().
@@ -167,7 +175,12 @@ public final class StackVer {
    *
    * @see org.apache.bcel.verifier.Verifier
    */
-  public StackVer() {}
+  public StackVer() {
+    /*
+    myOwner = owner;
+    this.method_no = method_no;
+    */
+  }
 
   /**
    * Return the types on the stack at each byte code offset. Only valid after do_stack_ver() is
@@ -431,6 +444,11 @@ public final class StackVer {
 
     final ExecutionVisitor ev = new ExecutionVisitor();
     ev.setConstantPoolGen(constantPoolGen);
+
+    /*
+    final Method[] methods =
+        jc.getMethods(); // Method no "method_no" exists, we ran Pass3a before on it!
+    */
 
     try {
       stack_types = new StackTypes(mg);
