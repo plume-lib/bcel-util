@@ -59,8 +59,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * symbolic execution in order to capture the state of the local variables and stack at the start of
  * each byte code instruction.
  *
- * <p>To see the diffs, <code>
- * wget https://raw.githubusercontent.com/apache/commons-bcel/trunk/src/main/java/org/apache/bcel/verifier/structurals/Pass3bVerifier.java
+ * <p>To see the diffs, you will need a git clone of git@github.com:apache/commons-bcel.git. The
+ * particular version StackVer is based on can be retrieved with<code>
+ * git show e6dcacb9ca1d:src/main/java/org/apache/bcel/verifier/structurals/Pass3bVerifier.java
  * </code> then run google-java-format on the downloaded file.
  *
  * <p>The original documentation follows.
@@ -92,6 +93,7 @@ public final class StackVer {
     private final List<InstructionContext> ics = new Vector<>();
     /** The second elements from pairs in the queue. */
     private final List<ArrayList<InstructionContext>> ecs = new Vector<>();
+
     /**
      * Adds an (InstructionContext, ExecutionChain) pair to this queue.
      *

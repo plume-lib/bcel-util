@@ -522,8 +522,17 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
           // Calculate the operand stack value(s) for revised code.
           mg.setMaxStack();
-          StackTypes stack_types = bcel_calc_stack_types(mg);
           OperandStack stack;
+          StackTypes stack_types = bcel_calc_stack_types(mg);
+          if (stack_types == null) {
+            Error e =
+                new Error(
+                    String.format(
+                        "bcel_calc_stack_types failure in %s.%s%n",
+                        mg.getClassName(), mg.getName()));
+            e.printStackTrace();
+            throw e;
+          }
 
           // Find last stack map entry prior to first new branch target;
           // returns -1 if there isn't one. Also sets running_offset and number_active_locals.

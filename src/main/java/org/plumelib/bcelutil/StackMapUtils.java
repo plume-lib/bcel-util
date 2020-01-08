@@ -1291,7 +1291,6 @@ public abstract class StackMapUtils {
       System.out.printf("Method is NOT instrumented%n");
       return null;
     }
-    assert vr == VerificationResult.VR_OK : " vr failed " + vr;
     return stackver.get_stack_types();
   }
 }
