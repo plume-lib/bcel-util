@@ -93,7 +93,7 @@ public final class BcelUtil {
 
     StringBuilder buf = new StringBuilder();
     // Note that pow is a binary mask for the flag (= 2^i).
-    for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG; i++) {
+    for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG_I; i++) {
       if ((flags & pow) != 0) {
         if (buf.length() > 0) {
           buf.append(" ");

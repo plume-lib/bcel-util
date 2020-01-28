@@ -25,7 +25,7 @@ repositories {
 
 dependencies {
   implementation 'org.plumelib:reflection-util:0.2.1'
-  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.3.1'
+  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.4.1'
   // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
   testImplementation 'junit:junit:4.12'
