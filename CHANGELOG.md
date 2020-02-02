@@ -1,6 +1,6 @@
 # BCEL-Util change log
 
-## 1.1.6
+## 1.1.7
 
 - Prefer new method `fqBinaryNameToType` to `classnameToType`
 
