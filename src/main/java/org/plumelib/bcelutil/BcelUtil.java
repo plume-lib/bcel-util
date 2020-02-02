@@ -14,6 +14,7 @@ import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
+import org.apache.bcel.generic.ArrayType;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.CodeExceptionGen;
 import org.apache.bcel.generic.ConstantPoolGen;
@@ -29,6 +30,7 @@ import org.apache.bcel.generic.Type;
 import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
+import org.checkerframework.checker.signature.qual.FqBinaryName;
 import org.checkerframework.checker.signature.qual.InternalForm;
 import org.plumelib.reflection.ReflectionPlume;
 import org.plumelib.reflection.Signatures;
@@ -674,11 +676,15 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the type corresponding to a given class name.
+   * Return the type corresponding to a given class or primitive name.
    *
-   * @param classname the binary name of a class (= fully-qualified name, except for inner classes)
+   * @param classname the binary name of a class (= fully-qualified name, except for inner classes),
+   *     or a primitive, but not an array
    * @return the type corresponding to the given class name
+   * @see #fqBinaryNameToType
    */
+  // TODO: Poor name because this handles any non-array, not just classes.
+  // TODO: Parameter type should be @BinaryNameOrPrimitive
   public static Type classnameToType(@BinaryName String classname) {
 
     classname = classname.intern();
@@ -701,6 +707,25 @@ public final class BcelUtil {
       return Type.SHORT;
     } else { // must be a non-primitive
       return new ObjectType(classname);
+    }
+  }
+
+  /**
+   * Return the type corresponding to a given fully-qualified binary name.
+   *
+   * @param classname the fully-qualified binary name of a type, which uses "$" rather than "." for
+   *     nested classes
+   * @return the type corresponding to the given name
+   */
+  public static Type fqBinaryNameToType(@FqBinaryName String classname) {
+
+    Signatures.ClassnameAndDimensions cad =
+        Signatures.ClassnameAndDimensions.parseFqBinaryName(classname);
+    Type eltType = classnameToType(cad.classname);
+    if (cad.dimensions == 0) {
+      return eltType;
+    } else {
+      return new ArrayType(eltType, cad.dimensions);
     }
   }
 }
