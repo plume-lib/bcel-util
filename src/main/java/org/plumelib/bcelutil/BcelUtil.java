@@ -304,7 +304,7 @@ public final class BcelUtil {
     if (javaVersion <= 8) {
       if (classname.startsWith("com/oracle/") || classname.startsWith("org/omg/")) return true;
     } else {
-      if (classname.startsWith("netscape/javascript.") || classname.startsWith("org/graalvm."))
+      if (classname.startsWith("netscape/javascript/") || classname.startsWith("org/graalvm/"))
         return true;
     }
     return false;
