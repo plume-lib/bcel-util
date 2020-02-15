@@ -42,6 +42,28 @@ public final class BcelUtil {
     throw new Error("do not instantiate");
   }
 
+  /** The current Java runtime version number. */
+  public static int javaVersion = getJavaVersion();
+
+  /**
+   * Extract the major version number from java.version. Two possible formats are considered. Up to
+   * Java 8, from a version string like `1.8.whatever`, this method extracts 8. Since Java 9, from a
+   * version string like `11.0.1`, this method extracts 11.
+   *
+   * @return The major version number from java.version
+   */
+  private static int getJavaVersion() {
+    String version = System.getProperty("java.version");
+    if (version.startsWith("1.")) {
+      version = version.substring(2, 3);
+    } else {
+      int dot = version.indexOf(".");
+      assert dot != -1;
+      version = version.substring(0, dot);
+    }
+    return Integer.parseInt(version);
+  }
+
   /** Controls whether the checks in {@link #checkMgen} are performed. */
   public static boolean skipChecks = false;
 
@@ -245,18 +267,22 @@ public final class BcelUtil {
    * @return true iff the class is in a package that is in the JDK (rt.jar)
    */
   public static boolean inJdk(@ClassGetName String classname) {
-    return classname.startsWith("java.")
-        || classname.startsWith("com.oracle.")
+    if (classname.startsWith("java.")
         || classname.startsWith("com.sun.")
         || classname.startsWith("javax.")
         || classname.startsWith("jdk.")
         || classname.startsWith("org.ietf.")
         || classname.startsWith("org.jcp.")
-        || classname.startsWith("org.omg.")
         || classname.startsWith("org.w3c.")
         || classname.startsWith("org.xml.")
-        || classname.startsWith("sun.")
-        || classname.startsWith("sunw.");
+        || classname.startsWith("sun.")) return true;
+    if (javaVersion <= 8) {
+      if (classname.startsWith("com.oracle.") || classname.startsWith("org.omg.")) return true;
+    } else {
+      if (classname.startsWith("netscape.javascript.") || classname.startsWith("org.graalvm."))
+        return true;
+    }
+    return false;
   }
 
   /**
@@ -266,18 +292,22 @@ public final class BcelUtil {
    * @return true iff the class is part of the JDK (rt.jar)
    */
   public static boolean inJdkInternalform(@InternalForm String classname) {
-    return classname.startsWith("java/")
-        || classname.startsWith("com/oracle/")
+    if (classname.startsWith("java/")
         || classname.startsWith("com/sun/")
         || classname.startsWith("javax/")
         || classname.startsWith("jdk/")
         || classname.startsWith("org/ietj/")
         || classname.startsWith("org/jcp/")
-        || classname.startsWith("org/omg/")
         || classname.startsWith("org/w3c/")
         || classname.startsWith("org/xml/")
-        || classname.startsWith("sun/")
-        || classname.startsWith("sunw/");
+        || classname.startsWith("sun/")) return true;
+    if (javaVersion <= 8) {
+      if (classname.startsWith("com/oracle/") || classname.startsWith("org/omg/")) return true;
+    } else {
+      if (classname.startsWith("netscape/javascript.") || classname.startsWith("org/graalvm."))
+        return true;
+    }
+    return false;
   }
 
   /**
