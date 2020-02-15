@@ -42,24 +42,22 @@ public final class BcelUtil {
     throw new Error("do not instantiate");
   }
 
-  /** The current Java runtime version number. */
+  /** The major version number of the Java runtime. */
   public static int javaVersion = getJavaVersion();
 
   /**
-   * Extract the major version number from java.version. Two possible formats are considered. Up to
-   * Java 8, from a version string like `1.8.whatever`, this method extracts 8. Since Java 9, from a
-   * version string like `11.0.1`, this method extracts 11.
+   * Extract the major version number from the "java.version" system property.
    *
-   * @return The major version number from java.version
+   * @return the major version of the Java runtime
    */
   private static int getJavaVersion() {
     String version = System.getProperty("java.version");
     if (version.startsWith("1.")) {
+      // Up to Java 8, from a version string like "1.8.whatever", extract "8".
       version = version.substring(2, 3);
     } else {
-      int dot = version.indexOf(".");
-      assert dot != -1;
-      version = version.substring(0, dot);
+      // Since Java 9, from a version string like "11.0.1", extract "11".
+      version = version.substring(0, version.indexOf("."));
     }
     return Integer.parseInt(version);
   }
@@ -275,12 +273,17 @@ public final class BcelUtil {
         || classname.startsWith("org.jcp.")
         || classname.startsWith("org.w3c.")
         || classname.startsWith("org.xml.")
-        || classname.startsWith("sun.")) return true;
+        || classname.startsWith("sun.")) {
+      return true;
+    }
     if (javaVersion <= 8) {
-      if (classname.startsWith("com.oracle.") || classname.startsWith("org.omg.")) return true;
-    } else {
-      if (classname.startsWith("netscape.javascript.") || classname.startsWith("org.graalvm."))
+      if (classname.startsWith("com.oracle.") || classname.startsWith("org.omg.")) {
         return true;
+      }
+    } else {
+      if (classname.startsWith("netscape.javascript.") || classname.startsWith("org.graalvm.")) {
+        return true;
+      }
     }
     return false;
   }
@@ -300,12 +303,17 @@ public final class BcelUtil {
         || classname.startsWith("org/jcp/")
         || classname.startsWith("org/w3c/")
         || classname.startsWith("org/xml/")
-        || classname.startsWith("sun/")) return true;
+        || classname.startsWith("sun/")) {
+      return true;
+    }
     if (javaVersion <= 8) {
-      if (classname.startsWith("com/oracle/") || classname.startsWith("org/omg/")) return true;
-    } else {
-      if (classname.startsWith("netscape/javascript/") || classname.startsWith("org/graalvm/"))
+      if (classname.startsWith("com/oracle/") || classname.startsWith("org/omg/")) {
         return true;
+      }
+    } else {
+      if (classname.startsWith("netscape/javascript/") || classname.startsWith("org/graalvm/")) {
+        return true;
+      }
     }
     return false;
   }
