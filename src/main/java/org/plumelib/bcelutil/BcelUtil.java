@@ -42,6 +42,12 @@ public final class BcelUtil {
     throw new Error("do not instantiate");
   }
 
+  /** Controls whether the checks in {@link #checkMgen} are performed. */
+  public static boolean skipChecks = false;
+
+  /** The type that represents String[]. */
+  private static final Type stringArray = Type.getType("[Ljava.lang.String;");
+
   /** The major version number of the Java runtime. */
   public static final int javaVersion = getJavaVersion();
 
@@ -61,12 +67,6 @@ public final class BcelUtil {
     }
     return Integer.parseInt(version);
   }
-
-  /** Controls whether the checks in {@link #checkMgen} are performed. */
-  public static boolean skipChecks = false;
-
-  /** The type that represents String[]. */
-  private static final Type stringArray = Type.getType("[Ljava.lang.String;");
 
   // 'ToString' methods
 
