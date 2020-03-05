@@ -43,7 +43,7 @@ public final class BcelUtil {
   }
 
   /** The major version number of the Java runtime. */
-  public static int javaVersion = getJavaVersion();
+  public static final int javaVersion = getJavaVersion();
 
   /**
    * Extract the major version number from the "java.version" system property.
