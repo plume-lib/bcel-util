@@ -1,5 +1,9 @@
 # BCEL-Util change log
 
+## 1.1.8 (unreleased)
+
+- New public BcelUtil.javaVersion that contains the major version number of the Java runtime
+
 ## 1.1.7
 
 - Prefer new method `fqBinaryNameToType` to `classnameToType`
