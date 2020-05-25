@@ -5,8 +5,8 @@ import java.util.StringTokenizer;
 import org.checkerframework.checker.index.qual.Positive;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
-import org.checkerframework.checker.signature.qual.DotSeparatedIdentifiers;
 import org.checkerframework.checker.signature.qual.FieldDescriptor;
+import org.checkerframework.checker.signature.qual.PrimitiveType;
 
 /**
  * Utility functions for working with the JVM.
@@ -21,7 +21,7 @@ import org.checkerframework.checker.signature.qual.FieldDescriptor;
 public final class JvmUtil {
 
   /** A map from Java primitive type name (such as "int") to field descriptor (such as "I"). */
-  private static HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>
+  private static HashMap<@PrimitiveType String, @FieldDescriptor String>
       primitiveToFieldDescriptor = new HashMap<>(8);
 
   static {
