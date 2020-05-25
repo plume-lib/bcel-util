@@ -47,17 +47,17 @@ public final class JvmUtil {
    */
   @SuppressWarnings("signature") // conversion routine
   public static @FieldDescriptor String binaryNameToFieldDescriptor(@BinaryName String classname) {
-    int dims = 0;
+    int dimensions = 0;
     String sansArray = classname;
     while (sansArray.endsWith("[]")) {
-      dims++;
+      dimensions++;
       sansArray = sansArray.substring(0, sansArray.length() - 2);
     }
     String result = primitiveToFieldDescriptor.get(sansArray);
     if (result == null) {
       result = "L" + sansArray + ";";
     }
-    for (int i = 0; i < dims; i++) {
+    for (int i = 0; i < dimensions; i++) {
       result = "[" + result;
     }
     return result.replace('.', '/');
@@ -89,7 +89,7 @@ public final class JvmUtil {
    * @return the class name, in Class.getName format
    */
   @SuppressWarnings("signature") // conversion routine
-  public static @ClassGetName String binaryNameToClassGetName(/*BinaryName*/ String bn) {
+  public static @ClassGetName String binaryNameToClassGetName(@BinaryName String bn) {
     if (bn.endsWith("[]")) {
       return binaryNameToFieldDescriptor(bn).replace('/', '.');
     } else {
@@ -104,7 +104,7 @@ public final class JvmUtil {
    * @return the class name, in Class.getName format
    */
   @SuppressWarnings("signature") // conversion routine
-  public static @ClassGetName String fieldDescriptorToClassGetName(/*FieldDescriptor*/ String fd) {
+  public static @ClassGetName String fieldDescriptorToClassGetName(@FieldDescriptor String fd) {
     if (fd.startsWith("[")) {
       return fd.replace('/', '.');
     } else {
@@ -164,9 +164,9 @@ public final class JvmUtil {
     if (classname.equals("")) {
       throw new Error("Empty string passed to fieldDescriptorToBinaryName");
     }
-    int dims = 0;
+    int dimensions = 0;
     while (classname.startsWith("[")) {
-      dims++;
+      dimensions++;
       classname = classname.substring(1);
     }
     String result;
@@ -178,7 +178,7 @@ public final class JvmUtil {
         throw new Error("Malformed base class: " + classname);
       }
     }
-    for (int i = 0; i < dims; i++) {
+    for (int i = 0; i < dimensions; i++) {
       result += "[]";
     }
     return result.replace('/', '.');
@@ -188,6 +188,8 @@ public final class JvmUtil {
    * Convert an argument list from JVML format to Java format. For example, convert
    * "([Ljava/lang/Integer;I[[Ljava/lang/Integer;)" to "(java.lang.Integer[], int,
    * java.lang.Integer[][])".
+   *
+   * <p>The argument is the first part of a method descriptor.
    *
    * @param arglist an argument list, in JVML format
    * @return argument list, in Java format
@@ -215,11 +217,14 @@ public final class JvmUtil {
         if (semicolonPos == -1) {
           throw new Error("Malformed arglist: " + arglist);
         }
-        String fieldDescriptor = arglist.substring(pos, semicolonPos + 1);
+        @SuppressWarnings("signature") // string parsing
+        @FieldDescriptor String fieldDescriptor = arglist.substring(pos, semicolonPos + 1);
         result += fieldDescriptorToBinaryName(fieldDescriptor);
         pos = semicolonPos + 1;
       } else {
-        String maybe = fieldDescriptorToBinaryName(arglist.substring(pos, nonarrayPos + 1));
+        @SuppressWarnings("signature") // string parsing
+        @FieldDescriptor String fieldDescriptor = arglist.substring(pos, nonarrayPos + 1);
+        String maybe = fieldDescriptorToBinaryName(fieldDescriptor);
         if (maybe == null) {
           // return null;
           throw new Error("Malformed arglist: " + arglist);

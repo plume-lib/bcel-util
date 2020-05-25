@@ -29,6 +29,7 @@ import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
 import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.signature.qual.BinaryName;
+import org.checkerframework.checker.signature.qual.BinaryNameOrPrimitiveType;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.FqBinaryName;
 import org.checkerframework.checker.signature.qual.InternalForm;
@@ -714,16 +715,29 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the type corresponding to a given class or primitive name.
+   * Return the type corresponding to a given binary name or primitive type name.
    *
    * @param classname the binary name of a class (= fully-qualified name, except for inner classes),
-   *     or a primitive, but not an array
+   *     or a primitive type name, but not an array
+   * @return the type corresponding to the given class name
+   * @see #fqBinaryNameToType
+   * @deprecated use {@link #binaryNameToType}
+   */
+  // TODO: Poor name because this handles any non-array, not just classes.
+  @Deprecated // use binaryNameToType
+  public static Type classnameToType(@BinaryNameOrPrimitiveType String classname) {
+    return binaryNameToType(classname);
+  }
+
+  /**
+   * Return the type corresponding to a given binary name or primitive type name.
+   *
+   * @param classname the binary name of a class (= fully-qualified name, except for inner classes),
+   *     or a primitive type name, but not an array
    * @return the type corresponding to the given class name
    * @see #fqBinaryNameToType
    */
-  // TODO: Poor name because this handles any non-array, not just classes.
-  // TODO: Parameter type should be @BinaryNameOrPrimitive
-  public static Type classnameToType(@BinaryName String classname) {
+  public static Type binaryNameToType(@BinaryNameOrPrimitiveType String classname) {
 
     classname = classname.intern();
 
@@ -743,8 +757,10 @@ public final class BcelUtil {
       return Type.LONG;
     } else if (classname == "short") { // interned
       return Type.SHORT;
-    } else { // must be a non-primitive
-      return new ObjectType(classname);
+    } else {
+      @SuppressWarnings("signature") // It's not a primitive, so it's a proper binary name.
+      @BinaryName String binaryName = classname;
+      return new ObjectType(binaryName);
     }
   }
 
