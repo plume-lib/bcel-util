@@ -189,6 +189,8 @@ public final class JvmUtil {
    * "([Ljava/lang/Integer;I[[Ljava/lang/Integer;)" to "(java.lang.Integer[], int,
    * java.lang.Integer[][])".
    *
+   * <p>The argument is the first part of a method descriptor.
+   *
    * @param arglist an argument list, in JVML format
    * @return argument list, in Java format
    */
