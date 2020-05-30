@@ -47,17 +47,17 @@ public final class JvmUtil {
    */
   @SuppressWarnings("signature") // conversion routine
   public static @FieldDescriptor String binaryNameToFieldDescriptor(@BinaryName String classname) {
-    int dims = 0;
+    int dimensions = 0;
     String sansArray = classname;
     while (sansArray.endsWith("[]")) {
-      dims++;
+      dimensions++;
       sansArray = sansArray.substring(0, sansArray.length() - 2);
     }
     String result = primitiveToFieldDescriptor.get(sansArray);
     if (result == null) {
       result = "L" + sansArray + ";";
     }
-    for (int i = 0; i < dims; i++) {
+    for (int i = 0; i < dimensions; i++) {
       result = "[" + result;
     }
     return result.replace('.', '/');
@@ -164,9 +164,9 @@ public final class JvmUtil {
     if (classname.equals("")) {
       throw new Error("Empty string passed to fieldDescriptorToBinaryName");
     }
-    int dims = 0;
+    int dimensions = 0;
     while (classname.startsWith("[")) {
-      dims++;
+      dimensions++;
       classname = classname.substring(1);
     }
     String result;
@@ -178,7 +178,7 @@ public final class JvmUtil {
         throw new Error("Malformed base class: " + classname);
       }
     }
-    for (int i = 0; i < dims; i++) {
+    for (int i = 0; i < dimensions; i++) {
       result += "[]";
     }
     return result.replace('/', '.');
