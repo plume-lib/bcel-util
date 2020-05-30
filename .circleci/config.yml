@@ -25,6 +25,7 @@ jobs:
             - gradle-v1-{{ .Branch }}-
             - gradle-v1-
 
+      # TODO: should use -cfLocal with the appropriate branch of the Checker Framework.
       - run: ./gradlew build javadoc
       - run: ./gradlew requireJavadoc
 
