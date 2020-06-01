@@ -9,7 +9,7 @@ For details, see the [API documentation](http://plumelib.org/bcel-util/api/).
 You can obtain the bcel-util library from [Maven
 Central](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.plumelib%22%20a%3A%22bcel-util%22).
 
-In a gradle buildfile, write
+In a Gradle buildfile, write
 
 ```
 dependencies {
