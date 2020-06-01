@@ -838,8 +838,10 @@ public abstract class StackMapUtils {
   }
 
   /**
+   * Return the operand size of this type (2 for long and double, 1 otherwise).
+   *
    * @param smt a StackMapType object
-   * @return operand size of this type (2 for long and double, 1 otherwise)
+   * @return the operand size of this type
    */
   protected final int getSize(StackMapType smt) {
     switch (smt.getType()) {
