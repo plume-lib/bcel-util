@@ -5,8 +5,8 @@ import java.util.StringTokenizer;
 import org.checkerframework.checker.index.qual.Positive;
 import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
-import org.checkerframework.checker.signature.qual.DotSeparatedIdentifiers;
 import org.checkerframework.checker.signature.qual.FieldDescriptor;
+import org.checkerframework.checker.signature.qual.PrimitiveType;
 
 /**
  * Utility functions for working with the JVM.
@@ -21,7 +21,7 @@ import org.checkerframework.checker.signature.qual.FieldDescriptor;
 public final class JvmUtil {
 
   /** A map from Java primitive type name (such as "int") to field descriptor (such as "I"). */
-  private static HashMap<@DotSeparatedIdentifiers String, @FieldDescriptor String>
+  private static HashMap<@PrimitiveType String, @FieldDescriptor String>
       primitiveToFieldDescriptor = new HashMap<>(8);
 
   static {
@@ -89,7 +89,7 @@ public final class JvmUtil {
    * @return the class name, in Class.getName format
    */
   @SuppressWarnings("signature") // conversion routine
-  public static @ClassGetName String binaryNameToClassGetName(/*BinaryName*/ String bn) {
+  public static @ClassGetName String binaryNameToClassGetName(@BinaryName String bn) {
     if (bn.endsWith("[]")) {
       return binaryNameToFieldDescriptor(bn).replace('/', '.');
     } else {
@@ -104,7 +104,7 @@ public final class JvmUtil {
    * @return the class name, in Class.getName format
    */
   @SuppressWarnings("signature") // conversion routine
-  public static @ClassGetName String fieldDescriptorToClassGetName(/*FieldDescriptor*/ String fd) {
+  public static @ClassGetName String fieldDescriptorToClassGetName(@FieldDescriptor String fd) {
     if (fd.startsWith("[")) {
       return fd.replace('/', '.');
     } else {
@@ -217,11 +217,14 @@ public final class JvmUtil {
         if (semicolonPos == -1) {
           throw new Error("Malformed arglist: " + arglist);
         }
-        String fieldDescriptor = arglist.substring(pos, semicolonPos + 1);
+        @SuppressWarnings("signature") // string parsing
+        @FieldDescriptor String fieldDescriptor = arglist.substring(pos, semicolonPos + 1);
         result += fieldDescriptorToBinaryName(fieldDescriptor);
         pos = semicolonPos + 1;
       } else {
-        String maybe = fieldDescriptorToBinaryName(arglist.substring(pos, nonarrayPos + 1));
+        @SuppressWarnings("signature") // string parsing
+        @FieldDescriptor String fieldDescriptor = arglist.substring(pos, nonarrayPos + 1);
+        String maybe = fieldDescriptorToBinaryName(fieldDescriptor);
         if (maybe == null) {
           // return null;
           throw new Error("Malformed arglist: " + arglist);

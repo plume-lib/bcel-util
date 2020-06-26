@@ -1,5 +1,9 @@
 # BCEL-Util change log
 
+## 1.1.9 (forthcoming)
+
+- Prefer new method `binaryNameToType` to `classnameToType`
+
 ## 1.1.8
 
 - Add new static field `BcelUtil.javaVersion`
