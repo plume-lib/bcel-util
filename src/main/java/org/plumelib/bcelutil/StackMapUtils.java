@@ -76,7 +76,7 @@ public abstract class StackMapUtils {
   /** A log to which to print debugging information about program instrumentation. */
   protected SimpleLog debug_instrument = new SimpleLog(false);
 
-  /** Whether or not the current method needs a StackMap. */
+  /** Whether or not the current method needs a StackMap; set by set_current_stack_map_table. */
   protected boolean needStackMap = false;
 
   /** Working copy of StackMapTable; set by set_current_stack_map_table. */
@@ -696,6 +696,7 @@ public abstract class StackMapUtils {
   @EnsuresNonNull({"stack_map_table"})
   protected final void set_current_stack_map_table(MethodGen mgen, int java_class_version) {
 
+    needStackMap = false;
     smta = (StackMap) get_stack_map_table_attribute(mgen);
     if (smta != null) {
       // get a deep copy of the original StackMapTable.
