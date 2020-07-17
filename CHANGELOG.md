@@ -1,7 +1,8 @@
 # BCEL-Util change log
 
-## 1.1.9 (forthcoming)
+## 1.1.9
 
+- Fixed bug in stack map processing
 - Prefer new method `binaryNameToType` to `classnameToType`
 
 ## 1.1.8
