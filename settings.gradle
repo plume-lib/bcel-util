@@ -1,0 +1,2 @@
+// Project name is read-only in build scripts.
+rootProject.name = "bcel-util"

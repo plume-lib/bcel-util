@@ -114,6 +114,10 @@ javadoc {
     // this works locally but not on Travis?
     //linksOffline 'https://commons.apache.org/proper/commons-bcel/apidocs/', 'https://commons.apache.org/proper/commons-bcel/apidocs/'
   }
+  def currentJavaVersion = org.gradle.api.JavaVersion.current()
+  if (currentJavaVersion.compareTo(org.gradle.api.JavaVersion.VERSION_1_9) >= 0) {
+      options.addStringOption("-release", "8");
+  }
   doLast {
     if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
       ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:'',
