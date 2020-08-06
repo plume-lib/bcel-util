@@ -9,11 +9,11 @@ plugins {
   // // Code formatting with Google Java Format; defines targets "goJF" and "verJF".
   // id 'com.github.sherter.google-java-format' version '0.7.1'
 
-  // Run the Error Prone linter.
-  id("net.ltgt.errorprone") version "1.1.1"
+  // Error Prone linter
+  id("net.ltgt.errorprone") version "1.2.1"
 
   // Checker Framework pluggable type-checking
-  id 'org.checkerframework' version '0.5.8' apply false
+  id 'org.checkerframework' version '0.5.8'
 
   // To show task list as a tree, run: ./gradlew <taskname> taskTree
   id 'com.dorongold.task-tree' version '1.5'
@@ -46,10 +46,10 @@ task compileAll() {
 }
 
 test {
-    useJUnitPlatform {
-        includeEngines 'junit-jupiter'
-        excludeEngines 'junit-vintage'
-    }
+  useJUnitPlatform {
+    includeEngines 'junit-jupiter'
+    excludeEngines 'junit-vintage'
+  }
 }
 
 /// Error Prone linter
@@ -75,6 +75,7 @@ apply plugin: 'org.checkerframework'
 checkerFramework {
   checkers = [
     'org.checkerframework.checker.formatter.FormatterChecker',
+    // TODO: 'org.checkerframework.checker.index.IndexChecker',
     'org.checkerframework.checker.interning.InterningChecker',
     'org.checkerframework.checker.lock.LockChecker',
     'org.checkerframework.checker.nullness.NullnessChecker',
@@ -106,24 +107,36 @@ if (project.hasProperty("cfLocal")) {
 // Turn Javadoc warnings into errors.
 javadoc {
   options.addStringOption('Xwerror', '-Xdoclint:all')
-  options.addStringOption('source', '8')
-  // Can't use `-private` because StackVer.java (which is copied from elsewhere) lacks some
-  // documentation.
-  /*
   options.addStringOption('private', '-quiet')
-  */
+  exclude 'org/plumelib/bcelutil/StackVer.java'
   options.with {
     linksOffline 'https://docs.oracle.com/javase/8/docs/api/', 'https://docs.oracle.com/javase/8/docs/api/'
     // this works locally but not on Travis?
     //linksOffline 'https://commons.apache.org/proper/commons-bcel/apidocs/', 'https://commons.apache.org/proper/commons-bcel/apidocs/'
+  }
+  doLast {
+    if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+      ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:'',
+	flags:'g', byline:true) {
+	fileset(dir: destinationDir)
+      }
+    }
   }
 }
 check.dependsOn javadoc
 
 task javadocWeb(type: Javadoc) {
   source = sourceSets.main.allJava
-  destinationDir = file("/cse/web/research/plumelib/bcel-util/api")
+  destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
   classpath = project.sourceSets.main.compileClasspath
+  doLast {
+    if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+      ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:'',
+	flags:'g', byline:true) {
+	fileset(dir: destinationDir)
+      }
+    }
+  }
 }
 
 configurations {
@@ -139,6 +152,7 @@ task requireJavadoc(type: JavaExec) {
   args "src/main/java"
 }
 check.dependsOn requireJavadoc
+javadocWeb.dependsOn requireJavadoc
 
 
 /// Git hooks

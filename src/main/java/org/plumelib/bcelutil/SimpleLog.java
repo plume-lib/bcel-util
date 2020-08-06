@@ -86,7 +86,11 @@ public final class SimpleLog {
     }
   }
 
-  /** Return the current indentation string. */
+  /**
+   * Return the current indentation string.
+   *
+   * @return the current indentation string x
+   */
   private String getIndentString() {
     assert enabled;
     if (indentString == null) {
