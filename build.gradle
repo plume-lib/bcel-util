@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.4.1.1'
+  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.5.0'
   // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
 
