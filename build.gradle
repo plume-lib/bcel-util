@@ -87,7 +87,7 @@ checkerFramework {
     '-Xlint:-processing', // because of Error Prone's "No processor claimed any of these annotations"
     '-AcheckPurityAnnotations',
     '-ArequirePrefixInWarningSuppressions',
-    '-AwarnUnneededSuppressions'
+    '-AwarnUnneededSuppressions',
   ]
 }
 
