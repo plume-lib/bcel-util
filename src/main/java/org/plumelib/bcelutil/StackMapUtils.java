@@ -29,7 +29,9 @@ import org.checkerframework.checker.index.qual.IndexOrLow;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.interning.qual.InternedDistinct;
 import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.RequiresNonNull;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.dataflow.qual.Pure;
 
@@ -86,7 +88,7 @@ public abstract class StackMapUtils {
   protected @Nullable StackMap smta = null;
 
   /** Initial state of StackMapTypes for locals on method entry. */
-  protected StackMapType[] initial_type_list;
+  protected StackMapType @MonotonicNonNull [] initial_type_list;
 
   /** The number of local variables in the current method prior to any modifications. */
   protected int initial_locals_count;
@@ -385,6 +387,7 @@ public abstract class StackMapUtils {
    * @param offset compiler assigned local offset of hidden temp
    * @return offset incremented by size of smallest temp found at offset
    */
+  @RequiresNonNull("initial_type_list")
   protected final int gen_temp_locals(MethodGen mgen, int offset) {
     int live_start = 0;
     Type live_type = null;
@@ -1148,6 +1151,7 @@ public abstract class StackMapUtils {
    *
    * @param mgen MethodGen to be modified
    */
+  @EnsuresNonNull("initial_type_list")
   protected final void fix_local_variable_table(MethodGen mgen) {
     InstructionList il = mgen.getInstructionList();
     if (il == null) {
