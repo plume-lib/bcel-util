@@ -1,5 +1,10 @@
 # BCEL-Util change log
 
+## 1.1.10
+
+- Update dependencies
+- Tweak documentation
+
 ## 1.1.9
 
 - Fixed bug in stack map processing

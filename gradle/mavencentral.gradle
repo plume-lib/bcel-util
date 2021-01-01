@@ -8,12 +8,13 @@
 //  * git pull
 //  * Update the version number in ../README.md and in this file (multiple times in each).
 //  * Update ../CHANGELOG.md .
+//  * Save files.
 //  * Run in the top-level directory:  ./gradlew clean javadocWeb && ./gradlew clean uploadArchives
 //  * Browse to https://oss.sonatype.org/#stagingRepositories, complete the Maven Central release.
 //  * Stage changes.
 //  * Add a git tag:
-//    VER=1.1.9 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push && git push --tags
-//  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.1.9", use the changelog text as the description, attach the .jar file from ../build/libs/
+//    VER=1.1.10 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push && git push --tags
+//  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.1.10", use the changelog text as the description, attach the .jar file from ../build/libs/
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -25,7 +26,7 @@ apply plugin: 'signing'
 
 group = "org.plumelib"
 archivesBaseName = "bcel-util"
-version = "1.1.9"
+version = "1.1.10"
 
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
