@@ -89,6 +89,8 @@ checkerFramework {
     '-AcheckPurityAnnotations',
     '-ArequirePrefixInWarningSuppressions',
     '-AwarnUnneededSuppressions',
+    // This is a hack to work around the fact that WPI (whole-program inference)
+    // yields a set of annotations that do not type-check cleanly.
     '-AsuppressWarnings=type.checking.not.run',
   ]
 }
