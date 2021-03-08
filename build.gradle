@@ -89,6 +89,7 @@ checkerFramework {
     '-AcheckPurityAnnotations',
     '-ArequirePrefixInWarningSuppressions',
     '-AwarnUnneededSuppressions',
+    '-AsuppressWarnings=type.checking.not.run',
   ]
 }
 
