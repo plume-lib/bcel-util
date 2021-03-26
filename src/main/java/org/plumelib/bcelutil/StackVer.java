@@ -349,7 +349,8 @@ public final class StackVer {
             this.addMessage(
                 "Warning: ReturnInstruction '"
                     + ic
-                    + "' may leave method with an uninitialized object in the local variables array '"
+                    + "' may leave method with"
+                    + " an uninitialized object in the local variables array '"
                     + lvs
                     + "'.");
           }
