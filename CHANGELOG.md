@@ -1,5 +1,9 @@
 # BCEL-Util change log
 
+## 1.1.11 (May 5, 2021)
+
+- SimpleLog supports logging to a file
+
 ## 1.1.10
 
 - Update dependencies
