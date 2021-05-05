@@ -4,7 +4,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.checkerframework.checker.formatter.qual.FormatMethod;
-import org.checkerframework.checker.nullness.qual.*;
+import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A logging class with the following features:
@@ -87,9 +89,9 @@ public final class SimpleLog {
   /**
    * Set the private field logfile, based on the private field filename.
    *
-   * <p>This creates the file if it does not exist. This should be called lazily, when
-   * output is performed. Otherwise, it would be annoying to create a zero-size logfile if no output
-   * is ever written.
+   * <p>This creates the file if it does not exist. This should be called lazily, when output is
+   * performed. Otherwise, it would be annoying to create a zero-size logfile if no output is ever
+   * written.
    */
   @EnsuresNonNull("logfile")
   private void setLogfile() {
@@ -108,9 +110,8 @@ public final class SimpleLog {
   }
 
   /**
-   * Log a message. The message is prepended with the current indentation string. The
-   * indentation is only applied at the start of the message, not for every line break within the
-   * message.
+   * Log a message. The message is prepended with the current indentation string. The indentation is
+   * only applied at the start of the message, not for every line break within the message.
    *
    * @param format format string for message
    * @param args values to be substituted into format
