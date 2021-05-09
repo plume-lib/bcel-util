@@ -24,10 +24,10 @@ public final class SimpleLog {
   public boolean enabled;
 
   /** Where to write logging output. Null if nothing has been output yet. */
-  private @MonotonicNonNull PrintStream logfile = null;
+  private @MonotonicNonNull PrintStream logfile;
 
-  /** The file for logging output. If null or "-", System.out is used. */
-  private @Nullable String filename = null;
+  /** The file for logging output. If null, System.out is used. */
+  private @Nullable String filename;
 
   /** The current indentation level. */
   private int indentLevel = 0;
@@ -60,7 +60,7 @@ public final class SimpleLog {
    *
    * @param filename file name, or use "-" or null for System.out
    */
-  public SimpleLog(String filename) {
+  public SimpleLog(@Nullable String filename) {
     this(filename, true);
   }
 
@@ -71,7 +71,7 @@ public final class SimpleLog {
    * @param enabled whether the logger starts out enabled
    */
   public SimpleLog(@Nullable String filename, boolean enabled) {
-    this.filename = filename;
+    this.filename = (filename != null && filename.equals("-")) ? null : filename;
     this.enabled = enabled;
     indentStrings = new ArrayList<String>();
     indentStrings.add("");
@@ -87,7 +87,7 @@ public final class SimpleLog {
   }
 
   /**
-   * Set the private field logfile, based on the private field filename.
+   * Set the private field logfile, based on the private field {@code filename}.
    *
    * <p>This creates the file if it does not exist. This should be called lazily, when output is
    * performed. Otherwise, it would be annoying to create a zero-size logfile if no output is ever
@@ -98,7 +98,7 @@ public final class SimpleLog {
     if (logfile != null) {
       return;
     }
-    if (filename == null || filename.equals("-")) {
+    if (filename == null) {
       logfile = System.out;
     } else {
       try {
