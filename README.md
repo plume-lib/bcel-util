@@ -17,4 +17,4 @@ dependencies {
 }
 ```
 
-Other build systems are [https://search.maven.org/artifact/org.plumelib/bcel-util/1.1.11/jar](similar).
+Other build systems are [similar](https://search.maven.org/artifact/org.plumelib/bcel-util/1.1.11/jar).
