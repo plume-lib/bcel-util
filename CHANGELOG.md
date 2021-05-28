@@ -1,5 +1,9 @@
 # BCEL-Util change log
 
+## 1.1.12 (May 28, 2021)
+
+- Fix exception handler processing for insert instruction list
+
 ## 1.1.11 (May 5, 2021)
 
 - SimpleLog supports logging to a file
