@@ -182,8 +182,9 @@ public abstract class InstructionListUtils extends StackMapUtils {
     InstructionHandle new_end = new_il.getEnd();
     int new_length = new_end.getPosition() + new_end.getInstruction().getLength();
 
-    print_stack_map_table("Before insert_inst");
+    print_il(ih, "Before insert_inst");
     debug_instrument.log("  insert_inst: %d%n%s%n", new_il.getLength(), new_il);
+    debug_instrument.log("  ih: %s%n", ih);
 
     // Add the new code in front of the instruction handle.
     InstructionHandle new_start = il.insert(ih, new_il);
@@ -212,7 +213,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
         } else if ((it instanceof CodeExceptionGen) && redirect_branches) {
           CodeExceptionGen exc = (CodeExceptionGen) it;
           if (exc.getStartPC() == ih) exc.updateTarget(ih, new_start);
-          // else if (exc.getEndPC() == ih) leave as is
+          else if (exc.getEndPC() == ih) ; // leave EndPC unchanged
           else if (exc.getHandlerPC() == ih) exc.setHandlerPC(new_start);
           else System.out.printf("Malformed CodeException: %s%n", exc);
         }
