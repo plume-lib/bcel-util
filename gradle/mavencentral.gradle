@@ -21,21 +21,12 @@
 /// Maven Central publishing
 /// (From http://central.sonatype.org/pages/gradle.html )
 
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
-group = "org.plumelib"
-archivesBaseName = "bcel-util"
-version = "1.1.12"
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+java {
+  withJavadocJar()
+  withSourcesJar()
 }
 
 artifacts {
@@ -47,58 +38,58 @@ signing {
     sign configurations.archives
 }
 
-uploadArchives {
-  doFirst {
-    repositories {
-      mavenDeployer {
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+publishing {
+  publications {
+    maven(MavenPublication) {
+      groupId = 'org.plumelib'
+      artifactId = 'bcel-util'
+      version = '1.1.12'
 
-        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-          authentication(userName: ossrhUsername, password: ossrhPassword)
+      from components.java
+      artifact sourcesJar
+      artifact javadocJar
+      pom {
+        name = 'Plume-lib Bcel-Util'
+        description = 'Utility functions for BCEL.'
+        url = 'https://github.com/plume-lib/bcel-util'
+
+        scm {
+          connection = 'scm:git:git@github.com:plume-lib/bcel-util.git'
+          developerConnection = 'scm:git:git@github.com:plume-lib/bcel-util.git'
+          url = 'git@github.com:plume-lib/bcel-util.git'
         }
 
-        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-          authentication(userName: ossrhUsername, password: ossrhPassword)
+        licenses {
+          license {
+            name = 'MIT License'
+            url = 'https://opensource.org/licenses/MIT'
+          }
         }
 
-        pom.project {
-          name 'Plume-lib Bcel-Util'
-          packaging 'jar'
-          description 'Utility functions for BCEL.'
-          url 'https://github.com/plume-lib/bcel-util'
-
-          scm {
-            connection 'scm:git:git@github.com:plume-lib/bcel-util.git'
-            developerConnection 'scm:git:git@github.com:plume-lib/bcel-util.git'
-            url 'git@github.com:plume-lib/bcel-util.git'
-          }
-
-          licenses {
-            license {
-              name 'MIT License'
-              url 'https://opensource.org/licenses/MIT'
-            }
-          }
-
-          developers {
-            developer {
-              id 'mernst'
-              name 'Michael Ernst'
-              email 'mernst@alum.mit.edu'
-            }
+        developers {
+          developer {
+            id = 'mernst'
+            name = 'Michael Ernst'
+            email = 'mernst@alum.mit.edu'
           }
         }
       }
     }
   }
+  repositories {
+    maven {
+      url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+      credentials {
+        username = ossrhUsername
+        password = ossrhPassword
+      }
+    }
+    maven {
+      url = "https://oss.sonatype.org/content/repositories/snapshots/"
+      credentials {
+        username = ossrhUsername
+        password = ossrhPassword
+      }
+    }
+  }
 }
-
-// The *-all.jar file isn't used by Maven/Gradle users.  The point of publishing
-// it is to host all artifacts on Maven Central, for people who want *-all.jar.
-// publishing  {
-//   publications {
-//     shadow(MavenPublication) {
-//       from components.shadow
-//       artifactId = 'bcel-util-all'
-//   }
-// }
