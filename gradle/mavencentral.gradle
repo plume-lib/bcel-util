@@ -8,10 +8,9 @@
 //  * git pull
 //  * Update the version number in ../README.md and in this file (multiple times in each).
 //  * Update ../CHANGELOG.md .
-//  * Save files.
-//  * Run in the top-level directory:  ./gradlew clean javadocWeb && ./gradlew clean publish
+//  * Save files and stage changes.
+//  * Run in the top-level directory:  ./gradlew clean publish && ./gradlew javadocWeb
 //  * Browse to https://oss.sonatype.org/#stagingRepositories, complete the Maven Central release.
-//  * Stage changes.
 //  * Add a git tag:
 //    VER=1.1.12 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push && git push --tags
 //  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.1.12", use the text from ../CHANGELOG.md as the description, attach the .jar file from ../build/libs/
@@ -30,68 +29,68 @@ version '1.1.12'
 final isSnapshot = version.contains('SNAPSHOT')
 
 java {
-    withJavadocJar()
-    withSourcesJar()
+  withJavadocJar()
+  withSourcesJar()
 }
 
 artifacts {
-    archives javadocJar, sourcesJar
+  archives javadocJar, sourcesJar
 }
 
 publishing {
-    publications {
-        maven(MavenPublication) {
+  publications {
+    maven(MavenPublication) {
 
-            from components.java
-            pom {
-                name = 'Plume-lib Bcel-Util'
-                description = 'Utility functions for BCEL.'
-                url = 'https://github.com/plume-lib/bcel-util'
+      from components.java
+      pom {
+        name = 'Plume-lib Bcel-Util'
+        description = 'Utility functions for BCEL.'
+        url = 'https://github.com/plume-lib/bcel-util'
 
-                scm {
-                    connection = 'scm:git:git@github.com:plume-lib/bcel-util.git'
-                    developerConnection = 'scm:git:git@github.com:plume-lib/bcel-util.git'
-                    url = 'git@github.com:plume-lib/bcel-util.git'
-                }
-
-                licenses {
-                    license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/licenses/MIT'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'mernst'
-                        name = 'Michael Ernst'
-                        email = 'mernst@alum.mit.edu'
-                    }
-                }
-            }
+        scm {
+          connection = 'scm:git:git@github.com:plume-lib/bcel-util.git'
+          developerConnection = 'scm:git:git@github.com:plume-lib/bcel-util.git'
+          url = 'git@github.com:plume-lib/bcel-util.git'
         }
+
+        licenses {
+          license {
+            name = 'MIT License'
+            url = 'https://opensource.org/licenses/MIT'
+          }
+        }
+
+        developers {
+          developer {
+            id = 'mernst'
+            name = 'Michael Ernst'
+            email = 'mernst@alum.mit.edu'
+          }
+        }
+      }
     }
+  }
+  repositories {
     repositories {
-        repositories {
-            maven {
-                url = (isSnapshot
-                        ? project.properties.getOrDefault('SNAPSHOT_REPOSITORY_URL', 'https://oss.sonatype.org/content/repositories/snapshots/')
-                        : project.properties.getOrDefault('RELEASE_REPOSITORY_URL', 'https://oss.sonatype.org/service/local/staging/deploy/maven2/')
-                )
-                credentials {
-                    username = project.properties.get('ossrhUsername')
-                    password = project.properties.get('ossrhPassword')
-                }
-            }
+      maven {
+        url = (isSnapshot
+            ? project.properties.getOrDefault('SNAPSHOT_REPOSITORY_URL', 'https://oss.sonatype.org/content/repositories/snapshots/')
+            : project.properties.getOrDefault('RELEASE_REPOSITORY_URL', 'https://oss.sonatype.org/service/local/staging/deploy/maven2/')
+        )
+        credentials {
+          username = project.properties.get('ossrhUsername')
+          password = project.properties.get('ossrhPassword')
         }
+      }
     }
+  }
 }
 
 signing {
-    // If anything about signing is misconfigured, fail loudly rather than quietly continuing with
-    // unsigned artifacts.
-    required = true
-    sign publishing.publications.maven
+  // If anything about signing is misconfigured, fail loudly rather than quietly continuing with
+  // unsigned artifacts.
+  required = true
+  sign publishing.publications.maven
 }
 
 tasks.withType(Sign).configureEach { onlyIf { !isSnapshot } }
