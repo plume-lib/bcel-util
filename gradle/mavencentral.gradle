@@ -16,11 +16,6 @@
 //    VER=1.1.12 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push && git push --tags
 //  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.1.12", use the text from ../CHANGELOG.md as the description, attach the .jar file from ../build/libs/
 
-
-///////////////////////////////////////////////////////////////////////////
-/// Maven Central publishing
-/// (From http://central.sonatype.org/pages/gradle.html )
-
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
