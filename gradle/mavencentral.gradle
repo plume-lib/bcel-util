@@ -8,10 +8,9 @@
 //  * git pull
 //  * Update the version number in ../README.md and in this file (multiple times in each).
 //  * Update ../CHANGELOG.md .
-//  * Save files.
-//  * Run in the top-level directory:  ./gradlew clean javadocWeb && ./gradlew clean uploadArchives
+//  * Save files and stage changes.
+//  * Run in the top-level directory:  ./gradlew clean publish && ./gradlew javadocWeb
 //  * Browse to https://oss.sonatype.org/#stagingRepositories, complete the Maven Central release.
-//  * Stage changes.
 //  * Add a git tag:
 //    VER=1.1.12 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push && git push --tags
 //  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.1.12", use the text from ../CHANGELOG.md as the description, attach the .jar file from ../build/libs/
@@ -31,11 +30,6 @@ java {
 
 artifacts {
     archives javadocJar, sourcesJar
-}
-
-signing {
-    required { project.gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
 }
 
 publishing {
@@ -80,16 +74,21 @@ publishing {
     maven {
       url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
       credentials {
-        username = ossrhUsername
-        password = ossrhPassword
+        username = project.properties.get('ossrhUsername')
+        password = project.properties.get('ossrhPassword')
       }
     }
     maven {
       url = "https://oss.sonatype.org/content/repositories/snapshots/"
       credentials {
-        username = ossrhUsername
-        password = ossrhPassword
+        username = project.properties.get('ossrhUsername')
+        password = project.properties.get('ossrhPassword')
       }
     }
   }
+}
+
+signing {
+    required { project.gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
 }
