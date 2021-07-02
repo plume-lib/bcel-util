@@ -596,7 +596,9 @@ public final class BcelUtil {
   public static void resetLocalsToFormals(MethodGen mg) {
 
     // Get the parameter types and names.
+    @SuppressWarnings("lock:annotation") // BCEL is not annotated with Lock Checker types
     Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
+    @SuppressWarnings("lock:annotation") // BCEL is not annotated with Lock Checker types
     String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
         argNames = mg.getArgumentNames();
 
