@@ -106,10 +106,10 @@ public abstract class StackMapUtils {
    */
   protected @NonNegative int number_active_locals;
 
-  /** The start of a local variable's live range. */
+  /** The start of a local variable's live range: the first instruction in the range. */
   protected InstructionHandle live_range_start = null;
 
-  /** The end of a local variable's live range. */
+  /** The end of a local variable's live range: the first instruction after the range. */
   protected InstructionHandle live_range_end = null;
 
   /** The type of a local variable during its live range. */
@@ -641,8 +641,8 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Calculate the stack types for the current method, and store them in variable {@link
-   * #stack_types}. (Does nothing if {@link #stack_types} is already set.)
+   * Calculates the stack types for each byte code offset of the current method, and stores them in
+   * variable {@link #stack_types}. Does nothing if {@link #stack_types} is already set.
    *
    * <p>bcel_calc_stack_types calculates the state of the operand stack at each byte code offset of
    * the method.
@@ -669,7 +669,8 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Create a new LocalVariable from the live_range data.
+   * Create a new LocalVariable from the live_range data. Does nothing if {@link #live_range_start}
+   * is null.
    *
    * @param mgen MethodGen of method to search
    * @param offset offset of the local
