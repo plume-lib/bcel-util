@@ -641,10 +641,13 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Calculate the stack types for the current method. bcel_calc_stack_types calculates the state of
-   * the operand stack at each byte code offset of the method.
+   * Calculate the stack types for the current method, and store them in variable {@link
+   * #stack_types}. (Does nothing if {@link #stack_types} is already set.)
    *
-   * @param mgen MethodGen of method to search
+   * <p>bcel_calc_stack_types calculates the state of the operand stack at each byte code offset of
+   * the method.
+   *
+   * @param mgen MethodGen of method whose stack types to compute
    */
   protected final void get_method_stack_types(MethodGen mgen) {
     // We cache the stack types for the current method.
@@ -758,8 +761,9 @@ public abstract class StackMapUtils {
         // Store of a null does not change type.
         // UNDONE: if tos is super of live_range_type, should not start new range
         if (live_range_start == null || (!tos.equals(Type.NULL) && !tos.equals(live_range_type))) {
-          // close current live range and start a new one
+          // close current live range
           create_local_from_live_range(mgen, offset);
+          // start a new live range
           live_range_type = tos;
           live_range_start = ih.getNext();
         }
