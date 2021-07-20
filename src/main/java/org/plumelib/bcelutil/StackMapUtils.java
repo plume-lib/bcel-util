@@ -1408,7 +1408,7 @@ public abstract class StackMapUtils {
       offset = 1;
       first_local_index++;
     } else {
-      // The java method sun/misc/ProxyGenerator generates proxy classes at runtime and for some
+      // The java method sun/misc/ProxyGenerator generates proxy classes at run time.  For some
       // unknown reason when it generates code for <clinit> it allocates local 0 but never uses it.
       if (mgen.getClassName().startsWith("com.sun.proxy.") && mgen.getName().equals("<clinit>")) {
         new_lvg = mgen.addLocalVariable("$clinit$hidden$" + offset, Type.INT, offset, null, null);
