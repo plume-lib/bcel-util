@@ -467,7 +467,7 @@ public abstract class StackMapUtils {
       // offset, byte_code_offset, live_start, live_type, locals_offset_height);
 
       if (live_start == 0) {
-        // did the latest StackMap entry define the temp in question?
+        // did the latest StackMap entry define the temp or local in question?
         if (offset < locals_offset_height) {
           live_start = byte_code_offset;
           int running_offset = 0;
@@ -485,9 +485,9 @@ public abstract class StackMapUtils {
           }
         }
       } else {
-        // did the latest StackMap entry undefine the temp in question?
+        // did the latest StackMap entry undefine the temp or local in question?
         if (offset >= locals_offset_height) {
-          // create the temp variable
+          // create a LocalVariable
           new_lvg =
               mgen.addLocalVariable(
                   "DaIkOnTeMp" + offset,
@@ -503,7 +503,7 @@ public abstract class StackMapUtils {
               new_lvg.getName(),
               new_lvg.getType());
           min_size = Math.min(min_size, live_type.getSize());
-          // reset to look for more temps at same offset
+          // reset to look for more temps or locals at same offset
           live_start = 0;
           live_type = null;
         }
@@ -515,9 +515,9 @@ public abstract class StackMapUtils {
     // System.out.printf ("offset: %d, bco: %d, lstart: %d, ltype: %s, loh: %d%n",
     // offset, byte_code_offset, live_start, live_type, locals_offset_height);
 
-    // we are done with stack maps; need to see if there is a temp still active
+    // we are done with stack maps; need to see if there is a temp or local still active
     if (live_start != 0) {
-      // must find end of live range and create the temp variable
+      // must find end of live range and create the LocalVariable
       live_range_start = il.findHandle(live_start);
       live_range_end = live_range_start; // not necessarily true, but only needs to be !null
       live_range_type = live_type;
@@ -644,9 +644,6 @@ public abstract class StackMapUtils {
    * Calculates the stack types for each byte code offset of the current method, and stores them in
    * variable {@link #stack_types}. Does nothing if {@link #stack_types} is already set.
    *
-   * <p>bcel_calc_stack_types calculates the state of the operand stack at each byte code offset of
-   * the method.
-   *
    * @param mgen MethodGen of method whose stack types to compute
    */
   protected final void get_method_stack_types(MethodGen mgen) {
@@ -679,7 +676,8 @@ public abstract class StackMapUtils {
     if (live_range_start == null) {
       return;
     }
-    // Type.getType doesn't understand NULL.
+    // Type.getType doesn't understand NULL which is the type of the top of operand stack
+    // after the JVM aconst_null instruction.
     if (Type.NULL.equals(live_range_type)) {
       live_range_type = Type.OBJECT;
     }
@@ -760,7 +758,7 @@ public abstract class StackMapUtils {
         Type tos = stack.peek(0);
         // System.out.printf ("tos: %s, live_type: %s%n", tos, live_range_type);
         // Store of a null does not change type.
-        // UNDONE: if tos is sub of live_range_type, should not start new range
+        // UNDONE: if tos is subclass of live_range_type, should not start new range
         if (live_range_start == null || (!tos.equals(Type.NULL) && !tos.equals(live_range_type))) {
           // close current live range
           create_local_from_live_range(mgen, offset);
@@ -1337,8 +1335,9 @@ public abstract class StackMapUtils {
 
   /**
    * Under some circumstances, there may be gaps in the LocalVariable table. These gaps occur when
-   * the Java compiler adds unnamed parameters and/or unnamed local variables. This routine creates
-   * LocalVariable entries for these missing items.
+   * the Java compiler adds unnamed parameters and/or unnamed local variables. A gap may also occur
+   * for a local variable declared in the source whose lifetime does not cross a StackMap location.
+   * This routine creates LocalVariable entries for these missing items.
    *
    * <ol>
    *   <li>The java Compiler allocates a hidden parameter for the constructor of an inner class.
