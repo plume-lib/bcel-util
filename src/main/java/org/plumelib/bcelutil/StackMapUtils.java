@@ -760,7 +760,7 @@ public abstract class StackMapUtils {
         Type tos = stack.peek(0);
         // System.out.printf ("tos: %s, live_type: %s%n", tos, live_range_type);
         // Store of a null does not change type.
-        // UNDONE: if tos is super of live_range_type, should not start new range
+        // UNDONE: if tos is sub of live_range_type, should not start new range
         if (live_range_start == null || (!tos.equals(Type.NULL) && !tos.equals(live_range_type))) {
           // close current live range
           create_local_from_live_range(mgen, offset);
