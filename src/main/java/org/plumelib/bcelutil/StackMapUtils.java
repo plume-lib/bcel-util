@@ -994,11 +994,13 @@ public abstract class StackMapUtils {
     return lv_new;
   }
 
-  /**
-   * The rest of the code in this file is "fix_local_variable_table" and the methods it calls,
-   * directly or indirectly. The following five variables are used by this code to contain the live
-   * range, type and size of a local variable while it is being processed.
-   */
+  ///////////////////////////////////////////////////////////////////////////
+  /// fix_local_variable_table
+  ///
+
+  // The rest of the code in this file is "fix_local_variable_table" and the methods it calls,
+  // directly or indirectly. The following five variables are used by this code to contain the live
+  // range, type and size of a local variable while it is being processed.
 
   /** The start of a local variable's live range: the first instruction in the range. */
   protected InstructionHandle live_range_start = null;
@@ -1530,4 +1532,9 @@ public abstract class StackMapUtils {
     }
     return stackver.get_stack_types();
   }
+
+  ///
+  /// end of fix_local_variable_table section of file
+  ///
+
 }
