@@ -399,9 +399,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Find the live range of the compiler temp(s) and/or user declared locals at the given offset and
-   * create a LocalVariableGen for each. Note the compiler might generate temps of different sizes
-   * at the same offset (must have disjoint lifetimes).
+   * Find the live range of the compiler temp(s) and/or user declared local(s) at the given offset
+   * and create a LocalVariableGen for each. Note the compiler might generate temps of different
+   * sizes at the same offset (must have disjoint lifetimes).
    *
    * @param mgen the method
    * @param offset compiler assigned local offset of hidden temp(s) or local(s)
@@ -649,7 +649,7 @@ public abstract class StackMapUtils {
    *
    * @param mgen MethodGen of method whose stack types to compute
    */
-  protected final void get_method_stack_types(MethodGen mgen) {
+  protected final void set_method_stack_types(MethodGen mgen) {
     // We cache the stack types for the current method.
     // fix_local_variable_table sets stack_types to null at the start of each method.
     if (stack_types == null) {
@@ -742,7 +742,7 @@ public abstract class StackMapUtils {
   protected final int gen_locals_from_byte_codes(
       MethodGen mgen, int offset, InstructionHandle start) {
     OperandStack stack;
-    get_method_stack_types(mgen);
+    set_method_stack_types(mgen);
     InstructionList il = mgen.getInstructionList();
     for (InstructionHandle ih = start; ih != null; ih = ih.getNext()) {
       Instruction inst = ih.getInstruction();
