@@ -404,7 +404,7 @@ public abstract class StackMapUtils {
    * at the same offset (must have disjoint lifetimes).
    *
    * @param mgen the method
-   * @param offset compiler assigned local offset of hidden temp or local
+   * @param offset compiler assigned local offset of hidden temp(s) or local(s)
    * @return offset incremented by size of smallest variable found at offset
    */
   @RequiresNonNull("initial_type_list")
@@ -814,6 +814,9 @@ public abstract class StackMapUtils {
         live_range_end = ih.getNext();
       }
     }
+    // If we've reached the end of the method without seeing the end of the live range, we set it to
+    // be the end of the method. Note that there may not be an active live_range but that will be
+    // checked in create_local_from_live_range.
     if (live_range_end == null) {
       live_range_end = il.getEnd();
     }
@@ -1333,10 +1336,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Under some circumstances, there may be problems with the local variable table. These problems
-   * occur when the Java compiler adds unnamed entries. There may be unnamed parameters and/or
-   * unnamed local variables. These items appear as gaps in the LocalVariable table. This routine
-   * creates LocalVariable entries for these missing items.
+   * Under some circumstances, there may be gaps in the LocalVariable table. These gaps occur when
+   * the Java compiler adds unnamed parameters and/or unnamed local variables. This routine creates
+   * LocalVariable entries for these missing items.
    *
    * <ol>
    *   <li>The java Compiler allocates a hidden parameter for the constructor of an inner class.
