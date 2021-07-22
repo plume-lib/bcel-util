@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
 import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantClass;
 import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.StackMap;
 import org.apache.bcel.classfile.StackMapEntry;
@@ -18,13 +19,16 @@ import org.apache.bcel.generic.IndexedInstruction;
 import org.apache.bcel.generic.Instruction;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InstructionList;
+import org.apache.bcel.generic.LoadInstruction;
 import org.apache.bcel.generic.LocalVariableGen;
 import org.apache.bcel.generic.LocalVariableInstruction;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.RET;
+import org.apache.bcel.generic.StoreInstruction;
 import org.apache.bcel.generic.Type;
 import org.apache.bcel.verifier.VerificationResult;
+import org.apache.bcel.verifier.structurals.OperandStack;
 import org.checkerframework.checker.index.qual.IndexOrLow;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.interning.qual.InternedDistinct;
@@ -32,6 +36,7 @@ import org.checkerframework.checker.nullness.qual.EnsuresNonNull;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.RequiresNonNull;
+import org.checkerframework.checker.signature.qual.BinaryName;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.dataflow.qual.Pure;
 
@@ -378,156 +383,6 @@ public abstract class StackMapUtils {
     }
   }
 
-  /**
-   * Find the live range of the compiler temp(s) at the given offset and create a LocalVariableGen
-   * for each. Note the compiler might generate temps of different sizes at the same offset (must
-   * have disjoint lifetimes).
-   *
-   * @param mgen the method
-   * @param offset compiler assigned local offset of hidden temp
-   * @return offset incremented by size of smallest temp found at offset
-   */
-  @RequiresNonNull("initial_type_list")
-  protected final int gen_temp_locals(MethodGen mgen, int offset) {
-    int live_start = 0;
-    Type live_type = null;
-    InstructionList il = mgen.getInstructionList();
-    il.setPositions();
-
-    // Set up inital state of StackMap info on entry to method.
-    int locals_offset_height = 0;
-    int byte_code_offset = -1;
-    LocalVariableGen new_lvg;
-    int min_size = 3; // only sizes are 1 or 2; start with something larger.
-
-    number_active_locals = initial_locals_count;
-    StackMapType[] types_of_active_locals = new StackMapType[number_active_locals];
-    for (int ii = 0; ii < number_active_locals; ii++) {
-      types_of_active_locals[ii] = initial_type_list[ii];
-      locals_offset_height += getSize(initial_type_list[ii]);
-    }
-
-    // update state for each StackMap entry
-    for (StackMapEntry smte : stack_map_table) {
-      int frame_type = smte.getFrameType();
-      byte_code_offset += smte.getByteCodeOffset() + 1;
-
-      if (frame_type >= Const.APPEND_FRAME && frame_type <= Const.APPEND_FRAME_MAX) {
-        // number to append is frame_type - 251
-        types_of_active_locals =
-            Arrays.copyOf(types_of_active_locals, number_active_locals + frame_type - 251);
-        for (StackMapType smt : smte.getTypesOfLocals()) {
-          types_of_active_locals[number_active_locals++] = smt;
-          locals_offset_height += getSize(smt);
-        }
-      } else if (frame_type >= Const.CHOP_FRAME && frame_type <= Const.CHOP_FRAME_MAX) {
-        int number_to_chop = 251 - frame_type;
-        while (number_to_chop > 0) {
-          locals_offset_height -= getSize(types_of_active_locals[--number_active_locals]);
-          number_to_chop--;
-        }
-        types_of_active_locals = Arrays.copyOf(types_of_active_locals, number_active_locals);
-      } else if (frame_type == Const.FULL_FRAME) {
-        locals_offset_height = 0;
-        number_active_locals = 0;
-        types_of_active_locals = new StackMapType[smte.getNumberOfLocals()];
-        for (StackMapType smt : smte.getTypesOfLocals()) {
-          types_of_active_locals[number_active_locals++] = smt;
-          locals_offset_height += getSize(smt);
-        }
-      }
-      // all other frame_types do not modify locals.
-
-      // System.out.printf("byte_code_offset: %d, temp offset: %d, locals_offset_height: %d,
-      // number_active_locals: %d, local types: %s%n",
-      //       byte_code_offset, offset, locals_offset_height, number_active_locals,
-      // Arrays.toString(types_of_active_locals));
-
-      if (live_start == 0) {
-        // did the latest StackMap entry define the temp in question?
-        if (offset < locals_offset_height) {
-          live_start = byte_code_offset;
-          int running_offset = 0;
-          for (StackMapType smt : types_of_active_locals) {
-            if (running_offset == offset) {
-              live_type = generate_Type_from_StackMapType(smt);
-              break;
-            }
-            running_offset += getSize(smt);
-          }
-          if (live_type == null) {
-            // No matching offset in stack maps so this offset must be
-            // second half of long or double. Just skip to next stack map.
-            live_start = 0;
-          }
-        }
-      } else {
-        // did the latest StackMap entry undefine the temp in question?
-        if (offset >= locals_offset_height) {
-          // create the temp variable
-          new_lvg =
-              mgen.addLocalVariable(
-                  "DaIkOnTeMp" + offset,
-                  live_type,
-                  offset,
-                  il.findHandle(live_start),
-                  il.findHandle(byte_code_offset));
-          debug_instrument.log(
-              "Added local  %s, %d, %d : %s, %s%n",
-              new_lvg.getIndex(),
-              new_lvg.getStart().getPosition(),
-              new_lvg.getEnd().getPosition(),
-              new_lvg.getName(),
-              new_lvg.getType());
-          min_size = Math.min(min_size, live_type.getSize());
-          // reset to look for more temps at same offset
-          live_start = 0;
-          live_type = null;
-        }
-      }
-      // go on to next StackMap entry
-    }
-    // we are done with stack maps; need to see if any temps still active
-    if (live_start != 0) {
-      // live range is to end of method; create the temp variable
-      new_lvg =
-          mgen.addLocalVariable(
-              "DaIkOnTeMp" + offset, live_type, offset, il.findHandle(live_start), null);
-      debug_instrument.log(
-          "Added local  %s, %d, %d : %s, %s%n",
-          new_lvg.getIndex(),
-          new_lvg.getStart().getPosition(),
-          il.getEnd().getPosition(),
-          new_lvg.getName(),
-          new_lvg.getType());
-      min_size = Math.min(min_size, live_type.getSize());
-    } else {
-      if (min_size == 3) {
-        // did not find a temp in any of the stack maps; that must mean the
-        // temp live range is in between two stack maps or after last stack map
-        // need to scan all byte codes to get live range and type
-        // HACK: for now, just make a guess and put it after last stack map
-        // Note we may be defining a bogus temp for second half of long or double.
-        if (byte_code_offset == -1) {
-          // no stack maps at all, set start to 0
-          byte_code_offset = 0;
-        }
-        new_lvg =
-            mgen.addLocalVariable(
-                "DaIkOnTeMp" + offset, Type.OBJECT, offset, il.findHandle(byte_code_offset), null);
-        debug_instrument.log(
-            "Added local  %s, %d, %d : %s, %s%n",
-            new_lvg.getIndex(),
-            new_lvg.getStart().getPosition(),
-            il.getEnd().getPosition(),
-            new_lvg.getName(),
-            new_lvg.getType());
-        min_size = Math.min(min_size, Type.OBJECT.getSize());
-      }
-    }
-    return offset + min_size;
-  }
-
   // TODO: From the documentation, I am not sure what this method does or when it should be called.
   /**
    * We need to locate and remember any NEW instructions that create uninitialized objects. Their
@@ -823,8 +678,9 @@ public abstract class StackMapUtils {
   protected final Type generate_Type_from_StackMapType(StackMapType smt) {
 
     switch (smt.getType()) {
+      case Const.ITEM_Bogus: // 'top' (undefined) in JVM verification nomenclature
+        return null;
       case Const.ITEM_Integer:
-      case Const.ITEM_Bogus: // not sure about this; reresents 'top'?
         return Type.INT;
       case Const.ITEM_Float:
         return Type.FLOAT;
@@ -833,7 +689,15 @@ public abstract class StackMapUtils {
       case Const.ITEM_Long:
         return Type.LONG;
       case Const.ITEM_Object:
-        return Type.OBJECT;
+        Constant c = pool.getConstantPool().getConstant(smt.getIndex());
+        @SuppressWarnings("signature") // ConstantPool CONSTANT_Class entry is a ClassName
+        @BinaryName String className = ((ConstantClass) c).getBytes(pool.getConstantPool());
+        if (className.charAt(0) == '[') {
+          // special case, className is descriptor of array type
+          return Type.getType(className);
+        } else {
+          return new ObjectType(className);
+        }
       default:
         Thread.dumpStack();
         assert false : "Invalid StackMapType: " + smt + smt.getType();
@@ -1130,11 +994,34 @@ public abstract class StackMapUtils {
     return lv_new;
   }
 
+  ///////////////////////////////////////////////////////////////////////////
+  /// fix_local_variable_table
+  ///
+
+  // The rest of the code in this file is "fix_local_variable_table" and the methods it calls,
+  // directly or indirectly. The following five variables are used by this code to contain the live
+  // range, type and size of a local variable while it is being processed.
+
+  /** The start of a local variable's live range: the first instruction in the range. */
+  protected InstructionHandle live_range_start = null;
+
+  /** The end of a local variable's live range: the first instruction after the range. */
+  protected InstructionHandle live_range_end = null;
+
+  /** The type of a local variable during its live range. */
+  protected Type live_range_type = null;
+
+  /** The storage size of local variable during its live range. */
+  protected int live_range_operand_size = 0;
+
+  /** The types of elements on the operand stack for current method. */
+  protected StackTypes stack_types = null;
+
   /**
-   * Under some circumstances, there may be problems with the local variable table. These problems
-   * occur when the Java compiler adds unnamed entries. There may be unnamed parameters and/or
-   * unnamed local variables. These items appear as gaps in the LocalVariable table. This routine
-   * creates LocalVariable entries for these missing items.
+   * Under some circumstances, there may be gaps in the LocalVariable table. These gaps occur when
+   * the Java compiler adds unnamed parameters and/or unnamed local variables. A gap may also occur
+   * for a local variable declared in the source whose lifetime does not cross a StackMap location.
+   * This routine creates LocalVariable entries for these missing items.
    *
    * <ol>
    *   <li>The java Compiler allocates a hidden parameter for the constructor of an inner class.
@@ -1144,6 +1031,7 @@ public abstract class StackMapUtils {
    *         <li>saving the exception in a finally clause
    *         <li>the lock for a synchronized block
    *         <li>interators
+   *         <li>user declared locals that never appear in a StackMap
    *         <li>(others?)
    *       </ul>
    *       These items are given the name DaIkOnTeMp appended with their offset.
@@ -1204,6 +1092,17 @@ public abstract class StackMapUtils {
       loc_index = 1;
       offset = 1;
       first_local_index++;
+    } else {
+      // The java method sun/misc/ProxyGenerator generates proxy classes at run time.  For some
+      // unknown reason when it generates code for <clinit> it allocates local 0 but never uses it.
+      if (mgen.getClassName().startsWith("com.sun.proxy.") && mgen.getName().equals("<clinit>")) {
+        new_lvg = mgen.addLocalVariable("$clinit$hidden$" + offset, Type.INT, offset, null, null);
+        debug_instrument.log(
+            "Added hidden proxy local  %s%n",
+            new_lvg.getIndex() + ": " + new_lvg.getName() + ", " + new_lvg.getType());
+        offset = 1;
+        first_local_index++;
+      }
     }
 
     // Loop through each parameter
@@ -1244,7 +1143,12 @@ public abstract class StackMapUtils {
     //   the lock for a synchronized block
     //   iterators
     //   (others?)
+    // Also, the javac compiler does not make a LocalVariable for user declared
+    // locals that never appear in a StackMap.
     // We will create a 'fake' local for these cases.
+
+    // set stack operand types to unknown
+    stack_types = null;
 
     for (int ii = first_local_index; ii < locals.length; ii++) {
       l = locals[ii];
@@ -1252,7 +1156,7 @@ public abstract class StackMapUtils {
         // A gap in index values indicates a compiler allocated temp.
         // (if offset is 0, probably a lock object)
         // there is at least one hidden compiler temp before the next local
-        offset = gen_temp_locals(mgen, offset);
+        offset = gen_locals(mgen, offset);
         ii--; // need to revisit same local
       } else {
         new_lvg =
@@ -1264,13 +1168,341 @@ public abstract class StackMapUtils {
       }
     }
 
-    // check for hidden temps after last declared local.
+    // Check after last declared local for any compiler temps and/or user declared
+    // locals not currently in the LocalVariables table.
     while (offset < max_locals) {
-      offset = gen_temp_locals(mgen, offset);
+      offset = gen_locals(mgen, offset);
     }
 
     // Recalculate the highest local used based on looking at code offsets.
     mgen.setMaxLocals();
+  }
+
+  /**
+   * Find the live range of the compiler temp(s) and/or user declared local(s) at the given offset
+   * and create a LocalVariableGen for each. Note the compiler might generate temps of different
+   * sizes at the same offset (must have disjoint lifetimes). In general, these variables will not
+   * have a live range of the entire method. We try to calculate the true live range so if, at some
+   * later point, we need to generate a new StackMap we can include the correct list of active
+   * locals.
+   *
+   * @param mgen the method
+   * @param offset compiler assigned local offset of hidden temp(s) or local(s)
+   * @return offset incremented by size of smallest variable found at offset
+   */
+  @RequiresNonNull("initial_type_list")
+  protected final int gen_locals(MethodGen mgen, int offset) {
+    int live_start = 0;
+    Type live_type = null;
+    InstructionList il = mgen.getInstructionList();
+    il.setPositions();
+
+    // Set up inital state of StackMap info on entry to method.
+    int locals_offset_height = 0;
+    int byte_code_offset = -1;
+    LocalVariableGen new_lvg;
+    int min_size = 3; // only sizes are 1 or 2; start with something larger.
+
+    number_active_locals = initial_locals_count;
+    StackMapType[] types_of_active_locals = new StackMapType[number_active_locals];
+    for (int ii = 0; ii < number_active_locals; ii++) {
+      types_of_active_locals[ii] = initial_type_list[ii];
+      locals_offset_height += getSize(initial_type_list[ii]);
+    }
+
+    // update state for each StackMap entry
+    for (StackMapEntry smte : stack_map_table) {
+      int frame_type = smte.getFrameType();
+      byte_code_offset += smte.getByteCodeOffset() + 1;
+
+      if (frame_type >= Const.APPEND_FRAME && frame_type <= Const.APPEND_FRAME_MAX) {
+        // number to append is frame_type - 251
+        types_of_active_locals =
+            Arrays.copyOf(types_of_active_locals, number_active_locals + frame_type - 251);
+        for (StackMapType smt : smte.getTypesOfLocals()) {
+          types_of_active_locals[number_active_locals++] = smt;
+          locals_offset_height += getSize(smt);
+        }
+      } else if (frame_type >= Const.CHOP_FRAME && frame_type <= Const.CHOP_FRAME_MAX) {
+        int number_to_chop = 251 - frame_type;
+        while (number_to_chop > 0) {
+          locals_offset_height -= getSize(types_of_active_locals[--number_active_locals]);
+          number_to_chop--;
+        }
+        types_of_active_locals = Arrays.copyOf(types_of_active_locals, number_active_locals);
+      } else if (frame_type == Const.FULL_FRAME) {
+        locals_offset_height = 0;
+        number_active_locals = 0;
+        types_of_active_locals = new StackMapType[smte.getNumberOfLocals()];
+        for (StackMapType smt : smte.getTypesOfLocals()) {
+          types_of_active_locals[number_active_locals++] = smt;
+          locals_offset_height += getSize(smt);
+        }
+      }
+      // all other frame_types do not modify locals.
+
+      // System.out.printf("byte_code_offset: %d, temp offset: %d, locals_offset_height: %d,
+      // number_active_locals: %d, local types: %s%n",
+      //       byte_code_offset, offset, locals_offset_height, number_active_locals,
+      // Arrays.toString(types_of_active_locals));
+
+      // System.out.printf ("offset: %d, bco: %d, lstart: %d, ltype: %s, loh: %d%n",
+      // offset, byte_code_offset, live_start, live_type, locals_offset_height);
+
+      if (live_start == 0) {
+        // did the latest StackMap entry define the temp or local in question?
+        if (offset < locals_offset_height) {
+          live_start = byte_code_offset;
+          int running_offset = 0;
+          for (StackMapType smt : types_of_active_locals) {
+            if (running_offset == offset) {
+              live_type = generate_Type_from_StackMapType(smt);
+              break;
+            }
+            running_offset += getSize(smt);
+          }
+          if (live_type == null) {
+            // No matching offset in stack maps or StackMapType was Bogus (Top).
+            // Just skip to next stack map.
+            live_start = 0;
+          }
+        }
+      } else {
+        // did the latest StackMap entry undefine the temp or local in question?
+        if (offset >= locals_offset_height) {
+          // create a LocalVariable
+          new_lvg =
+              mgen.addLocalVariable(
+                  "DaIkOnTeMp" + offset,
+                  live_type,
+                  offset,
+                  il.findHandle(live_start),
+                  il.findHandle(byte_code_offset));
+          debug_instrument.log(
+              "Added local  %s, %d, %d : %s, %s%n",
+              new_lvg.getIndex(),
+              new_lvg.getStart().getPosition(),
+              new_lvg.getEnd().getPosition(),
+              new_lvg.getName(),
+              new_lvg.getType());
+          min_size = Math.min(min_size, live_type.getSize());
+          // reset to look for more temps or locals at same offset
+          live_start = 0;
+          live_type = null;
+        }
+      }
+      // go on to next StackMap entry
+    }
+
+    // System.out.printf ("end of stack maps%n");
+    // System.out.printf ("offset: %d, bco: %d, lstart: %d, ltype: %s, loh: %d%n",
+    // offset, byte_code_offset, live_start, live_type, locals_offset_height);
+
+    // we are done with stack maps; need to see if there is a temp or local still active
+    if (live_start != 0) {
+      // must find end of live range and create the LocalVariable
+      live_range_start = il.findHandle(live_start);
+      live_range_end = live_range_start; // not necessarily true, but only needs to be !null
+      live_range_type = live_type;
+      live_range_operand_size = min_size;
+      min_size = gen_locals_from_byte_codes(mgen, offset, il.findHandle(byte_code_offset));
+    } else {
+      if (min_size == 3) {
+        // We did not find the offset in any of the stack maps; that must mean
+        // the live range is in between two stack maps or after the last stack map.
+        // We need to scan all the byte codes to calculate the live range and type.
+        min_size = gen_locals_from_byte_codes(mgen, offset);
+        // offset is never mentioned in code; go on to next location
+        if (min_size == 3) {
+          return offset + 1;
+        }
+      }
+    }
+    return offset + min_size;
+  }
+
+  /**
+   * Calculate the live range of a local variable (or variables).
+   *
+   * @param mgen MethodGen of method to search
+   * @param offset offset of the local
+   * @return minimum size of local(s) found at offset
+   */
+  protected final int gen_locals_from_byte_codes(MethodGen mgen, int offset) {
+    // The same local offset could be used for multiple local variables
+    // with disjoint lifetimes.  We attempt to deal with this by looking
+    // at the type of a store instruction and if it does not equal the
+    // current type we create a temp from the current live range data
+    // and then reset to start a new live range.
+
+    // reset globals
+    live_range_start = null;
+    live_range_end = null;
+    live_range_type = null;
+    // only sizes are 1 or 2; start with something larger.
+    live_range_operand_size = 3;
+    return gen_locals_from_byte_codes(mgen, offset, mgen.getInstructionList().getStart());
+  }
+
+  /**
+   * Calculate the live range of a local variable starting from the given InstructionHandle. The
+   * following live_range globals must be set:
+   *
+   * <ul>
+   *   <li>live_range_start
+   *   <li>live_range_end
+   *   <li>live_range_type
+   *   <li>live_range_operand_size
+   * </ul>
+   *
+   * @param mgen MethodGen of method to search
+   * @param offset offset of the local
+   * @param start search forward from this instruction
+   * @return minimum size of local(s) found at offset
+   */
+  protected final int gen_locals_from_byte_codes(
+      MethodGen mgen, int offset, InstructionHandle start) {
+    OperandStack stack;
+    set_method_stack_types(mgen);
+    InstructionList il = mgen.getInstructionList();
+    for (InstructionHandle ih = start; ih != null; ih = ih.getNext()) {
+      Instruction inst = ih.getInstruction();
+
+      debug_instrument.log(
+          "gen_locals_from_byte_codes for offset: %d :: position: %d, inst: %s%n",
+          offset, ih.getPosition(), inst);
+
+      if (inst instanceof StoreInstruction) {
+        if (offset != ((LocalVariableInstruction) inst).getIndex()) {
+          continue;
+        }
+        stack = stack_types.get(ih.getPosition());
+        // get type of item about to be stored
+        Type tos = stack.peek(0);
+        // System.out.printf ("tos: %s, live_type: %s%n", tos, live_range_type);
+        // Store of a null does not change type.
+        // UNDONE: if tos is subclass of live_range_type, should not start new range
+        if (live_range_start == null || (!tos.equals(Type.NULL) && !tos.equals(live_range_type))) {
+          // close current live range
+          create_local_from_live_range(mgen, offset);
+          // start a new live range
+          live_range_type = tos;
+          live_range_start = ih.getNext();
+        }
+        // update live_range_end
+        live_range_end = ih.getNext();
+
+      } else if (inst instanceof IINC) {
+        if (offset != ((IndexedInstruction) inst).getIndex()) {
+          continue;
+        }
+        if (live_range_type == null) {
+          throw new RuntimeException("gen_locals_from_byte_code: no store before IINC");
+        } else if (live_range_type != Type.INT) {
+          throw new RuntimeException("gen_locals_from_byte_code: IINC operand not type int");
+        }
+        // update live_range_end
+        live_range_end = ih.getNext();
+
+      } else if (inst instanceof RET) {
+        if (offset != ((IndexedInstruction) inst).getIndex()) {
+          continue;
+        }
+        if (live_range_type == null) {
+          throw new RuntimeException("gen_locals_from_byte_code: no store before RET");
+        } else if (live_range_type.getType() != Const.T_ADDRESS) {
+          throw new RuntimeException(
+              "gen_locals_from_byte_code: RET operand not type returnAddress");
+        }
+        // update live_range_end
+        live_range_end = ih.getNext();
+
+      } else if (inst instanceof LoadInstruction) {
+        if (offset != ((LocalVariableInstruction) inst).getIndex()) {
+          continue;
+        }
+        stack = stack_types.get(ih.getPosition() + inst.getLength());
+        // get type of item about to be loaded
+        Type tos = stack.peek(0);
+        if (live_range_type == null) {
+          throw new RuntimeException("gen_locals_from_byte_code: no store before load");
+        } else if (!tos.equals(live_range_type)) {
+          // Load type can be super class of store type.  Rather than write code
+          // using reflection to verify, we just assume compiler got it right.
+          // throw new RuntimeException("gen_locals_from_byte_code: store/load types do not match");
+        }
+        // update live_range_end
+        live_range_end = ih.getNext();
+      }
+    }
+    // If we've reached the end of the method without seeing the end of the live range, we set it to
+    // be the end of the method. Note that there may not be an active live_range but that will be
+    // checked in create_local_from_live_range.
+    if (live_range_end == null) {
+      live_range_end = il.getEnd();
+    }
+    // close current live range
+    create_local_from_live_range(mgen, offset);
+
+    return live_range_operand_size;
+  }
+
+  /**
+   * Create a new LocalVariable from the live_range data. Does nothing if {@link #live_range_start}
+   * is null.
+   *
+   * @param mgen MethodGen of method to search
+   * @param offset offset of the local
+   */
+  protected final void create_local_from_live_range(MethodGen mgen, int offset) {
+    if (live_range_start == null) {
+      return;
+    }
+    // Type.getType doesn't understand NULL which is the type of the top of operand stack
+    // after the JVM aconst_null instruction.
+    if (Type.NULL.equals(live_range_type)) {
+      live_range_type = Type.OBJECT;
+    }
+    // convert returnAddress to Object
+    if (live_range_type.getType() == Const.T_ADDRESS) {
+      live_range_type = Type.OBJECT;
+    }
+    LocalVariableGen new_lvg =
+        mgen.addLocalVariable(
+            "DaIkOnTeMp" + offset, live_range_type, offset, live_range_start, live_range_end);
+    debug_instrument.log(
+        "Added local  %s, %d, %d : %s, %s%n",
+        new_lvg.getIndex(),
+        new_lvg.getStart().getPosition(),
+        new_lvg.getEnd().getPosition(),
+        new_lvg.getName(),
+        new_lvg.getType());
+    live_range_operand_size = Math.min(live_range_operand_size, live_range_type.getSize());
+  }
+
+  /**
+   * Calculates the stack types for each byte code offset of the current method, and stores them in
+   * variable {@link #stack_types}. Does nothing if {@link #stack_types} is already set.
+   *
+   * @param mgen MethodGen of method whose stack types to compute
+   */
+  protected final void set_method_stack_types(MethodGen mgen) {
+    // We cache the stack types for the current method.
+    // fix_local_variable_table sets stack_types to null at the start of each method.
+    if (stack_types == null) {
+      // bcel_calc_stack_types needs MaxLocals set properly.
+      mgen.setMaxLocals();
+      stack_types = bcel_calc_stack_types(mgen);
+      if (stack_types == null) {
+        Error e =
+            new Error(
+                String.format(
+                    "bcel_calc_stack_types failure in %s.%s%n",
+                    mgen.getClassName(), mgen.getName()));
+        e.printStackTrace();
+        throw e;
+      }
+    }
   }
 
   /**
@@ -1300,4 +1532,9 @@ public abstract class StackMapUtils {
     }
     return stackver.get_stack_types();
   }
+
+  ///
+  /// end of fix_local_variable_table section of file
+  ///
+
 }
