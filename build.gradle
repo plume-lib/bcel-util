@@ -2,7 +2,7 @@ plugins {
   id 'java-library'
 
   // To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
-  id 'com.github.johnrengelman.shadow' version '6.1.0'
+  id 'com.github.johnrengelman.shadow' version '7.1.0'
 
   // Formatting is disabled due to poor handling of type annotations; wait until
   // this issue is fixed: https://github.com/google/google-java-format/issues/5
@@ -10,13 +10,13 @@ plugins {
   // id 'com.github.sherter.google-java-format' version '0.7.1'
 
   // Error Prone linter
-  id("net.ltgt.errorprone") version "2.0.1"
+  id("net.ltgt.errorprone") version "2.0.2"
 
   // Checker Framework pluggable type-checking
   id 'org.checkerframework' version '0.6.2'
 
   // To show task list as a tree, run: ./gradlew <taskname> taskTree
-  id 'com.dorongold.task-tree' version '1.5'
+  id 'com.dorongold.task-tree' version '2.1.0'
 }
 
 repositories {
@@ -28,9 +28,9 @@ dependencies {
   // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
 
-  implementation 'org.plumelib:reflection-util:1.0.3'
+  implementation 'org.plumelib:reflection-util:1.0.4'
 
-  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
