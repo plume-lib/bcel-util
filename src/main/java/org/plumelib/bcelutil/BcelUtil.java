@@ -362,7 +362,8 @@ public final class BcelUtil {
     }
 
     try {
-      mgen.toString(); // ensure it can be formatted without exceptions
+      @SuppressWarnings("UnusedVariable")
+      String ignore = mgen.toString(); // ensure it can be formatted without exceptions
       mgen.getLineNumberTable(mgen.getConstantPool());
 
       InstructionList ilist = mgen.getInstructionList();
@@ -724,6 +725,7 @@ public final class BcelUtil {
    * @deprecated use {@link #binaryNameToType}
    */
   // TODO: Poor name because this handles any non-array, not just classes.
+  @SuppressWarnings("InlineMeSuggester")
   @Deprecated // use binaryNameToType
   public static Type classnameToType(@BinaryNameOrPrimitiveType String classname) {
     return binaryNameToType(classname);
