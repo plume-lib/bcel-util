@@ -1,8 +1,12 @@
 # BCEL-Util change log
 
+## 1.1.14 (??)
+
+- Builds and runs under JDK 17, but not JDK 16.  (Still builds and runs under JDK 8 and 11.)
+
 ## 1.1.13 (July 22, 2021)
 
-- Builds and runs under JDK 16.  (Still builds runs under JDK 8 and 11.)
+- Builds and runs under JDK 16.  (Still builds and runs under JDK 8 and 11.)
 - Improved handling of gaps (missing local vars) in local variable table.
 
 ## 1.1.12 (May 28, 2021)
