@@ -25,8 +25,6 @@
  * members of the {@link org.apache.bcel.classfile} package and {@link
  * org.plumelib.bcelutil.BcelUtil} to explore the class file of interest.
  *
- * <p>
- *
  * @see org.plumelib.bcelutil.InstructionListUtils InstructionListUtils for notes on modifing a Java
  *     class file
  * @see <a href="https://commons.apache.org/proper/commons-bcel/index.html">Commons BCEL web site
