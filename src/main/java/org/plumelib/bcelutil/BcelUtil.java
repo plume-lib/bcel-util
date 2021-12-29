@@ -64,7 +64,14 @@ public final class BcelUtil {
       version = version.substring(2, 3);
     } else {
       // Since Java 9, from a version string like "11.0.1", extract "11".
-      version = version.substring(0, version.indexOf("."));
+      int i = version.indexOf(".");
+      if (i < 0) {
+        // Some Linux dockerfiles return only the major version number for
+        // the system property "java.varsion"; i.e., no ".<minor version>".
+        // Return 'version' unchanged in this case.
+      } else {
+        version = version.substring(0, i);
+      }
     }
     return Integer.parseInt(version);
   }
