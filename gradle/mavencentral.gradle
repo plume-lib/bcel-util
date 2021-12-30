@@ -12,14 +12,14 @@
 //  * Run in the top-level directory:  ./gradlew clean publish && ./gradlew javadocWeb
 //  * Browse to https://oss.sonatype.org/#stagingRepositories, complete the Maven Central release.
 //  * Add a git tag:
-//    VER=1.1.13 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push && git push --tags
-//  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.1.13", use the text from ../CHANGELOG.md as the description, attach the .jar file from ../build/libs/
+//    VER=1.1.14 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push && git push --tags
+//  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.1.14", use the text from ../CHANGELOG.md as the description, attach the .jar file from ../build/libs/
 
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group 'org.plumelib'
-version '1.1.13'
+version '1.1.14'
 
 final isSnapshot = version.contains('SNAPSHOT')
 
