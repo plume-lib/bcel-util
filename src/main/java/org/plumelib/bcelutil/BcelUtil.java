@@ -67,7 +67,7 @@ public final class BcelUtil {
       int i = version.indexOf(".");
       if (i < 0) {
         // Some Linux dockerfiles return only the major version number for
-        // the system property "java.varsion"; i.e., no ".<minor version>".
+        // the system property "java.version"; i.e., no ".<minor version>".
         // Return 'version' unchanged in this case.
       } else {
         version = version.substring(0, i);
