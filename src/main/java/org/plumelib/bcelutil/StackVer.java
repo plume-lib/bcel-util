@@ -383,7 +383,7 @@ public final class StackVer {
                 invalidReturnTypeError(returnedType, m);
               }
             } catch (final ClassNotFoundException e) {
-              // Don't know what do do now, so raise RuntimeException
+              // Don't know what to do now, so raise RuntimeException
               throw new RuntimeException(e);
             }
           } else if (!returnedType.equals(m.getReturnType().normalizeForStackOrLocal())) {
