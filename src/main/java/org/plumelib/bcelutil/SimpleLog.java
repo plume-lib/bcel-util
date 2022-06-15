@@ -87,7 +87,8 @@ public final class SimpleLog {
   }
 
   /**
-   * Set the private field logfile (if it is not set), based on the private field {@code filename}.
+   * Set the private field {@code logfile} (if it is not set), based on the private field {@code
+   * filename}.
    *
    * <p>This creates the file if it does not exist. This should be called lazily, when output is
    * performed. Otherwise, it would be annoying to create a zero-size logfile if no output is ever
