@@ -87,12 +87,14 @@ public final class SimpleLog {
   }
 
   /**
-   * Set the private field logfile, based on the private field {@code filename}.
+   * Set the private field {@code logfile} (if it is not set), based on the private field {@code
+   * filename}.
    *
    * <p>This creates the file if it does not exist. This should be called lazily, when output is
    * performed. Otherwise, it would be annoying to create a zero-size logfile if no output is ever
    * written.
    */
+  @SuppressWarnings("builder:required.method.not.called") // a leak, but only of a single file
   @EnsuresNonNull("logfile")
   private void setLogfile() {
     if (logfile != null) {
