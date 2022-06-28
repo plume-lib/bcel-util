@@ -679,6 +679,7 @@ public abstract class StackMapUtils {
 
     switch (smt.getType()) {
       case Const.ITEM_Bogus: // 'top' (undefined) in JVM verification nomenclature
+      case Const.ITEM_Null:  // no idea what this means, but Groovy generates it (mlr)
         return null;
       case Const.ITEM_Integer:
         return Type.INT;
