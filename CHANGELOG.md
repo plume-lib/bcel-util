@@ -1,6 +1,6 @@
 # BCEL-Util change log
 
-## 1.1.15 (???)
+## 1.1.15 (June 29, 2022)
 
 - Now supports Groovy generated class files.
 
