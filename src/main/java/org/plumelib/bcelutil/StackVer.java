@@ -109,7 +109,7 @@ public final class StackVer {
     /**
      * Tests if InstructionContext queue is empty.
      *
-     * @return true if the InstructionContext queue is empty.
+     * @return true if the InstructionContext queue is empty
      */
     public boolean isEmpty() {
       return ics.isEmpty();
