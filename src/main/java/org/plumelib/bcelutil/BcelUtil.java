@@ -488,11 +488,8 @@ public final class BcelUtil {
    */
   public static void dump(JavaClass jc, File dumpDir) {
 
-    try {
-      dumpDir.mkdir();
-      File path = new File(dumpDir, jc.getClassName() + ".bcel");
-      PrintStream p = new PrintStream(path);
-
+    dumpDir.mkdir();
+    try (PrintStream p = new PrintStream(new File(dumpDir, jc.getClassName() + ".bcel"))) {
       // Print the class, superclass, and interfaces
       p.printf("class %s extends %s%n", jc.getClassName(), jc.getSuperclassName());
       String[] inames = jc.getInterfaceNames();
@@ -534,9 +531,6 @@ public final class BcelUtil {
       for (int ii = 0; ii < constants.length; ii++) {
         p.printf("  %d %s%n", ii, constants[ii]);
       }
-
-      p.close();
-
     } catch (Exception e) {
       throw new Error(
           "Unexpected error dumping JavaClass: " + jc.getClassName() + " to " + dumpDir.getName(),
