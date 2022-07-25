@@ -29,9 +29,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * <p>BCEL ought to automatically build and maintain the StackMapTable in a manner similar to the
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
  *
- * <p>If one wishes to modify a Java class file, you should create a subclass of
- * InstructionListUtils to do the modifications. Then a rough program template for that class would
- * be:
+ * <p>If you wish to modify a Java class file, you should create a subclass of InstructionListUtils
+ * to do the modifications. Then a rough program template for that class would be:
  *
  * <pre>
  *   import org.apache.bcel.classfile.*;
@@ -109,6 +108,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @SuppressWarnings("nullness")
 public abstract class InstructionListUtils extends StackMapUtils {
+
+  /** Create a new InstructionListUtils. */
+  public InstructionListUtils() {}
 
   /**
    * Appends the specified instruction to the end of the specified list. Required because for some
@@ -213,7 +215,8 @@ public abstract class InstructionListUtils extends StackMapUtils {
         } else if ((it instanceof CodeExceptionGen) && redirect_branches) {
           CodeExceptionGen exc = (CodeExceptionGen) it;
           if (exc.getStartPC() == ih) exc.updateTarget(ih, new_start);
-          else if (exc.getEndPC() == ih) ; // leave EndPC unchanged
+          else if (exc.getEndPC() == ih)
+            ; // leave EndPC unchanged
           else if (exc.getHandlerPC() == ih) exc.setHandlerPC(new_start);
           else System.out.printf("Malformed CodeException: %s%n", exc);
         }

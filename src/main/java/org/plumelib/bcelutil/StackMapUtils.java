@@ -55,6 +55,11 @@ import org.checkerframework.dataflow.qual.Pure;
 @SuppressWarnings("nullness")
 public abstract class StackMapUtils {
 
+  /** Create a new StackMapUtils object. */
+  public StackMapUtils() {
+    // Nothing to do.
+  }
+
   /*
    * NOMENCLATURE
    *
@@ -679,7 +684,7 @@ public abstract class StackMapUtils {
 
     switch (smt.getType()) {
       case Const.ITEM_Bogus: // 'top' (undefined) in JVM verification nomenclature
-      case Const.ITEM_Null:  // no idea what this means, but Groovy generates it (mlr)
+      case Const.ITEM_Null: // no idea what this means, but Groovy generates it (mlr)
         return null;
       case Const.ITEM_Integer:
         return Type.INT;
