@@ -73,6 +73,10 @@ public final class BcelUtil {
         version = version.substring(0, i);
       }
     }
+    int i = version.indexOf("-");
+    if (i > 0) {
+      version = version.substring(0, i);
+    }
     return Integer.parseInt(version);
   }
 
