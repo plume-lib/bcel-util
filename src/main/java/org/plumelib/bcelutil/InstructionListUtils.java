@@ -214,7 +214,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           CodeExceptionGen exc = (CodeExceptionGen) it;
           if (exc.getStartPC() == ih) exc.updateTarget(ih, new_start);
           else if (exc.getEndPC() == ih) {
-            ; // leave EndPC unchanged
+            // leave EndPC unchanged
           } else if (exc.getHandlerPC() == ih) {
             exc.setHandlerPC(new_start);
           } else {
