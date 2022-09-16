@@ -3,7 +3,7 @@
 //     ossrhUsername=YOUR_USER_NAME_HERE
 //     ossrhPassword=YOUR_PASSWORD_HERE
 
-// To make a release:
+// To make a release (run on any filesystem, except the last step):
 //  * git pull
 //  * Update the version number in ../README.md and in this file (multiple times in each).
 //  * Update ../CHANGELOG.md .
@@ -13,7 +13,7 @@
 //  * Add a git tag:
 //    VER=1.1.15 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push && git push --tags
 //  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.1.15", use the text from ../CHANGELOG.md as the description, attach the .jar file from ../build/libs/
-//  * On the CSE filesystem:  git pull && ./gradlew javadocWeb
+//  * Finally, run on the CSE filesystem:  git pull && ./gradlew javadocWeb
 
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
