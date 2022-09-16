@@ -1,8 +1,12 @@
 # BCEL-Util change log
 
+## 1.1.16 (?? ??, 20??)
+
+- Compiles and runs under Java 18.
+
 ## 1.1.15 (June 29, 2022)
 
-- Now supports Groovy generated class files.
+- Now supports Groovy-generated class files.
 
 ## 1.1.14 (December 29, 2021)
 

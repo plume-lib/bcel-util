@@ -55,6 +55,11 @@ import org.checkerframework.dataflow.qual.Pure;
 @SuppressWarnings("nullness")
 public abstract class StackMapUtils {
 
+  /** Create a new StackMapUtils object. */
+  public StackMapUtils() {
+    // Nothing to do.
+  }
+
   /*
    * NOMENCLATURE
    *
