@@ -215,10 +215,13 @@ public abstract class InstructionListUtils extends StackMapUtils {
         } else if ((it instanceof CodeExceptionGen) && redirect_branches) {
           CodeExceptionGen exc = (CodeExceptionGen) it;
           if (exc.getStartPC() == ih) exc.updateTarget(ih, new_start);
-          else if (exc.getEndPC() == ih)
-            ; // leave EndPC unchanged
-          else if (exc.getHandlerPC() == ih) exc.setHandlerPC(new_start);
-          else System.out.printf("Malformed CodeException: %s%n", exc);
+          else if (exc.getEndPC() == ih) {
+            // leave EndPC unchanged
+          } else if (exc.getHandlerPC() == ih) {
+            exc.setHandlerPC(new_start);
+          } else {
+            System.out.printf("Malformed CodeException: %s%n", exc);
+          }
         }
       }
     }

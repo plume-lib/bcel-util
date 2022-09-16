@@ -3,12 +3,4 @@
 # Verify all .java files compile prior to checkin.
 ./gradlew compileAll
 
-## Enable when google-java-format handles type annotations better;
-## see https://github.com/google/google-java-format/issues/5
-# # Verify proper Java file formatting prior to checkin.
-# changed_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.java$' | paste -s -d",")
-# # This only works if ignoreFailures is set to false (which it is by default).
-# ./gradlew verifyGJF -DverifyGoogleJavaFormat.include="$changed_files" &>/dev/null && exit 0
-# echo "Some files are not formatted properly. Please run:"
-# echo "./gradlew gJF -DgoogleJavaFormat.include=\"$changed_files\""
-# exit 1
+# Don't check code formatting here; it is run as part of `gradlew check`.
