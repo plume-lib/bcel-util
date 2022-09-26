@@ -129,9 +129,19 @@ javadoc {
   options.addStringOption('private', '-quiet')
   exclude 'org/plumelib/bcelutil/StackVer.java'
   options.with {
-    linksOffline 'https://docs.oracle.com/javase/8/docs/api/', 'https://docs.oracle.com/javase/8/docs/api/'
-    // this works locally but not on Travis?
-    //linksOffline 'https://commons.apache.org/proper/commons-bcel/apidocs/', 'https://commons.apache.org/proper/commons-bcel/apidocs/'
+    // "linksOffline 'https://docs.oracle.com/javase/8/docs/api/', ..."
+    // no longer works, because that URL redirects to https://docs.oracle.com/en/java/javase/19/ but not to any specific webpage under it.
+    // "linksOffline 'https://docs.oracle.com/en/java/javase/17/docs/api/', ..."
+    // does not works under JDK <= 17.
+    // Under JDK 11 and JDK 17, even with "-source 8", it yields error:
+    //   The code being documented uses packages in the unnamed module, but the packages defined in
+    //   https://docs.oracle.com/en/java/javase/17/docs/api/ are in named modules.
+    // See https://bugs.openjdk.org/browse/JDK-8274639
+    // JDK 18 has a "--link-modularity-mismatch" command-line option which is "info" or "warn".
+    // I think it would work to:
+    //  *   use JDK 8 links under JDK <= 17.
+    //  * use JDK 17 links, and "--link-modularity-mismatch info", under JDK > 17 (i.e., JDK >= 18).
+    // But it's easier to just not use "linksOffline".
   }
   if (JavaVersion.current().compareTo(org.gradle.api.JavaVersion.VERSION_1_9) >= 0) {
     options.addStringOption('source', '8')
