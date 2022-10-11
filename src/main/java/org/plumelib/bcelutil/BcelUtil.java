@@ -73,6 +73,7 @@ public final class BcelUtil {
         version = version.substring(0, i);
       }
     }
+    // Handle version strings like "18-ea".
     int i = version.indexOf("-");
     if (i > 0) {
       version = version.substring(0, i);
