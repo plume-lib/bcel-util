@@ -1,6 +1,6 @@
 # BCEL-Util change log
 
-## 1.1.16 (October 10, 2022)
+## 1.1.16 (October 12, 2022)
 
 - Compiles and runs under Java 18.
 - `BcelUtil.javaVersion` works on early access releases.
