@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
 import org.apache.bcel.classfile.Code;
