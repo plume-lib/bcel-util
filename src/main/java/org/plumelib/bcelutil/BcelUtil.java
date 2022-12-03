@@ -1,6 +1,5 @@
 package org.plumelib.bcelutil;
 
-import com.google.errorprone.annotations.InlineMe;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -503,7 +502,9 @@ public final class BcelUtil {
       if ((inames != null) && (inames.length > 0)) {
         p.printf("   implements ");
         for (String iname : inames) {
-          if (!first) p.printf(", ");
+          if (!first) {
+            p.printf(", ");
+          }
           p.printf("%s", iname);
           first = false;
         }
@@ -603,11 +604,6 @@ public final class BcelUtil {
    */
   public static void resetLocalsToFormals(MethodGen mg) {
 
-    // Get the parameter types and names.
-    Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
-    String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
-        argNames = mg.getArgumentNames();
-
     // Remove any existing locals
     mg.setMaxLocals(0);
     mg.removeLocalVariables();
@@ -616,6 +612,11 @@ public final class BcelUtil {
     if (!mg.isStatic()) {
       mg.addLocalVariable("this", new ObjectType(mg.getClassName()), null, null);
     }
+
+    // Get the parameter types and names.
+    Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
+    String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
+        argNames = mg.getArgumentNames();
 
     // Add a local for each parameter
     for (int ii = 0; ii < argNames.length; ii++) {
@@ -720,24 +721,6 @@ public final class BcelUtil {
     System.arraycopy(types, 0, newTypes, 1, types.length);
     newTypes[0] = newType;
     return newTypes;
-  }
-
-  /**
-   * Return the type corresponding to a given binary name or primitive type name.
-   *
-   * @param classname the binary name of a class (= fully-qualified name, except for inner classes),
-   *     or a primitive type name, but not an array
-   * @return the type corresponding to the given class name
-   * @see #fqBinaryNameToType
-   * @deprecated use {@link #binaryNameToType}
-   */
-  // TODO: Poor name because this handles any non-array, not just classes.
-  @Deprecated // use binaryNameToType
-  @InlineMe(
-      replacement = "BcelUtil.binaryNameToType(classname)",
-      imports = "org.plumelib.bcelutil.BcelUtil")
-  public static Type classnameToType(@BinaryNameOrPrimitiveType String classname) {
-    return binaryNameToType(classname);
   }
 
   /**

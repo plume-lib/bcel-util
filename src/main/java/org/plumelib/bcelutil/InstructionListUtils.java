@@ -64,12 +64,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *        }
  *
  *        // Get existing StackMapTable (if present)
- *        set_current_stack_map_table(mg, cg.getMajor());
- *        fix_local_variable_table(mg);
+ *        setCurrentStackMapTable(mg, cg.getMajor());
+ *        fixLocalVariableTable(mg);
  *
  *        // Create a map of Uninitialized_variable_info offsets to
  *        // InstructionHandles.
- *        build_unitialized_NEW_map(il);
+ *        buildUnitializedNewMap(il);
  *
  * This is where you would insert your code to modify the current method (mg).
  * Most often this is done with members of the {@link org.apache.bcel.generic}
@@ -79,8 +79,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  *        // Update the Uninitialized_variable_info offsets before
  *        // we write out the new StackMapTable.
- *        update_uninitialized_NEW_offsets(il);
- *        create_new_stack_map_attribute(mg);
+ *        updateUninitializedNewOffsets(il);
+ *        createNewStackMapAttribute(mg);
  *
  *        // Update the instruction list
  *        mg.setInstructionList(il);
@@ -103,7 +103,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *  }
  * </pre>
  *
- * It one only wishes to examine a class file, the use of this class is not necessary. See {@link
+ * <p>It one only wishes to examine a class file, the use of this class is not necessary. See {@link
  * org.plumelib.bcelutil.BcelUtil} for notes on inspecting a Java class file.
  */
 @SuppressWarnings("nullness")
@@ -141,35 +141,35 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * Inserts an instruction list at the beginning of a method.
    *
    * @param mg MethodGen of method to be modified
-   * @param new_il InstructionList holding the new code
+   * @param newIl InstructionList holding the new code
    */
-  protected final void insert_at_method_start(MethodGen mg, InstructionList new_il) {
+  protected final void insertAtMethodStart(MethodGen mg, InstructionList newIl) {
 
     // Ignore methods with no instructions
     InstructionList il = mg.getInstructionList();
     if (il == null) {
       return;
     }
-    insert_before_handle(mg, il.getStart(), new_il, false);
+    insertBeforeHandle(mg, il.getStart(), newIl, false);
   }
 
   /**
    * Inserts a new instruction list into an existing instruction list just prior to the indicated
-   * instruction handle (which must be a member of the existing instruction list). If new_il is
-   * null, do nothing.
+   * instruction handle (which must be a member of the existing instruction list). If newIl is null,
+   * do nothing.
    *
    * @param mg MethodGen containing the instruction handle
    * @param ih InstructionHandle indicating where to insert new code
-   * @param new_il InstructionList holding the new code
-   * @param redirect_branches flag indicating if branch targets should be moved from ih to new_il
+   * @param newIl InstructionList holding the new code
+   * @param redirectBranches flag indicating if branch targets should be moved from ih to newIl
    */
-  protected final void insert_before_handle(
+  protected final void insertBeforeHandle(
       MethodGen mg,
       InstructionHandle ih,
-      @Nullable InstructionList new_il,
-      boolean redirect_branches) {
+      @Nullable InstructionList newIl,
+      boolean redirectBranches) {
 
-    if (new_il == null) {
+    if (newIl == null) {
       return;
     }
 
@@ -179,46 +179,47 @@ public abstract class InstructionListUtils extends StackMapUtils {
       return;
     }
 
-    boolean at_start = (ih.getPrev() == null);
-    new_il.setPositions();
-    InstructionHandle new_end = new_il.getEnd();
-    int new_length = new_end.getPosition() + new_end.getInstruction().getLength();
+    boolean atStart = (ih.getPrev() == null);
+    newIl.setPositions();
+    InstructionHandle newEnd = newIl.getEnd();
+    final int newLength = newEnd.getPosition() + newEnd.getInstruction().getLength();
 
-    print_il(ih, "Before insert_inst");
-    debug_instrument.log("  insert_inst: %d%n%s%n", new_il.getLength(), new_il);
-    debug_instrument.log("  ih: %s%n", ih);
+    printIl(ih, "Before insert_inst");
+    debugInstrument.log("  insert_inst: %d%n%s%n", newIl.getLength(), newIl);
+    debugInstrument.log("  ih: %s%n", ih);
 
     // Add the new code in front of the instruction handle.
-    InstructionHandle new_start = il.insert(ih, new_il);
+    InstructionHandle newStart = il.insert(ih, newIl);
     il.setPositions();
 
-    if (redirect_branches) {
+    if (redirectBranches) {
       // Move all of the branches from the old instruction to the new start.
-      il.redirectBranches(ih, new_start);
+      il.redirectBranches(ih, newStart);
     }
 
     // Move other targets to the new start.
     if (ih.hasTargeters()) {
       for (InstructionTargeter it : ih.getTargeters()) {
-        if ((it instanceof LineNumberGen) && redirect_branches) {
-          it.updateTarget(ih, new_start);
+        if ((it instanceof LineNumberGen) && redirectBranches) {
+          it.updateTarget(ih, newStart);
         } else if (it instanceof LocalVariableGen) {
           LocalVariableGen lvg = (LocalVariableGen) it;
           // If ih is end of local variable range, leave as is.
           // If ih is start of local variable range and we are
           // at the begining of the method go ahead and change
-          // start to new_start.  This is to preserve live range
+          // start to newStart.  This is to preserve live range
           // for variables that are live for entire method.
-          if ((lvg.getStart() == ih) && at_start) {
-            it.updateTarget(ih, new_start);
+          if ((lvg.getStart() == ih) && atStart) {
+            it.updateTarget(ih, newStart);
           }
-        } else if ((it instanceof CodeExceptionGen) && redirect_branches) {
+        } else if ((it instanceof CodeExceptionGen) && redirectBranches) {
           CodeExceptionGen exc = (CodeExceptionGen) it;
-          if (exc.getStartPC() == ih) exc.updateTarget(ih, new_start);
-          else if (exc.getEndPC() == ih) {
+          if (exc.getStartPC() == ih) {
+            exc.updateTarget(ih, newStart);
+          } else if (exc.getEndPC() == ih) {
             // leave EndPC unchanged
           } else if (exc.getHandlerPC() == ih) {
-            exc.setHandlerPC(new_start);
+            exc.setHandlerPC(newStart);
           } else {
             System.out.printf("Malformed CodeException: %s%n", exc);
           }
@@ -227,39 +228,39 @@ public abstract class InstructionListUtils extends StackMapUtils {
     }
 
     // Need to update stack map for change in length of instruction bytes.
-    // If redirect_branches is true then we don't want to change the
+    // If redirectBranches is true then we don't want to change the
     // offset of a stack map that was on the original ih, we want it
-    // to 'move' to the new_start.  If we did not redirect the branches
+    // to 'move' to the newStart.  If we did not redirect the branches
     // then we do want any stack map associated with the original ih
-    // to stay there. The routine update_stack_map starts looking for
+    // to stay there. The routine updateStackMap starts looking for
     // a stack map after the location given as its first argument.
     // Thus we need to subtract one from this location if the
-    // redirect_branches flag is false.
+    // redirectBranches flag is false.
     il.setPositions();
-    update_stack_map_offset(new_start.getPosition() - (redirect_branches ? 0 : 1), new_length);
+    updateStackMapOffset(newStart.getPosition() - (redirectBranches ? 0 : 1), newLength);
 
-    print_il(new_start, "After update_stack_map_offset");
+    printIl(newStart, "After updateStackMapOffset");
 
     // We need to see if inserting the additional instructions caused
     // a change in the amount of switch instruction padding bytes.
-    modify_stack_maps_for_switches(new_start, il);
+    modifyStackMapsForSwitches(newStart, il);
   }
 
   /**
-   * Print a BCEL instruction list to the debug_instrument log.
+   * Print a BCEL instruction list to the debugInstrument log.
    *
    * @param start start of the instruction list
    * @param label a descriptive string for the instruction list
    */
-  private void print_il(InstructionHandle start, String label) {
-    if (debug_instrument.enabled()) {
-      print_stack_map_table(label);
+  private void printIl(InstructionHandle start, String label) {
+    if (debugInstrument.enabled()) {
+      printStackMapTable(label);
       InstructionHandle tih = start;
       while (tih != null) {
-        debug_instrument.log("inst: %s %n", tih);
+        debugInstrument.log("inst: %s %n", tih);
         if (tih.hasTargeters()) {
           for (InstructionTargeter it : tih.getTargeters()) {
-            debug_instrument.log("targeter: %s %n", it);
+            debugInstrument.log("targeter: %s %n", it);
           }
         }
         tih = tih.getNext();
@@ -282,43 +283,47 @@ public abstract class InstructionListUtils extends StackMapUtils {
   }
 
   /**
-   * Delete instruction(s) from start_ih thru end_ih in an instruction list. start_ih may be the
-   * first instruction of the list, but end_ih must not be the last instruction of the list.
-   * start_ih may be equal to end_ih. There must not be any targeters on any of the instructions to
-   * be deleted except for start_ih. Those targeters will be moved to the first instruction
-   * following end_ih.
+   * Delete instruction(s) from startIh thru endIh in an instruction list. startIh may be the first
+   * instruction of the list, but endIh must not be the last instruction of the list. startIh may be
+   * equal to endIh. There must not be any targeters on any of the instructions to be deleted except
+   * for startIh. Those targeters will be moved to the first instruction following endIh.
    *
    * @param mg MethodGen containing the instruction handles
-   * @param start_ih InstructionHandle indicating first instruction to be deleted
-   * @param end_ih InstructionHandle indicating last instruction to be deleted
+   * @param startIh InstructionHandle indicating first instruction to be deleted
+   * @param endIh InstructionHandle indicating last instruction to be deleted
    */
   protected final void delete_instructions(
-      MethodGen mg, InstructionHandle start_ih, InstructionHandle end_ih) {
+      MethodGen mg, InstructionHandle startIh, InstructionHandle endIh) {
     InstructionList il = mg.getInstructionList();
-    InstructionHandle new_start = end_ih.getNext();
-    if (new_start == null) {
+    InstructionHandle newStart = endIh.getNext();
+    if (newStart == null) {
       throw new RuntimeException("Cannot delete last instruction.");
     }
 
     il.setPositions();
-    int size_deletion = start_ih.getPosition() - new_start.getPosition();
+    final int numDeleted = startIh.getPosition() - newStart.getPosition();
 
     // Move all of the branches from the first instruction to the new start
-    il.redirectBranches(start_ih, new_start);
+    il.redirectBranches(startIh, newStart);
 
     // Move other targeters to the new start.
-    if (start_ih.hasTargeters()) {
-      for (InstructionTargeter it : start_ih.getTargeters()) {
+    if (startIh.hasTargeters()) {
+      for (InstructionTargeter it : startIh.getTargeters()) {
         if (it instanceof LineNumberGen) {
-          it.updateTarget(start_ih, new_start);
+          it.updateTarget(startIh, newStart);
         } else if (it instanceof LocalVariableGen) {
-          it.updateTarget(start_ih, new_start);
+          it.updateTarget(startIh, newStart);
         } else if (it instanceof CodeExceptionGen) {
           CodeExceptionGen exc = (CodeExceptionGen) it;
-          if (exc.getStartPC() == start_ih) exc.updateTarget(start_ih, new_start);
-          else if (exc.getEndPC() == start_ih) exc.updateTarget(start_ih, new_start);
-          else if (exc.getHandlerPC() == start_ih) exc.setHandlerPC(new_start);
-          else System.out.printf("Malformed CodeException: %s%n", exc);
+          if (exc.getStartPC() == startIh) {
+            exc.updateTarget(startIh, newStart);
+          } else if (exc.getEndPC() == startIh) {
+            exc.updateTarget(startIh, newStart);
+          } else if (exc.getHandlerPC() == startIh) {
+            exc.setHandlerPC(newStart);
+          } else {
+            System.out.printf("Malformed CodeException: %s%n", exc);
+          }
         } else {
           System.out.printf("unexpected target %s%n", it);
         }
@@ -327,7 +332,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
     // Remove the old handle(s).  There should not be any targeters left.
     try {
-      il.delete(start_ih, end_ih);
+      il.delete(startIh, endIh);
     } catch (Exception e) {
       throw new Error("Can't delete instruction list", e);
     }
@@ -335,12 +340,12 @@ public abstract class InstructionListUtils extends StackMapUtils {
     il.setPositions();
 
     // Update stack map to account for deleted instructions.
-    update_stack_map_offset(new_start.getPosition(), size_deletion);
+    updateStackMapOffset(newStart.getPosition(), numDeleted);
 
     // Check to see if the deletion caused any changes
     // in the amount of switch instruction padding bytes.
     // If so, we may need to update the corresponding stackmap.
-    modify_stack_maps_for_switches(new_start, il);
+    modifyStackMapsForSwitches(newStart, il);
   }
 
   /**
@@ -352,20 +357,20 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @param location the code location to be evaluated
    * @return an array of StackMapType describing the live locals at location
    */
-  protected final StackMapType[] calculate_live_local_types(MethodGen mg, int location) {
-    int max_local_index = -1;
-    StackMapType[] local_map_types = new StackMapType[mg.getMaxLocals()];
-    Arrays.fill(local_map_types, new StackMapType(Const.ITEM_Bogus, -1, pool.getConstantPool()));
+  protected final StackMapType[] calculateLiveLocalTypes(MethodGen mg, int location) {
+    int maxLocalIndex = -1;
+    StackMapType[] localMapTypes = new StackMapType[mg.getMaxLocals()];
+    Arrays.fill(localMapTypes, new StackMapType(Const.ITEM_Bogus, -1, pool.getConstantPool()));
     for (LocalVariableGen lv : mg.getLocalVariables()) {
       if (location >= lv.getStart().getPosition()) {
         if (lv.getLiveToEnd() || location < lv.getEnd().getPosition()) {
           int i = lv.getIndex();
-          local_map_types[i] = generate_StackMapType_from_Type(lv.getType());
-          max_local_index = Math.max(max_local_index, i);
+          localMapTypes[i] = generateStackMapTypeFromType(lv.getType());
+          maxLocalIndex = Math.max(maxLocalIndex, i);
         }
       }
     }
-    return Arrays.copyOf(local_map_types, max_local_index + 1);
+    return Arrays.copyOf(localMapTypes, maxLocalIndex + 1);
   }
 
   /**
@@ -375,96 +380,100 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @param stack an OperandStack object
    * @return an array of StackMapType describing the stack contents
    */
-  protected final StackMapType[] calculate_live_stack_types(OperandStack stack) {
+  protected final StackMapType[] calculateLiveStackTypes(OperandStack stack) {
     int ss = stack.size();
-    StackMapType[] stack_map_types = new StackMapType[ss];
+    StackMapType[] stackMapTypes = new StackMapType[ss];
     for (int ii = 0; ii < ss; ii++) {
-      stack_map_types[ii] = generate_StackMapType_from_Type(stack.peek(ss - ii - 1));
+      stackMapTypes[ii] = generateStackMapTypeFromType(stack.peek(ss - ii - 1));
     }
-    return stack_map_types;
+    return stackMapTypes;
   }
 
   /**
-   * Replace instruction ih in list il with the instructions in new_il. If new_il is null, do
-   * nothing.
+   * Replace instruction ih in list il with the instructions in newIl. If newIl is null, do nothing.
    *
    * @param mg MethodGen containing the instruction handle
    * @param il InstructionList containing ih
    * @param ih InstructionHandle indicating where to insert new code
-   * @param new_il InstructionList holding the new code
+   * @param newIl InstructionList holding the new code
    */
-  protected final void replace_instructions(
-      MethodGen mg, InstructionList il, InstructionHandle ih, @Nullable InstructionList new_il) {
+  protected final void replaceInstructions(
+      MethodGen mg, InstructionList il, InstructionHandle ih, @Nullable InstructionList newIl) {
 
-    if (new_il == null) {
+    if (newIl == null) {
       return;
     }
 
-    InstructionHandle new_end;
-    InstructionHandle new_start;
-    int old_length = ih.getInstruction().getLength();
+    InstructionHandle newEnd;
+    InstructionHandle newStart;
+    int oldLength = ih.getInstruction().getLength();
 
-    new_il.setPositions();
-    InstructionHandle end = new_il.getEnd();
-    int new_length = end.getPosition() + end.getInstruction().getLength();
+    newIl.setPositions();
+    InstructionHandle end = newIl.getEnd();
+    int newLength = end.getPosition() + end.getInstruction().getLength();
 
-    debug_instrument.log("  replace_inst: %s %d%n%s%n", ih, new_il.getLength(), new_il);
-    print_il(ih, "Before replace_inst");
+    debugInstrument.log("  replace_inst: %s %d%n%s%n", ih, newIl.getLength(), newIl);
+    printIl(ih, "Before replace_inst");
 
     // If there is only one new instruction, just replace it in the handle
-    if (new_il.getLength() == 1) {
-      ih.setInstruction(new_il.getEnd().getInstruction());
-      if (old_length == new_length) {
+    if (newIl.getLength() == 1) {
+      ih.setInstruction(newIl.getEnd().getInstruction());
+      if (oldLength == newLength) {
         // no possible changes downstream, so we can exit now
         return;
       }
-      print_stack_map_table("replace_inst_with_single_inst B");
+      printStackMapTable("replace_inst_with_single_inst B");
       il.setPositions();
-      new_end = ih;
+      newEnd = ih;
       // Update stack map for change in length of instruction bytes.
-      update_stack_map_offset(ih.getPosition(), (new_length - old_length));
+      updateStackMapOffset(ih.getPosition(), (newLength - oldLength));
 
       // We need to see if inserting the additional instructions caused
       // a change in the amount of switch instruction padding bytes.
       // If so, we may need to update the corresponding stackmap.
-      modify_stack_maps_for_switches(new_end, il);
+      modifyStackMapsForSwitches(newEnd, il);
     } else {
-      print_stack_map_table("replace_inst_with_inst_list B");
+      printStackMapTable("replace_inst_with_inst_list B");
       // We are inserting more than one instruction.
       // Get the start and end handles of the new instruction list.
-      new_end = new_il.getEnd();
-      new_start = il.insert(ih, new_il);
+      newEnd = newIl.getEnd();
+      newStart = il.insert(ih, newIl);
       il.setPositions();
 
-      // Just in case there is a switch instruction in new_il we need
-      // to recalculate new_length as the padding may have changed.
-      new_length = new_end.getNext().getPosition() - new_start.getPosition();
+      // Just in case there is a switch instruction in newIl we need
+      // to recalculate newLength as the padding may have changed.
+      newLength = newEnd.getNext().getPosition() - newStart.getPosition();
 
       // Move all of the branches from the old instruction to the new start
-      il.redirectBranches(ih, new_start);
+      il.redirectBranches(ih, newStart);
 
-      print_il(new_end, "replace_inst #1");
+      printIl(newEnd, "replace_inst #1");
 
       // Move other targets to the new instuctions.
       if (ih.hasTargeters()) {
         for (InstructionTargeter it : ih.getTargeters()) {
           if (it instanceof LineNumberGen) {
-            it.updateTarget(ih, new_start);
+            it.updateTarget(ih, newStart);
           } else if (it instanceof LocalVariableGen) {
-            it.updateTarget(ih, new_end);
+            it.updateTarget(ih, newEnd);
           } else if (it instanceof CodeExceptionGen) {
             CodeExceptionGen exc = (CodeExceptionGen) it;
-            if (exc.getStartPC() == ih) exc.updateTarget(ih, new_start);
-            else if (exc.getEndPC() == ih) exc.updateTarget(ih, new_end);
-            else if (exc.getHandlerPC() == ih) exc.setHandlerPC(new_start);
-            else System.out.printf("Malformed CodeException: %s%n", exc);
+            if (exc.getStartPC() == ih) {
+              exc.updateTarget(ih, newStart);
+            } else if (exc.getEndPC() == ih) {
+              exc.updateTarget(ih, newEnd);
+            } else if (exc.getHandlerPC() == ih) {
+              exc.setHandlerPC(newStart);
+            } else {
+              System.out.printf("Malformed CodeException: %s%n", exc);
+            }
           } else {
             System.out.printf("unexpected target %s%n", it);
           }
         }
       }
 
-      print_il(new_end, "replace_inst #2");
+      printIl(newEnd, "replace_inst #2");
 
       // Remove the old handle.  There should be no targeters left to it.
       try {
@@ -476,27 +485,27 @@ public abstract class InstructionListUtils extends StackMapUtils {
       // Need to update instruction address due to delete above.
       il.setPositions();
 
-      print_il(new_end, "replace_inst #3");
+      printIl(newEnd, "replace_inst #3");
 
       if (needStackMap) {
         // Before we look for branches in the inserted code we need
         // to update any existing stack maps for locations in the old
         // code that are after the inserted code.
-        update_stack_map_offset(new_start.getPosition(), (new_length - old_length));
+        updateStackMapOffset(newStart.getPosition(), (newLength - oldLength));
 
         // We need to see if inserting the additional instructions caused
         // a change in the amount of switch instruction padding bytes.
         // If so, we may need to update the corresponding stackmap.
-        modify_stack_maps_for_switches(new_end, il);
-        print_stack_map_table("replace_inst_with_inst_list C");
+        modifyStackMapsForSwitches(newEnd, il);
+        printStackMapTable("replace_inst_with_inst_list C");
 
         // Look for branches within the new il; i.e., both the source
         // and target must be within the new il.  If we find any, the
         // target will need a stack map entry.
         // This situation is caused by a call to "instrument_object_call".
-        InstructionHandle nih = new_start;
-        int target_count = 0;
-        int target_offsets[] = new int[2]; // see note below for why '2'
+        InstructionHandle nih = newStart;
+        int targetCount = 0;
+        int[] targetOffsets = new int[2]; // see note below for why '2'
 
         // Any targeters on the first instruction will be from 'outside'
         // the new il so we start with the second instruction. (We already
@@ -505,47 +514,47 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
         // We assume there is more code after the new il insertion point
         // so this getNext will not fail.
-        new_end = new_end.getNext();
-        while (nih != new_end) {
+        newEnd = newEnd.getNext();
+        while (nih != newEnd) {
           if (nih.hasTargeters()) {
             for (InstructionTargeter it : nih.getTargeters()) {
               if (it instanceof BranchInstruction) {
-                target_offsets[target_count++] = nih.getPosition();
-                debug_instrument.log("New branch target: %s %n", nih);
+                targetOffsets[targetCount++] = nih.getPosition();
+                debugInstrument.log("New branch target: %s %n", nih);
               }
             }
           }
           nih = nih.getNext();
         }
 
-        print_il(new_end, "replace_inst #4");
+        printIl(newEnd, "replace_inst #4");
 
-        if (target_count != 0) {
-          // Currently, target_count is always 2; but code is
+        if (targetCount != 0) {
+          // Currently, targetCount is always 2; but code is
           // written to allow more.
-          int cur_loc = new_start.getPosition();
-          int orig_size = stack_map_table.length;
-          StackMapEntry[] new_stack_map_table = new StackMapEntry[orig_size + target_count];
+          int curLoc = newStart.getPosition();
+          int origSize = stackMapTable.length;
+          final StackMapEntry[] newStackMapTable = new StackMapEntry[origSize + targetCount];
 
           // Calculate the operand stack value(s) for revised code.
           mg.setMaxStack();
           OperandStack stack;
-          StackTypes stack_types = bcel_calc_stack_types(mg);
-          if (stack_types == null) {
+          StackTypes stackTypes = bcelCalcStackTypes(mg);
+          if (stackTypes == null) {
             Error e =
                 new Error(
                     String.format(
-                        "bcel_calc_stack_types failure in %s.%s%n",
+                        "bcelCalcStackTypes failure in %s.%s%n",
                         mg.getClassName(), mg.getName()));
             e.printStackTrace();
             throw e;
           }
 
           // Find last stack map entry prior to first new branch target;
-          // returns -1 if there isn't one. Also sets running_offset and number_active_locals.
-          // The '+1' below means new_index points to the first stack map entry after our
-          // inserted code.  There may not be one; in which case new_index == orig_size.
-          int new_index = find_stack_map_index_before(target_offsets[0]) + 1;
+          // returns -1 if there isn't one. Also sets runningOffset and numberActiveLocals.
+          // The '+1' below means newIndex points to the first stack map entry after our
+          // inserted code.  There may not be one; in which case newIndex == origSize.
+          int newIndex = findStackMapIndexBefore(targetOffsets[0]) + 1;
 
           // The Java compiler can 'simplfy' the generated class file by not
           // inserting a stack map entry every time a local is defined if
@@ -581,55 +590,55 @@ public abstract class InstructionListUtils extends StackMapUtils {
           // that it plans to identify in a subsequent StackMap APPEND entry.
 
           // First, lets calculate the number and types of the live locals.
-          StackMapType[] local_map_types = calculate_live_local_types(mg, cur_loc);
-          int local_map_index = local_map_types.length;
+          StackMapType[] localMapTypes = calculateLiveLocalTypes(mg, curLoc);
+          int localMapIndex = localMapTypes.length;
 
-          // local_map_index now contains the number of live locals.
-          // number_active_locals has been calculated from the existing StackMap.
+          // localMapIndex now contains the number of live locals.
+          // numberActiveLocals has been calculated from the existing StackMap.
           // If these two are equal, we should be ok.
-          int number_extra_locals = local_map_index - number_active_locals;
+          int numberExtraLocals = localMapIndex - numberActiveLocals;
           // lets do a sanity check
-          assert number_extra_locals >= 0
-              : "invalid extra locals count: " + number_active_locals + ", " + local_map_index;
+          assert numberExtraLocals >= 0
+              : "invalid extra locals count: " + numberActiveLocals + ", " + localMapIndex;
 
           // Copy any existing stack maps prior to inserted code.
-          System.arraycopy(stack_map_table, 0, new_stack_map_table, 0, new_index);
+          System.arraycopy(stackMapTable, 0, newStackMapTable, 0, newIndex);
 
-          boolean need_full_maps = false;
-          for (int i = 0; i < target_count; i++) {
-            stack = stack_types.get(target_offsets[i]);
-            debug_instrument.log("stack: %s %n", stack);
+          boolean needFullMaps = false;
+          for (int i = 0; i < targetCount; i++) {
+            stack = stackTypes.get(targetOffsets[i]);
+            debugInstrument.log("stack: %s %n", stack);
 
-            if (number_extra_locals == 0 && stack.size() == 1 && !need_full_maps) {
+            if (numberExtraLocals == 0 && stack.size() == 1 && !needFullMaps) {
               // the simple case
-              StackMapType stack_map_type0 = generate_StackMapType_from_Type(stack.peek(0));
-              StackMapType[] stack_map_types0 = {stack_map_type0};
-              new_stack_map_table[new_index + i] =
+              StackMapType stackMapType0 = generateStackMapTypeFromType(stack.peek(0));
+              StackMapType[] stackMapTypes0 = {stackMapType0};
+              newStackMapTable[newIndex + i] =
                   new StackMapEntry(
                       Const.SAME_LOCALS_1_STACK_ITEM_FRAME,
-                      0, // byte_code_offset set below
+                      0, // byteCodeOffset set below
                       null,
-                      stack_map_types0,
+                      stackMapTypes0,
                       pool.getConstantPool());
             } else {
               // need a FULL_FRAME stack map entry
-              need_full_maps = true;
-              new_stack_map_table[new_index + i] =
+              needFullMaps = true;
+              newStackMapTable[newIndex + i] =
                   new StackMapEntry(
                       Const.FULL_FRAME,
-                      0, // byte_code_offset set below
-                      calculate_live_local_types(mg, target_offsets[i]),
-                      calculate_live_stack_types(stack),
+                      0, // byteCodeOffset set below
+                      calculateLiveLocalTypes(mg, targetOffsets[i]),
+                      calculateLiveStackTypes(stack),
                       pool.getConstantPool());
             }
             // now set the offset from the previous Stack Map entry to our new one.
-            new_stack_map_table[new_index + i].updateByteCodeOffset(
-                target_offsets[i] - (running_offset + 1));
-            running_offset = target_offsets[i];
+            newStackMapTable[newIndex + i].updateByteCodeOffset(
+                targetOffsets[i] - (runningOffset + 1));
+            runningOffset = targetOffsets[i];
           }
 
           // now copy remaining 'old' stack maps
-          int remainder = orig_size - new_index;
+          int remainder = origSize - newIndex;
           if (remainder > 0) {
             // before we copy, we need to update first map after insert
             l1:
@@ -637,20 +646,20 @@ public abstract class InstructionListUtils extends StackMapUtils {
               if (nih.hasTargeters()) {
                 for (InstructionTargeter it : nih.getTargeters()) {
                   if (it instanceof BranchInstruction) {
-                    stack_map_table[new_index].updateByteCodeOffset(
+                    stackMapTable[newIndex].updateByteCodeOffset(
                         nih.getPosition()
-                            - target_offsets[target_count - 1]
+                            - targetOffsets[targetCount - 1]
                             - 1
-                            - stack_map_table[new_index].getByteCodeOffset());
+                            - stackMapTable[newIndex].getByteCodeOffset());
                     break l1;
                   } else if (it instanceof CodeExceptionGen) {
                     CodeExceptionGen exc = (CodeExceptionGen) it;
                     if (exc.getHandlerPC() == nih) {
-                      stack_map_table[new_index].updateByteCodeOffset(
+                      stackMapTable[newIndex].updateByteCodeOffset(
                           nih.getPosition()
-                              - target_offsets[target_count - 1]
+                              - targetOffsets[targetCount - 1]
                               - 1
-                              - stack_map_table[new_index].getByteCodeOffset());
+                              - stackMapTable[newIndex].getByteCodeOffset());
                       break l1;
                     }
                   }
@@ -660,38 +669,34 @@ public abstract class InstructionListUtils extends StackMapUtils {
             }
 
             // Now we can copy the remaining stack map entries.
-            if (need_full_maps) {
+            if (needFullMaps) {
               // Must convert all remaining stack map entries to FULL.
               while (remainder > 0) {
-                int stack_map_offset = stack_map_table[new_index].getByteCodeOffset();
-                running_offset = running_offset + stack_map_offset + 1;
-                stack = stack_types.get(running_offset);
-                // System.out.printf("running_offset: %d, stack: %s%n", running_offset, stack);
-                new_stack_map_table[new_index + target_count] =
+                int stackMapOffset = stackMapTable[newIndex].getByteCodeOffset();
+                runningOffset = runningOffset + stackMapOffset + 1;
+                stack = stackTypes.get(runningOffset);
+                // System.out.printf("runningOffset: %d, stack: %s%n", runningOffset, stack);
+                newStackMapTable[newIndex + targetCount] =
                     new StackMapEntry(
                         Const.FULL_FRAME,
-                        stack_map_offset,
-                        calculate_live_local_types(mg, running_offset),
-                        calculate_live_stack_types(stack),
+                        stackMapOffset,
+                        calculateLiveLocalTypes(mg, runningOffset),
+                        calculateLiveStackTypes(stack),
                         pool.getConstantPool());
-                new_index++;
+                newIndex++;
                 remainder--;
               }
             } else {
               System.arraycopy(
-                  stack_map_table,
-                  new_index,
-                  new_stack_map_table,
-                  new_index + target_count,
-                  remainder);
+                  stackMapTable, newIndex, newStackMapTable, newIndex + targetCount, remainder);
             }
           }
-          stack_map_table = new_stack_map_table;
+          stackMapTable = newStackMapTable;
         }
       }
     }
 
-    debug_instrument.log("%n");
-    print_il(new_end, "replace_inst #5");
+    debugInstrument.log("%n");
+    printIl(newEnd, "replace_inst #5");
   }
 }

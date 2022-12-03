@@ -17,6 +17,7 @@
  *  limitations under the License.
  *
  */
+
 package org.plumelib.bcelutil;
 
 import java.io.PrintWriter;
@@ -131,7 +132,7 @@ public final class StackVer {
      * @param i the index of the item to be fetched
      * @return the indicated InstructionContext
      */
-    public InstructionContext getIC(final @NonNegative int i) {
+    public InstructionContext getIc(final @NonNegative int i) {
       return ics.get(i);
     }
 
@@ -141,7 +142,7 @@ public final class StackVer {
      * @param i the index of the item to be fetched
      * @return the indicated ExecutionChain
      */
-    public ArrayList<InstructionContext> getEC(final @NonNegative int i) {
+    public ArrayList<InstructionContext> getEc(final @NonNegative int i) {
       return ecs.get(i);
     }
 
@@ -158,19 +159,15 @@ public final class StackVer {
   /** In DEBUG mode, the verification algorithm is not randomized. */
   private static final boolean DEBUG = true;
 
-  /** The Verifier that created this. */
-  /*
-  private final Verifier myOwner;
-  */
+  // /** The Verifier that created this. */
+  // private final Verifier myOwner;
 
-  /** The method number to verify. */
-  /*
-  private final int method_no;
-  */
+  // /** The method number to verify. */
+  // private final int method_no;
 
   /** The types on the stack for each instruction by byte code offset. */
   // Set by do_stack_ver().
-  private @MonotonicNonNull StackTypes stack_types;
+  private @MonotonicNonNull StackTypes stackTypes;
 
   /**
    * This class should only be instantiated by a Verifier.
@@ -190,8 +187,8 @@ public final class StackVer {
    *
    * @return the StackTypes object for the method being verified
    */
-  public StackTypes get_stack_types() {
-    return stack_types;
+  public StackTypes get_stackTypes() {
+    return stackTypes;
   }
 
   /**
@@ -220,12 +217,12 @@ public final class StackVer {
       ArrayList<InstructionContext> ec;
       if (!DEBUG) {
         final int r = random.nextInt(icq.size());
-        u = icq.getIC(r);
-        ec = icq.getEC(r);
+        u = icq.getIc(r);
+        ec = icq.getEc(r);
         icq.remove(r);
       } else {
-        u = icq.getIC(0);
-        ec = icq.getEC(0);
+        u = icq.getIc(0);
+        ec = icq.getEc(0);
         icq.remove(0);
       }
 
@@ -245,29 +242,29 @@ public final class StackVer {
         final InstructionContext theSuccessor = cfg.contextOf(t.getTarget());
 
         // Sanity check
-        InstructionContext lastJSR = null;
-        int skip_jsr = 0;
+        InstructionContext lastJsr = null;
+        int skipJsr = 0;
         for (int ss = oldchain.size() - 1; ss >= 0; ss--) {
-          if (skip_jsr < 0) {
+          if (skipJsr < 0) {
             throw new AssertionViolatedException("More RET than JSR in execution chain?!");
           }
           // System.err.println("+"+oldchain.get(ss));
           if ((oldchain.get(ss)).getInstruction().getInstruction() instanceof JsrInstruction) {
-            if (skip_jsr == 0) {
-              lastJSR = oldchain.get(ss);
+            if (skipJsr == 0) {
+              lastJsr = oldchain.get(ss);
               break;
             }
-            skip_jsr--;
+            skipJsr--;
           }
           if ((oldchain.get(ss)).getInstruction().getInstruction() instanceof RET) {
-            skip_jsr++;
+            skipJsr++;
           }
         }
-        if (lastJSR == null) {
+        if (lastJsr == null) {
           throw new AssertionViolatedException(
               "RET without a JSR before in ExecutionChain?! EC: '" + oldchain + "'.");
         }
-        final JsrInstruction jsr = (JsrInstruction) (lastJSR.getInstruction().getInstruction());
+        final JsrInstruction jsr = (JsrInstruction) (lastJsr.getInstruction().getInstruction());
         if (theSuccessor != (cfg.contextOf(jsr.physicalSuccessor()))) {
           throw new AssertionViolatedException(
               "RET '"
@@ -454,7 +451,7 @@ public final class StackVer {
     */
 
     try {
-      stack_types = new StackTypes(mg);
+      stackTypes = new StackTypes(mg);
 
       icv.setMethodGen(mg);
 
@@ -517,21 +514,19 @@ public final class StackVer {
     return VerificationResult.VR_OK;
   }
 
-  /** Returns the method number as supplied when instantiating. */
-  /* Removed from StackVer
-  public int getMethodNo() {
-    return method_no;
-  }
-  */
+  // /** Returns the method number as supplied when instantiating. */
+  // public int getMethodNo() {
+  //   return method_no;
+  // }
 
-  /** Like InstructionContext.execute, but also sets stack_types. */
+  /** Like InstructionContext.execute, but also sets stackTypes. */
   boolean execute(
       InstructionContext ic,
       Frame inFrame,
       ArrayList<InstructionContext> executionPredecessors,
       InstConstraintVisitor icv,
       ExecutionVisitor ev) {
-    stack_types.set(ic.getInstruction().getPosition(), inFrame);
+    stackTypes.set(ic.getInstruction().getPosition(), inFrame);
     return ic.execute(inFrame, executionPredecessors, icv, ev);
   }
 
