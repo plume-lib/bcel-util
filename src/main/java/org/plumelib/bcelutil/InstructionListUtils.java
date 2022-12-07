@@ -544,8 +544,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
             Error e =
                 new Error(
                     String.format(
-                        "bcelCalcStackTypes failure in %s.%s%n",
-                        mg.getClassName(), mg.getName()));
+                        "bcelCalcStackTypes failure in %s.%s%n", mg.getClassName(), mg.getName()));
             e.printStackTrace();
             throw e;
           }
