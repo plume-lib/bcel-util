@@ -40,11 +40,6 @@ apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-task compileAll() {
-  dependsOn compileJava
-  dependsOn compileTestJava
-}
-
 test {
   useJUnitPlatform {
     includeEngines 'junit-jupiter'
