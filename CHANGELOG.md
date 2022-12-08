@@ -3,9 +3,7 @@
 ## 1.2.0 (??)
 
 Changed naming convention from snake_case to camelCase, which is idiomatic in Java.
-This is a huge incompatibility
-
-Removed deprecated methods and classes.
+This is a huge incompatibility with the previous version, 1.1.16.
 
 ## 1.1.16 (October 12, 2022)
 

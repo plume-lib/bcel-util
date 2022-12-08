@@ -1,5 +1,6 @@
 package org.plumelib.bcelutil;
 
+import com.google.errorprone.annotations.InlineMe;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -534,6 +535,22 @@ public abstract class StackMapUtils {
 
   /**
    * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
+   * one. Sets both smta and stack_map_table. Must be called prior to any other methods that
+   * manipulate the stack_map_table!
+   *
+   * @param mgen MethodGen to search
+   * @param java_class_version Java version for the classfile; stack_map_table is optional before
+   *     Java 1.7 (= classfile version 51)
+   * @deprecated use {@link #setCurrentStackMapTable}
+   */
+  @Deprecated // use set_current_stack_map_table() */
+  @InlineMe(replacement = "this.setCurrentStackMapTable(mgen, java_class_version)")
+  protected final void fetch_current_stack_map_table(MethodGen mgen, int java_class_version) {
+    setCurrentStackMapTable(mgen, java_class_version);
+  }
+
+  /**
+   * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
    * one. Sets both smta and stackMapTable. Must be called prior to any other methods that
    * manipulate the stackMapTable!
    *
@@ -753,6 +770,26 @@ public abstract class StackMapUtils {
         stackMapTable[i].setTypesOfLocals(newLocalTypes);
       }
     }
+  }
+
+  /**
+   * Add a new parameter to the method. This will be added after last current parameter and before
+   * the first local variable. This might have the side effect of causing us to rewrite the method
+   * byte codes to adjust the offsets for the local variables - see below for details.
+   *
+   * <p>Must call fix_local_variable_table (just once per method) before calling this routine.
+   *
+   * @param mgen MethodGen to be modified
+   * @param arg_name name of new parameter
+   * @param arg_type type of new parameter
+   * @return a LocalVariableGen for the new parameter
+   * @deprecated use {@link #addNewParameter}
+   */
+  @Deprecated // use add_new_parameter()
+  @InlineMe(replacement = "this.addNewParameter(mgen, arg_name, arg_type)")
+  protected final LocalVariableGen add_new_argument(
+      MethodGen mgen, String arg_name, Type arg_type) {
+    return addNewParameter(mgen, arg_name, arg_type);
   }
 
   /**
@@ -1468,8 +1505,7 @@ public abstract class StackMapUtils {
         Error e =
             new Error(
                 String.format(
-                    "bcelCalcStackTypes failure in %s.%s%n",
-                    mgen.getClassName(), mgen.getName()));
+                    "bcelCalcStackTypes failure in %s.%s%n", mgen.getClassName(), mgen.getName()));
         e.printStackTrace();
         throw e;
       }
