@@ -1,6 +1,5 @@
 package org.plumelib.bcelutil;
 
-import com.google.errorprone.annotations.InlineMe;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -722,24 +721,6 @@ public final class BcelUtil {
     System.arraycopy(types, 0, newTypes, 1, types.length);
     newTypes[0] = newType;
     return newTypes;
-  }
-
-  /**
-   * Return the type corresponding to a given binary name or primitive type name.
-   *
-   * @param classname the binary name of a class (= fully-qualified name, except for inner classes),
-   *     or a primitive type name, but not an array
-   * @return the type corresponding to the given class name
-   * @see #fqBinaryNameToType
-   * @deprecated use {@link #binaryNameToType}
-   */
-  // TODO: Poor name because this handles any non-array, not just classes.
-  @Deprecated // use binaryNameToType
-  @InlineMe(
-      replacement = "BcelUtil.binaryNameToType(classname)",
-      imports = "org.plumelib.bcelutil.BcelUtil")
-  public static Type classnameToType(@BinaryNameOrPrimitiveType String classname) {
-    return binaryNameToType(classname);
   }
 
   /**
