@@ -1468,8 +1468,7 @@ public abstract class StackMapUtils {
         Error e =
             new Error(
                 String.format(
-                    "bcelCalcStackTypes failure in %s.%s%n",
-                    mgen.getClassName(), mgen.getName()));
+                    "bcelCalcStackTypes failure in %s.%s%n", mgen.getClassName(), mgen.getName()));
         e.printStackTrace();
         throw e;
       }
