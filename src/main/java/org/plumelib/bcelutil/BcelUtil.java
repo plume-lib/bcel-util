@@ -503,7 +503,9 @@ public final class BcelUtil {
       if ((inames != null) && (inames.length > 0)) {
         p.printf("   implements ");
         for (String iname : inames) {
-          if (!first) p.printf(", ");
+          if (!first) {
+            p.printf(", ");
+          }
           p.printf("%s", iname);
           first = false;
         }
@@ -603,11 +605,6 @@ public final class BcelUtil {
    */
   public static void resetLocalsToFormals(MethodGen mg) {
 
-    // Get the parameter types and names.
-    Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
-    String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
-        argNames = mg.getArgumentNames();
-
     // Remove any existing locals
     mg.setMaxLocals(0);
     mg.removeLocalVariables();
@@ -616,6 +613,11 @@ public final class BcelUtil {
     if (!mg.isStatic()) {
       mg.addLocalVariable("this", new ObjectType(mg.getClassName()), null, null);
     }
+
+    // Get the parameter types and names.
+    Type @SameLen({"argTypes", "mg.getArgumentTypes()"}) [] argTypes = mg.getArgumentTypes();
+    String @SameLen({"argTypes", "argNames", "mg.getArgumentTypes()", "mg.getArgumentNames()"}) []
+        argNames = mg.getArgumentNames();
 
     // Add a local for each parameter
     for (int ii = 0; ii < argNames.length; ii++) {

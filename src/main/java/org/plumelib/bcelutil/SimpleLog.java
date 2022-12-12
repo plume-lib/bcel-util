@@ -9,7 +9,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * A logging class with the following features:
+ * A logging class with the following features.
  *
  * <ul>
  *   <li>Can be enabled and disabled (when disabled, all operations are no-ops),
@@ -32,7 +32,7 @@ public final class SimpleLog {
   /** The current indentation level. */
   private int indentLevel = 0;
   /** Indentation string for one level of indentation. */
-  private final String INDENT_STR_ONE_LEVEL = "  ";
+  private static final String INDENT_STR_ONE_LEVEL = "  ";
   /**
    * Cache for the current indentation string, or null if needs to be recomputed. Never access this
    * directly; always call {@link #getIndentString}.
@@ -134,9 +134,9 @@ public final class SimpleLog {
       setLogfile();
       Throwable t = new Throwable();
       t.fillInStackTrace();
-      StackTraceElement[] ste_arr = t.getStackTrace();
-      for (int ii = 2; ii < ste_arr.length; ii++) {
-        StackTraceElement ste = ste_arr[ii];
+      StackTraceElement[] stackTrace = t.getStackTrace();
+      for (int ii = 2; ii < stackTrace.length; ii++) {
+        StackTraceElement ste = stackTrace[ii];
         logfile.printf("%s  %s%n", getIndentString(), ste);
       }
       logfile.flush();
