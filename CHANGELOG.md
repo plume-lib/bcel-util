@@ -1,5 +1,12 @@
 # BCEL-Util change log
 
+## 1.2.1 (??)
+
+Removed deprecated methods:
+ * add_new_argument
+ * fetch_current_stack_map_table
+ * classnameToType
+
 ## 1.2.0 (December 12, 2022)
 
 Changed naming convention from snake_case to camelCase, which is idiomatic in Java.
