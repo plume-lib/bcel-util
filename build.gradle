@@ -1,7 +1,7 @@
 plugins {
   id 'java-library'
 
-  // To create a fat jar build/libs/bcel-util-all.jar, run: ./gradlew shadowJar
+  // To create a fat jar build/libs/...-all.jar, run: ./gradlew shadowJar
   id 'com.github.johnrengelman.shadow' version '7.1.2'
 
   // Code formatting; defines targets "spotlessApply" and "spotlessCheck"
@@ -27,9 +27,7 @@ dependencies {
   api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.5.0'
   // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
-
   implementation "com.google.errorprone:error_prone_core:${errorproneVersion}"
-
   implementation 'org.plumelib:reflection-util:1.0.5'
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
@@ -72,7 +70,8 @@ dependencies {
   errorprone("com.google.errorprone:error_prone_core:${errorproneVersion}")
 }
 tasks.withType(JavaCompile).configureEach {
-  options.compilerArgs << "-Xlint:all" << "-Werror"
+  // "-processing" avoids javac warning "No processor claimed any of these annotations".
+  options.compilerArgs << "-Xlint:all,-processing" << "-Werror"
   options.errorprone {
     enabled = JavaVersion.current() != JavaVersion.VERSION_1_8
     disable("ReferenceEquality") // Use Interning Checker instead.
@@ -87,10 +86,10 @@ apply plugin: 'org.checkerframework'
 
 checkerFramework {
   checkers = [
-    // TODO: 'org.checkerframework.checker.index.IndexChecker',
     // No need to run CalledMethodsChecker, because ResourceLeakChecker does so.
     // 'org.checkerframework.checker.calledmethods.CalledMethodsChecker',
     'org.checkerframework.checker.formatter.FormatterChecker',
+    // TODO: 'org.checkerframework.checker.index.IndexChecker',
     'org.checkerframework.checker.interning.InterningChecker',
     'org.checkerframework.checker.lock.LockChecker',
     'org.checkerframework.checker.nullness.NullnessChecker',
@@ -102,7 +101,6 @@ checkerFramework {
   ]
   extraJavacArgs = [
     '-Werror',
-    '-Xlint:-processing', // because of Error Prone's "No processor claimed any of these annotations"
     '-AcheckPurityAnnotations',
     '-ArequirePrefixInWarningSuppressions',
     '-AwarnUnneededSuppressions',
