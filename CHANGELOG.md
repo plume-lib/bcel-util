@@ -2,7 +2,10 @@
 
 ## 1.2.1 (??)
 
-Removed deprecated methods and classes.
+Removed deprecated methods:
+ * add_new_argument
+ * fetch_current_stack_map_table
+ * classnameToType
 
 ## 1.2.0 (December 12, 2022)
 
