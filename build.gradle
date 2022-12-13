@@ -24,9 +24,10 @@ repositories {
 ext.errorproneVersion = '2.16'
 
 dependencies {
-  api group: 'org.checkerframework.annotatedlib', name: 'bcel', version: '6.5.0'
+  api 'org.checkerframework.annotatedlib:bcel:6.5.0'
   // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
+
   implementation "com.google.errorprone:error_prone_core:${errorproneVersion}"
   implementation 'org.plumelib:reflection-util:1.0.5'
 
