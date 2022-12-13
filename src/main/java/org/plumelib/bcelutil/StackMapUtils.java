@@ -130,7 +130,7 @@ public abstract class StackMapUtils {
 
   /**
    * A map from instructions that create uninitialized NEW objects to the corresponding StackMap
-   * entry. Set by buildUnitializedNewMap.
+   * entry. Set by buildUninitializedNewMap.
    */
   private Map<InstructionHandle, Integer> uninitializedNewMap = new HashMap<>();
 
@@ -397,7 +397,7 @@ public abstract class StackMapUtils {
    *
    * @param il instruction list to search
    */
-  protected final void buildUnitializedNewMap(InstructionList il) {
+  protected final void buildUninitializedNewMap(InstructionList il) {
 
     uninitializedNewMap.clear();
     il.setPositions();
