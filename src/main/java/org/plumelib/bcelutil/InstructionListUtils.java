@@ -69,7 +69,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  *        // Create a map of Uninitialized_variable_info offsets to
  *        // InstructionHandles.
- *        buildUnitializedNewMap(il);
+ *        buildUninitializedNewMap(il);
  *
  * This is where you would insert your code to modify the current method (mg).
  * Most often this is done with members of the {@link org.apache.bcel.generic}

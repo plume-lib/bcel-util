@@ -1,11 +1,13 @@
 # BCEL-Util change log
 
-## 1.2.0 (??)
+## 1.3.0 (??)
+
+Removed deprecated methods and classes.
+
+## 1.2.0 (December 12, 2022)
 
 Changed naming convention from snake_case to camelCase, which is idiomatic in Java.
 This is a huge incompatibility with the previous version, 1.1.16.
-
-Removed deprecated methods and classes.
 
 ## 1.1.16 (October 12, 2022)
 
