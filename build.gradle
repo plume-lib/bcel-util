@@ -28,7 +28,7 @@ dependencies {
   // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
 
-  implementation "com.google.errorprone:error_prone_core:${errorproneVersion}"
+  // implementation "com.google.errorprone:error_prone_core:${errorproneVersion}" // For @InlineMe.
   implementation 'org.plumelib:reflection-util:1.0.5'
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
