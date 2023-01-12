@@ -769,7 +769,7 @@ public final class BcelUtil {
 
     Signatures.ClassnameAndDimensions cad =
         Signatures.ClassnameAndDimensions.parseFqBinaryName(classname);
-    Type eltType = binaryNameToType(cad.classname);
+    Type eltType = fqBinaryNameToType(cad.classname);
     if (cad.dimensions == 0) {
       return eltType;
     } else {
