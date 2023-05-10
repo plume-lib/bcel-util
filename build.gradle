@@ -150,7 +150,7 @@ javadoc {
     // See https://bugs.openjdk.org/browse/JDK-8274639
     // JDK 18 has a "--link-modularity-mismatch" command-line option which is "info" or "warn".
     // I think it would work to:
-    //  *   use JDK 8 links under JDK <= 17.
+    //  * use JDK 8 links under JDK <= 17.
     //  * use JDK 17 links, and "--link-modularity-mismatch info", under JDK > 17 (i.e., JDK >= 18).
     // But it's easier to just not use "linksOffline".
   }
