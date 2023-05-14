@@ -769,7 +769,11 @@ public final class BcelUtil {
 
     Signatures.ClassnameAndDimensions cad =
         Signatures.ClassnameAndDimensions.parseFqBinaryName(classname);
-    Type eltType = fqBinaryNameToType(cad.classname);
+    @SuppressWarnings("signature:assignment" // suppression and local variable are not necessary
+    // after next release of signature-util
+    )
+    @BinaryNameOrPrimitiveType String classnameWithoutArrays = cad.classname;
+    Type eltType = binaryNameToType(classnameWithoutArrays);
     if (cad.dimensions == 0) {
       return eltType;
     } else {
