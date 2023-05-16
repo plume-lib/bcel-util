@@ -1,5 +1,10 @@
 # BCEL-Util change log
 
+## 1.2.2 (May 15, 2022)
+
+- Tested under Java 20
+- No longer compiles under Java 8, but still runs under Java 8.
+
 ## 1.2.1 (December 13, 2022)
 
 Removed deprecated methods:

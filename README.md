@@ -13,8 +13,8 @@ In a Gradle buildfile, write
 
 ```
 dependencies {
-  implementation 'org.plumelib:bcel-util:1.2.1'
+  implementation 'org.plumelib:bcel-util:1.2.2'
 }
 ```
 
-Other build systems are [similar](https://search.maven.org/artifact/org.plumelib/bcel-util/1.2.1/jar).
+Other build systems are [similar](https://search.maven.org/artifact/org.plumelib/bcel-util/1.2.2/jar).
