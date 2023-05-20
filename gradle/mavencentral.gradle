@@ -5,14 +5,16 @@
 
 // To make a release (run on any filesystem, except the last step):
 //  * git pull
+//  * In ../build.gradle, ensure that "To use a snapshot version" is not enabled.
 //  * Update the version number in ../README.md and in this file (multiple times in each).
+//    Ensure the version number in this file does not contain "-SNAPSHOT".
 //  * Update ../CHANGELOG.md .
 //  * Save files and stage changes.
 //  * Run in the top-level directory:  ./gradlew clean publish
 //  * Browse to https://oss.sonatype.org/#stagingRepositories, complete the Maven Central release.
 //  * Add a git tag:
 //    VER=1.2.2 && git commit -m "Version $VER" && git push && git tag -a v$VER -m "Version $VER" && git push && git push --tags
-//  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.2.2", use the text from ../CHANGELOG.md as the description, attach the .jar file from ../build/libs/
+//  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.2.2", use the text from ../CHANGELOG.md as the description, attach the .jar and -all.jar files from ../build/libs/ .
 //  * Finally, run on the CSE filesystem:  git pull && ./gradlew javadocWeb
 
 apply plugin: 'maven-publish'
@@ -38,7 +40,7 @@ publishing {
 
       from components.java
       pom {
-        name = 'Plume-lib Bcel-Util'
+        name = 'BCEL Util'
         description = 'Utility functions for BCEL.'
         url = 'https://github.com/plume-lib/bcel-util'
 
