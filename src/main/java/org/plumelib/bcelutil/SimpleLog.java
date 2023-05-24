@@ -31,13 +31,16 @@ public final class SimpleLog {
 
   /** The current indentation level. */
   private int indentLevel = 0;
+
   /** Indentation string for one level of indentation. */
   private static final String INDENT_STR_ONE_LEVEL = "  ";
+
   /**
    * Cache for the current indentation string, or null if needs to be recomputed. Never access this
    * directly; always call {@link #getIndentString}.
    */
   private @Nullable String indentString = null;
+
   /** Cache of indentation strings that have been computed so far. */
   private List<String> indentStrings;
 
