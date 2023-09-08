@@ -39,13 +39,8 @@ dependencies {
 // To upload to Maven Central, see instructions in the file.
 apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
-if (JavaVersion.current().compareTo(org.gradle.api.JavaVersion.VERSION_20) < 0) {
-  sourceCompatibility = 1.8
-  targetCompatibility = 1.8
-} else {
-  sourceCompatibility = 11
-  targetCompatibility = 11
-}
+sourceCompatibility = 11
+targetCompatibility = 11
 
 test {
   useJUnitPlatform {
@@ -87,7 +82,6 @@ tasks.withType(JavaCompile).configureEach {
   // "-processing" avoids javac warning "No processor claimed any of these annotations".
   options.compilerArgs << '-Xlint:all,-processing' << '-Werror'
   options.errorprone {
-    enabled = JavaVersion.current() != JavaVersion.VERSION_1_8
     disable('ReferenceEquality') // Use Interning Checker instead.
     // Code copied from BCEL that we don't want to change gratuitously.
     excludedPaths = '.*/org/plumelib/bcelutil/StackVer.java'
@@ -150,13 +144,11 @@ javadoc {
     // See https://bugs.openjdk.org/browse/JDK-8274639
     // JDK 18 has a "--link-modularity-mismatch" command-line option which is "info" or "warn".
     // I think it would work to:
-    //  * use JDK 8 links under JDK <= 17.
+    //  * use JDK 11 links under JDK <= 17.
     //  * use JDK 17 links, and "--link-modularity-mismatch info", under JDK > 17 (i.e., JDK >= 18).
     // But it's easier to just not use "linksOffline".
   }
-  if (JavaVersion.current().compareTo(org.gradle.api.JavaVersion.VERSION_1_9) >= 0) {
-    options.addStringOption('source', '8')
-  }
+  options.addStringOption('source', '11')
   doLast {
     ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:'',
     flags:'g', byline:true) {
@@ -171,9 +163,7 @@ task javadocWeb(type: Javadoc) {
   source = sourceSets.main.allJava
   destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
   classpath = project.sourceSets.main.compileClasspath
-  if (JavaVersion.current().compareTo(org.gradle.api.JavaVersion.VERSION_1_9) >= 0) {
-    options.addStringOption('source', '8')
-  }
+  options.addStringOption('source', '11')
   doLast {
     ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:'',
     flags:'g', byline:true) {

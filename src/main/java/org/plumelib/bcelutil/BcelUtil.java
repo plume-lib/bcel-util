@@ -296,14 +296,8 @@ public final class BcelUtil {
         || classname.startsWith("sun.")) {
       return true;
     }
-    if (javaVersion <= 8) {
-      if (classname.startsWith("com.oracle.") || classname.startsWith("org.omg.")) {
-        return true;
-      }
-    } else {
-      if (classname.startsWith("netscape.javascript.") || classname.startsWith("org.graalvm.")) {
-        return true;
-      }
+    if (classname.startsWith("netscape.javascript.") || classname.startsWith("org.graalvm.")) {
+      return true;
     }
     return false;
   }
@@ -326,14 +320,8 @@ public final class BcelUtil {
         || classname.startsWith("sun/")) {
       return true;
     }
-    if (javaVersion <= 8) {
-      if (classname.startsWith("com/oracle/") || classname.startsWith("org/omg/")) {
-        return true;
-      }
-    } else {
-      if (classname.startsWith("netscape/javascript/") || classname.startsWith("org/graalvm/")) {
-        return true;
-      }
+    if (classname.startsWith("netscape/javascript/") || classname.startsWith("org/graalvm/")) {
+      return true;
     }
     return false;
   }

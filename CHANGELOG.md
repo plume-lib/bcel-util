@@ -1,5 +1,9 @@
 # BCEL-Util change log
 
+## 1.3.0 (Sep ??, 2023)
+
+- No longer runs under Java 8.  Use Java 11 or later.
+
 ## 1.2.2 (May 15, 2022)
 
 - Tested under Java 20
