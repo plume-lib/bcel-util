@@ -621,8 +621,6 @@ public final class BcelUtil {
     // Reset the current number of locals so that when other locals
     // are added they get added at the correct offset.
     mg.setMaxLocals();
-
-    return;
   }
 
   /**
