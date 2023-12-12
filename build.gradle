@@ -30,7 +30,7 @@ dependencies {
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
 
   // implementation "com.google.errorprone:error_prone_core:${errorproneVersion}" // For @InlineMe.
-  implementation 'org.plumelib:reflection-util:1.1.1'
+  implementation 'org.plumelib:reflection-util:1.1.2'
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
