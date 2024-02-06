@@ -37,8 +37,8 @@ artifacts {
 publishing {
   publications {
     maven(MavenPublication) {
-
       from components.java
+
       pom {
         name = 'BCEL Util'
         description = 'Utility functions for BCEL.'
