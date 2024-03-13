@@ -22,7 +22,7 @@ repositories {
   mavenCentral()
 }
 
-ext.errorproneVersion = '2.26.0'
+ext.errorproneVersion = '2.26.1'
 
 dependencies {
   api 'org.checkerframework.annotatedlib:bcel:6.5.0'
