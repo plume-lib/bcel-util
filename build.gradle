@@ -15,7 +15,7 @@ plugins {
   id 'org.checkerframework' version '0.6.37'
 
   // To show task list as a tree, run: ./gradlew <taskname> taskTree
-  id 'com.dorongold.task-tree' version '2.1.1'
+  id 'com.dorongold.task-tree' version '3.0.0'
 }
 
 repositories {
