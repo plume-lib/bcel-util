@@ -24,7 +24,7 @@ repositories {
   maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
-ext.errorproneVersion = '2.27.0'
+ext.errorproneVersion = '2.27.1'
 
 dependencies {
   api 'org.checkerframework.annotatedlib:bcel:6.5.0'
