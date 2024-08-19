@@ -456,7 +456,7 @@ public final class StackVer {
 
       icv.setMethodGen(mg);
 
-      ////////////// DFA BEGINS HERE ////////////////
+      // //////////// DFA BEGINS HERE ////////////////
       if (!(mg.isAbstract() || mg.isNative())) { // IF mg HAS CODE (See pass 2)
 
         // false says don't check if jsr subroutine is covered by exception handler
