@@ -1503,8 +1503,8 @@ public abstract class StackMapUtils {
     return stackver.get_stackTypes();
   }
 
-  ///
-  /// end of fixLocalVariableTable section of file
-  ///
+  //
+  // end of fixLocalVariableTable section of file
+  //
 
 }
