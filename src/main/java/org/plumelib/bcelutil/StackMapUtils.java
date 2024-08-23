@@ -965,9 +965,9 @@ public abstract class StackMapUtils {
     return lvNew;
   }
 
-  ///////////////////////////////////////////////////////////////////////////
-  /// fixLocalVariableTable
-  ///
+  // //////////////////////////////////////////////////////////////////////
+  // fixLocalVariableTable
+  //
 
   // The rest of the code in this file is "fixLocalVariableTable" and the methods it calls,
   // directly or indirectly. The following five variables are used by this code to contain the live
@@ -1503,8 +1503,8 @@ public abstract class StackMapUtils {
     return stackver.get_stackTypes();
   }
 
-  ///
-  /// end of fixLocalVariableTable section of file
-  ///
+  //
+  // end of fixLocalVariableTable section of file
+  //
 
 }
