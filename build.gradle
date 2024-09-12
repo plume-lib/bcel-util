@@ -24,9 +24,10 @@ repositories {
   maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
-ext.errorproneVersion = '2.32.0'
-
-ext.isJava17orHigher = JavaVersion.current() >= JavaVersion.VERSION_17
+ext {
+  errorproneVersion = '2.32.0'
+  isJava17orHigher = JavaVersion.current() >= JavaVersion.VERSION_17
+}
 
 dependencies {
   api 'org.checkerframework.annotatedlib:bcel:6.5.0'
