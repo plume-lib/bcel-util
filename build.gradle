@@ -24,7 +24,9 @@ repositories {
   maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 }
 
-ext.errorproneVersion = '2.31.0'
+ext.errorproneVersion = '2.32.0'
+
+ext.isJava17orHigher = JavaVersion.current() >= JavaVersion.VERSION_17
 
 dependencies {
   api 'org.checkerframework.annotatedlib:bcel:6.5.0'
@@ -32,8 +34,6 @@ dependencies {
   // implementation fileTree(dir: "$System.env.BCEL/target", include: 'bcel-6.2.0.2.jar')
 
   implementation 'org.plumelib:reflection-util:1.1.3'
-
-  compileOnly "com.google.errorprone:error_prone_annotations:${errorproneVersion}"
 
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
@@ -86,12 +86,16 @@ dependencies {
 tasks.withType(JavaCompile).configureEach {
   // "-processing" avoids javac warning "No processor claimed any of these annotations".
   options.compilerArgs << '-Xlint:all,-processing' << '-Werror'
-  options.errorprone {
-    disable('ExtendsObject')  // Incorrect when using the Checker Framework
-    disable('ReferenceEquality') // Use Interning Checker instead.
-    disable('AnnotateFormatMethod') // Error Prone doesn't know about Checker Framework @FormatMethod
-    // Code copied from BCEL that we don't want to change gratuitously.
-    excludedPaths = '.*/org/plumelib/bcelutil/StackVer.java'
+  if (isJava17orHigher) {
+    options.errorprone {
+      disable('ExtendsObject')  // Incorrect when using the Checker Framework
+      disable('ReferenceEquality') // Use Interning Checker instead.
+      disable('AnnotateFormatMethod') // Error Prone doesn't know about Checker Framework @FormatMethod
+      // Code copied from BCEL that we don't want to change gratuitously.
+      excludedPaths = '.*/org/plumelib/bcelutil/StackVer.java'
+    }
+  } else {
+    options.errorprone.enabled = false
   }
 }
 
