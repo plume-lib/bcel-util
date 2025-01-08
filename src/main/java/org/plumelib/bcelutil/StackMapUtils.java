@@ -649,9 +649,9 @@ public abstract class StackMapUtils {
       case Const.T_OBJECT:
         return new StackMapType(
             Const.ITEM_Object, pool.addClass(typeToClassGetName(t)), pool.getConstantPool());
-        // UNKNOWN seems to be used for Uninitialized objects.
-        // The second argument to the constructor should be the code offset
-        // of the corresponding 'new' instruction.  Just using 0 for now.
+      // UNKNOWN seems to be used for Uninitialized objects.
+      // The second argument to the constructor should be the code offset
+      // of the corresponding 'new' instruction.  Just using 0 for now.
       case Const.T_UNKNOWN:
         return new StackMapType(Const.ITEM_NewObject, 0, pool.getConstantPool());
       default:
