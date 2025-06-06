@@ -45,8 +45,8 @@ dependencies {
 apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 test {
@@ -86,8 +86,9 @@ dependencies {
   errorprone("com.google.errorprone:error_prone_core:${errorproneVersion}")
 }
 tasks.withType(JavaCompile).configureEach {
-  // "-processing" avoids javac warning "No processor claimed any of these annotations".
-  options.compilerArgs << '-Xlint:all,-processing' << '-Werror'
+  // -processing: suppresses "No processor claimed any of these annotations"
+  // -options: suppresses "target value 8 is obsolete and will be removed in a future release"
+  options.compilerArgs << '-Xlint:all,-processing,-options' << '-Werror'
   options.errorprone {
     disable('ExtendsObject')  // Incorrect when using the Checker Framework
     disable('ReferenceEquality') // Use Interning Checker instead.
