@@ -83,7 +83,8 @@ public abstract class StackMapUtils {
    * The pool for the method currently being processed. Must be set by the client. See the sample
    * code in {@link InstructionListUtils} for when and how to set this value.
    */
-  protected @Nullable ConstantPoolGen pool = null;
+  // Use a dummy value to let the variable be @NonNull.
+  protected ConstantPoolGen pool = new ConstantPoolGen();
 
   /** A log to which to print debugging information about program instrumentation. */
   protected SimpleLog debugInstrument = new SimpleLog(false);
@@ -649,9 +650,9 @@ public abstract class StackMapUtils {
       case Const.T_OBJECT:
         return new StackMapType(
             Const.ITEM_Object, pool.addClass(typeToClassGetName(t)), pool.getConstantPool());
-      // UNKNOWN seems to be used for Uninitialized objects.
-      // The second argument to the constructor should be the code offset
-      // of the corresponding 'new' instruction.  Just using 0 for now.
+        // UNKNOWN seems to be used for Uninitialized objects.
+        // The second argument to the constructor should be the code offset
+        // of the corresponding 'new' instruction.  Just using 0 for now.
       case Const.T_UNKNOWN:
         return new StackMapType(Const.ITEM_NewObject, 0, pool.getConstantPool());
       default:

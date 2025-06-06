@@ -5,8 +5,8 @@ plugins {
   id 'com.gradleup.shadow' version '8.3.6'
 
   // Code formatting; defines targets "spotlessApply" and "spotlessCheck"
-  // Requires JDK 11 or higher; the plugin crashes under JDK 8.
-  id 'com.diffplug.spotless' version '7.0.4'
+  // Version 6.14.0 and later requires JRE 11+, but version 6.13.0 doesn't work on JRE 21.
+  id 'com.diffplug.spotless' version '6.13.0'
 
   // Error Prone linter
   id('net.ltgt.errorprone') version '4.2.0'
@@ -45,8 +45,8 @@ dependencies {
 apply from: "${buildscript.sourceFile.parent}/gradle/mavencentral.gradle"
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 test {
@@ -56,27 +56,29 @@ test {
   }
 }
 
-spotless {
-  format 'misc', {
-    // define the files to apply `misc` to
-    target '*.md', '.gitignore'
+if (! isJava21orHigher) {
+  spotless {
+    format 'misc', {
+      // define the files to apply `misc` to
+      target '*.md', '.gitignore'
 
-    // define the steps to apply to those files
-    trimTrailingWhitespace()
-    leadingTabsToSpaces(2)
-    endWithNewline()
-  }
-  java {
-    targetExclude('**/WeakIdentityHashMap.java')
-    googleJavaFormat()
-    formatAnnotations()
-  }
-  groovyGradle {
-    target '**/*.gradle'
-    greclipse()  // which formatter Spotless should use to format .gradle files.
-    leadingTabsToSpaces(2)
-    trimTrailingWhitespace()
-    // endWithNewline() // Don't want to end empty files with a newline
+      // define the steps to apply to those files
+      trimTrailingWhitespace()
+      indentWithSpaces(2) // in Spotless version 7, change to: leadingTabsToSpaces(2)
+      endWithNewline()
+    }
+    java {
+      targetExclude('**/WeakIdentityHashMap.java')
+      googleJavaFormat()
+      formatAnnotations()
+    }
+    groovyGradle {
+      target '**/*.gradle'
+      greclipse()  // which formatter Spotless should use to format .gradle files.
+      indentWithSpaces(2) // in Spotless version 7, change to: leadingTabsToSpaces(2)
+      trimTrailingWhitespace()
+      // endWithNewline() // Don't want to end empty files with a newline
+    }
   }
 }
 
@@ -86,8 +88,9 @@ dependencies {
   errorprone("com.google.errorprone:error_prone_core:${errorproneVersion}")
 }
 tasks.withType(JavaCompile).configureEach {
-  // "-processing" avoids javac warning "No processor claimed any of these annotations".
-  options.compilerArgs << '-Xlint:all,-processing' << '-Werror'
+  // -processing: suppresses "No processor claimed any of these annotations"
+  // -options: suppresses "target value 8 is obsolete and will be removed in a future release"
+  options.compilerArgs << '-Xlint:all,-processing,-options' << '-Werror'
   options.errorprone {
     disable('ExtendsObject')  // Incorrect when using the Checker Framework
     disable('ReferenceEquality') // Use Interning Checker instead.
