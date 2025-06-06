@@ -5,8 +5,8 @@ plugins {
   id 'com.gradleup.shadow' version '8.3.6'
 
   // Code formatting; defines targets "spotlessApply" and "spotlessCheck"
-  // Requires JDK 11 or higher; the plugin crashes under JDK 8.
-  id 'com.diffplug.spotless' version '7.0.4'
+  // Version 6.14.0 and later requires JRE 11+, but version 6.13.0 doesn't work on JRE 21.
+  id 'com.diffplug.spotless' version '6.13.0'
 
   // Error Prone linter
   id('net.ltgt.errorprone') version '4.2.0'
@@ -56,27 +56,29 @@ test {
   }
 }
 
-spotless {
-  format 'misc', {
-    // define the files to apply `misc` to
-    target '*.md', '.gitignore'
+if (! isJava21orHigher) {
+  spotless {
+    format 'misc', {
+      // define the files to apply `misc` to
+      target '*.md', '.gitignore'
 
-    // define the steps to apply to those files
-    trimTrailingWhitespace()
-    leadingTabsToSpaces(2)
-    endWithNewline()
-  }
-  java {
-    targetExclude('**/WeakIdentityHashMap.java')
-    googleJavaFormat()
-    formatAnnotations()
-  }
-  groovyGradle {
-    target '**/*.gradle'
-    greclipse()  // which formatter Spotless should use to format .gradle files.
-    leadingTabsToSpaces(2)
-    trimTrailingWhitespace()
-    // endWithNewline() // Don't want to end empty files with a newline
+      // define the steps to apply to those files
+      trimTrailingWhitespace()
+      indentWithSpaces(2) // in Spotless version 7, change to: leadingTabsToSpaces(2)
+      endWithNewline()
+    }
+    java {
+      targetExclude('**/WeakIdentityHashMap.java')
+      googleJavaFormat()
+      formatAnnotations()
+    }
+    groovyGradle {
+      target '**/*.gradle'
+      greclipse()  // which formatter Spotless should use to format .gradle files.
+      indentWithSpaces(2) // in Spotless version 7, change to: leadingTabsToSpaces(2)
+      trimTrailingWhitespace()
+      // endWithNewline() // Don't want to end empty files with a newline
+    }
   }
 }
 
