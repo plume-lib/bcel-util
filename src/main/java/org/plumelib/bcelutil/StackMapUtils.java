@@ -89,7 +89,7 @@ public abstract class StackMapUtils {
   /** A log to which to print debugging information about program instrumentation. */
   protected SimpleLog debugInstrument = new SimpleLog(false);
 
-  /** Whether or not the current method needs a StackMap; set by setCurrentStackMapTable. */
+  /** True if the current method needs a StackMap; set by setCurrentStackMapTable. */
   protected boolean needStackMap = false;
 
   /** Working copy of StackMapTable; set by setCurrentStackMapTable. */
@@ -151,7 +151,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Return the attribute name for the specified attribute.
+   * Returns the attribute name for the specified attribute.
    *
    * @param a the attribute
    * @return the attribute name for the specified attribute
@@ -165,7 +165,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Returns whether or not the specified attribute is a LocalVariableTypeTable.
+   * Returns true if the specified attribute is a LocalVariableTypeTable.
    *
    * @param a the attribute
    * @return true iff the attribute is a LocalVariableTypeTable
@@ -176,7 +176,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Returns whether or not the specified attribute is a StackMapTable.
+   * Returns true if the specified attribute is a StackMapTable.
    *
    * @param a the attribute
    * @return true iff the attribute is a StackMapTable
@@ -534,8 +534,8 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Get existing StackMapTable from the MethodGen argument. If there is none, create a new empty
-   * one. Sets both smta and stackMapTable. Must be called prior to any other methods that
+   * Returns existing StackMapTable from the MethodGen argument. If there is none, create a new
+   * empty one. Sets both smta and stackMapTable. Must be called prior to any other methods that
    * manipulate the stackMapTable!
    *
    * @param mgen MethodGen to search
@@ -628,7 +628,7 @@ public abstract class StackMapUtils {
   /**
    * Convert a Type to a StackMapType.
    *
-   * @param t Type to be converted
+   * @param t type to be converted
    * @return result StackMapType
    */
   protected final StackMapType generateStackMapTypeFromType(Type t) {
@@ -698,7 +698,7 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Return the operand size of this type (2 for long and double, 1 otherwise).
+   * Returns the operand size of this type (2 for long and double, 1 otherwise).
    *
    * @param smt a StackMapType object
    * @return the operand size of this type

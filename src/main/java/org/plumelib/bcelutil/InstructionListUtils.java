@@ -118,7 +118,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * and append them.
    *
    * @param il InstructionList to be modified
-   * @param inst Instruction to be appended
+   * @param inst instruction to be appended
    */
   protected final void append_inst(InstructionList il, Instruction inst) {
 
