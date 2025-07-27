@@ -123,7 +123,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Return a string representation of the access flags of method m. In the string, the flags are
+   * Returns a string representation of the access flags of method m. In the string, the flags are
    * space-separated and in a canonical order.
    *
    * @param m the method whose access flags to retrieve
@@ -153,7 +153,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Return a printed description of the given instructions.
+   * Returns a printed description of the given instructions.
    *
    * @param il the instructions to describe
    * @param pool the constant pool the instructions refer to
@@ -170,7 +170,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Return a description of the local variables (one per line).
+   * Returns a description of the local variables (one per line).
    *
    * @param mg the method whose local variables to describe
    * @return a description of the local variables (one per line)
@@ -189,7 +189,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the attribute name for the specified attribute, looked up in the original class file
+   * Returns the attribute name for the specified attribute, looked up in the original class file
    * ConstantPool.
    *
    * @param a the attribute
@@ -205,7 +205,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the attribute name for the specified attribute, looked up in the given ConstantPoolGen.
+   * Returns the attribute name for the specified attribute, looked up in the given ConstantPoolGen.
    *
    * @param a the attribute
    * @param pool the constant pool
@@ -222,7 +222,7 @@ public final class BcelUtil {
   // 'is' (boolean test) methods
 
   /**
-   * Returns whether or not the method is a constructor.
+   * Returns true if the method is a constructor.
    *
    * @param mg the MethodGen to test
    * @return true iff the method is a constructor
@@ -235,7 +235,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not the method is a constructor.
+   * Returns true if the method is a constructor.
    *
    * @param m the Method to test
    * @return true iff the method is a constructor
@@ -248,7 +248,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not the method is a class initializer.
+   * Returns true if the method is a class initializer.
    *
    * @param mg the method to test
    * @return true iff the method is a class initializer
@@ -258,7 +258,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not the method is a class initializer.
+   * Returns true if the method is a class initializer.
    *
    * @param m the method to test
    * @return true iff the method is a class initializer
@@ -268,7 +268,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not the class is part of the JDK (rt.jar).
+   * Returns true if the class is part of the JDK (rt.jar).
    *
    * @param gen the class to test
    * @return true iff the class is in a package that is in the JDK (rt.jar)
@@ -278,7 +278,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not the class is part of the JDK (rt.jar).
+   * Returns true if the class is part of the JDK (rt.jar).
    *
    * @param classname the class to test, in the format of Class.getName(); the class should not be
    *     an array
@@ -303,7 +303,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not the class is part of the JDK (rt.jar).
+   * Returns true if the class is part of the JDK (rt.jar).
    *
    * @param classname the class to test, in internal form
    * @return true iff the class is part of the JDK (rt.jar)
@@ -327,7 +327,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not the specified attribute is a local variable type table.
+   * Returns true if the specified attribute is a local variable type table.
    *
    * @param a the attribute
    * @param pool the constant pool
@@ -338,8 +338,8 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns whether or not this is a standard main method (static, void, name is 'main', and one
-   * formal parameter: a string array).
+   * Returns true if this is a standard main method (static, void, name is 'main', and one formal
+   * parameter: a string array).
    *
    * @param mg the method to check
    * @return true iff the method is a main method
@@ -717,7 +717,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the type corresponding to a given binary name or primitive type name.
+   * Returns the type corresponding to a given binary name or primitive type name.
    *
    * @param classname the binary name of a class (= fully-qualified name, except for inner classes),
    *     or a primitive type name, but not an array
@@ -752,7 +752,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Return the type corresponding to a given fully-qualified binary name.
+   * Returns the type corresponding to a given fully-qualified binary name.
    *
    * @param classname the fully-qualified binary name of a type, which is like a
    *     fully-qualified-name but uses "$" rather than "." for nested classes

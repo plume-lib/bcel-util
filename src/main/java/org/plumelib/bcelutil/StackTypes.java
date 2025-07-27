@@ -87,7 +87,7 @@ public final class StackTypes {
   }
 
   /**
-   * Return a printed representation of the given OperandStack.
+   * Returns a printed representation of the given OperandStack.
    *
    * @param os the OperandStack to print
    * @return a printed representation of {@code os}
@@ -113,7 +113,7 @@ public final class StackTypes {
   }
 
   /**
-   * Return a printed representation of the given LocalVariables.
+   * Returns a printed representation of the given LocalVariables.
    *
    * @param lv the LocalVariablesStack to print
    * @return a printed representation of {@code lv}

@@ -52,7 +52,7 @@ public final class SimpleLog {
   /**
    * Create a new SimpleLog object with logging to standard out.
    *
-   * @param enabled whether the logger starts out enabled
+   * @param enabled true if the logger starts out enabled
    */
   public SimpleLog(boolean enabled) {
     this(null, enabled);
@@ -71,7 +71,7 @@ public final class SimpleLog {
    * Create a new SimpleLog object with logging to a file.
    *
    * @param filename file name, or use "-" or null for System.out
-   * @param enabled whether the logger starts out enabled
+   * @param enabled true if the logger starts out enabled
    */
   public SimpleLog(@Nullable String filename, boolean enabled) {
     this.filename = (filename != null && filename.equals("-")) ? null : filename;
@@ -81,9 +81,9 @@ public final class SimpleLog {
   }
 
   /**
-   * Return whether logging is enabled.
+   * Returns true if logging is enabled.
    *
-   * @return whether logging is enabled
+   * @return true if logging is enabled
    */
   public boolean enabled() {
     return enabled;
@@ -147,7 +147,7 @@ public final class SimpleLog {
   }
 
   /**
-   * Return the current indentation string.
+   * Returns the current indentation string.
    *
    * @return the current indentation string
    */
