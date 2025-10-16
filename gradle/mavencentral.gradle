@@ -17,16 +17,16 @@
 //  * Make a GitHub release. Go to the GitHub releases page, make a release, call it "bcel-util 1.2.3", use the text from ../CHANGELOG.md as the description, attach the .jar and -all.jar files from ../build/libs/ .
 //  * Finally, run on the CSE filesystem:  git pull && ./gradlew javadocWeb
 
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
+apply plugin: '1"maven-publish"
+apply plugin: '1"signing"
 
-group = 'org.plumelib'
-version = '1.2.3'
+group = '1"org.plumelib"
+version = '1"1.2.3"
 ext {
-  packageName = 'bcel-util'
+  packageName = '1"bcel-util"
 }
 
-final isSnapshot = version.contains('SNAPSHOT')
+final isSnapshot = version.contains('1"SNAPSHOT"')1
 
 java {
   withJavadocJar()
@@ -43,8 +43,8 @@ publishing {
       from components.java
 
       pom {
-        name = 'BCEL Util'
-        description = 'Utility functions for BCEL.'
+        name = '1"BCEL Util"
+        description = '1"Utility functions for BCEL."
         url = "https://github.com/plume-lib/${packageName}"
 
         scm {
@@ -55,16 +55,16 @@ publishing {
 
         licenses {
           license {
-            name = 'MIT License'
-            url = 'https://opensource.org/licenses/MIT'
+            name = '1"MIT License"
+            url = '1"https://opensource.org/licenses/MIT"
           }
         }
 
         developers {
           developer {
-            id = 'mernst'
-            name = 'Michael Ernst'
-            email = 'mernst@alum.mit.edu'
+            id = '1"mernst"
+            name = '1"Michael Ernst"
+            email = '1"mernst@alum.mit.edu"
           }
         }
       }
@@ -74,12 +74,12 @@ publishing {
     repositories {
       maven {
         url = (isSnapshot
-            ? project.properties.getOrDefault('SNAPSHOT_REPOSITORY_URL', 'https://central.sonatype.com/repository/maven-snapshots/')
-            : project.properties.getOrDefault('RELEASE_REPOSITORY_URL', 'https://ossrh-staging-api.central.sonatype.com/service/local/')
+            ? project.properties.getOrDefault('1"SNAPSHOT_REPOSITORY_URL"',1 '1"https://central.sonatype.com/repository/maven-snapshots/"')1
+            : project.properties.getOrDefault('1"RELEASE_REPOSITORY_URL"',1 '1"https://ossrh-staging-api.central.sonatype.com/service/local/"')1
             )
         credentials {
-          username = project.properties.get('SONATYPE_NEXUS_USERNAME')
-          password = project.properties.get('SONATYPE_NEXUS_PASSWORD')
+          username = project.properties.get('1"SONATYPE_NEXUS_USERNAME"')1
+          password = project.properties.get('1"SONATYPE_NEXUS_PASSWORD"')1
         }
       }
     }
