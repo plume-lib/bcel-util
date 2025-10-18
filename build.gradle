@@ -1,21 +1,21 @@
 plugins {
-  id "java-library"
+  id("java-library")
 
   // To create a fat jar build/libs/...-all.jar, run: ./gradlew shadowJar
-  id "com.gradleup.shadow" version "9.2.2"
+  id("com.gradleup.shadow").version("9.2.2")
 
   // Code formatting; defines targets "spotlessApply" and "spotlessCheck"
   // Requires JDK 11 or higher; the plugin crashes under JDK 8.
-  id "com.diffplug.spotless" version "8.0.0"
+  id("com.diffplug.spotless").version("8.0.0")
 
   // Error Prone linter
-  id("net.ltgt.errorprone") version "4.3.0"
+  id("net.ltgt.errorprone").version("4.3.0")
 
   // Checker Framework pluggable type-checking
-  id "org.checkerframework" version "0.6.60"
+  id("org.checkerframework").version("0.6.60")
 
   // To show task list as a tree, run: ./gradlew <taskname> taskTree
-  id "com.dorongold.task-tree" version "4.0.1"
+  id("com.dorongold.task-tree").version("4.0.1")
 }
 
 repositories {
@@ -32,11 +32,11 @@ ext {
 }
 
 dependencies {
-  api "org.checkerframework.annotatedlib:bcel:6.5.0"
+  api("org.checkerframework.annotatedlib:bcel:6.5.0")
   // For a locally-built commons-bcel, set $BCEL and use this line instead of the above.
   // implementation fileTree(dir: "$System.env.BCEL/target", include: "bcel-6.2.0.2.jar")
 
-  implementation "org.plumelib:reflection-util:1.1.5"
+  implementation("org.plumelib:reflection-util:1.1.5")
 
   testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -67,7 +67,7 @@ test {
 spotless {
   format "misc", {
     // define the files to apply `misc` to
-    target "*.md", ".gitignore"
+    target("*.md", ".gitignore")
 
     // define the steps to apply to those files
     trimTrailingWhitespace()
@@ -82,7 +82,7 @@ spotless {
     formatAnnotations()
   }
   groovyGradle {
-    target "**/*.gradle"
+    target("**/*.gradle")
     greclipse()  // which formatter Spotless should use to format .gradle files.
     leadingTabsToSpaces(2)
     trimTrailingWhitespace()
@@ -256,5 +256,5 @@ tasks.withType(JavaCompile) {
 /* Make Emacs TAGS table */
 tasks.register("tags", Exec) {
   description = "Run etags to create an Emacs TAGS table"
-  commandLine "bash", "-c", "find src/ -name "*.java" | sort | xargs etags"
+  commandLine "bash", "-c", "find src/ -name '*.java' | sort | xargs etags"
 }
