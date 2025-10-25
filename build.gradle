@@ -9,7 +9,7 @@ plugins {
   id("com.diffplug.spotless").version("8.0.0")
 
   // Error Prone linter
-  id("net.ltgt.errorprone").version("4.3.0")
+  id("net.ltgt.errorprone").version("4.3.0") apply false
 
   // Checker Framework pluggable type-checking
   id("org.checkerframework").version("0.6.60")
@@ -26,7 +26,7 @@ repositories {
 }
 
 ext {
-  errorproneVersion = "2.42.0"
+  errorproneVersion = "2.43.0"
   isJava17orHigher = JavaVersion.current() >= JavaVersion.VERSION_17
   isJava21orHigher = JavaVersion.current() >= JavaVersion.VERSION_21
 }
@@ -90,21 +90,23 @@ spotless {
 
 // Error Prone linter
 
-dependencies {
-  errorprone("com.google.errorprone:error_prone_core:${errorproneVersion}")
-}
-tasks.withType(JavaCompile).configureEach {
-  // -processing: suppresses "No processor claimed any of these annotations"
-  // -options: suppresses "target value 8 is obsolete and will be removed in a future release"
-  options.compilerArgs << "-Xlint:all,-processing,-options" << "-Werror"
-  options.errorprone {
-    disable("ExtendsObject")  // Incorrect when using the Checker Framework
-    disable("ReferenceEquality") // Use Interning Checker instead.
-    disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod
-    // Code copied from BCEL that we don't want to change gratuitously.
-    excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
+if (isJava21orHigher) {
+  apply plugin: "net.ltgt.errorprone"
+  dependencies {
+    errorprone("com.google.errorprone:error_prone_core:${errorproneVersion}")
   }
-  options.errorprone.enabled = isJava17orHigher
+  tasks.withType(JavaCompile).configureEach {
+    // -processing: suppresses "No processor claimed any of these annotations"
+    // -options: suppresses "target value 8 is obsolete and will be removed in a future release"
+    options.compilerArgs << "-Xlint:all,-processing,-options" << "-Werror"
+    options.errorprone {
+      disable("ExtendsObject")  // Incorrect when using the Checker Framework
+      disable("ReferenceEquality") // Use Interning Checker instead.
+      disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod
+      // Code copied from BCEL that we don't want to change gratuitously.
+      excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
+    }
+  }
 }
 
 // Checker Framework pluggable type-checking
