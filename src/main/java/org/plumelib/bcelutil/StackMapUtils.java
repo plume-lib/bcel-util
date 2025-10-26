@@ -142,10 +142,7 @@ public abstract class StackMapUtils {
    * @return the new string array
    */
   protected String[] addString(String[] arr, String newString) {
-    String[] newArr = new String[arr.length + 1];
-    for (int ii = 0; ii < arr.length; ii++) {
-      newArr[ii] = arr[ii];
-    }
+    String[] newArr = Arrays.copyOf(arr, arr.length + 1);
     newArr[arr.length] = newString;
     return newArr;
   }
@@ -746,10 +743,7 @@ public abstract class StackMapUtils {
           newLocalTypes[index] = oldLocalTypes[index];
         }
         newLocalTypes[index++] = generateStackMapTypeFromType(typeNewVar);
-        while (index <= numLocals) {
-          newLocalTypes[index] = oldLocalTypes[index - 1];
-          index++;
-        }
+        System.arraycopy(oldLocalTypes, index - 1, newLocalTypes, index, numLocals - index);
 
         stackMapTable[i].setTypesOfLocals(newLocalTypes);
       }
@@ -1176,9 +1170,8 @@ public abstract class StackMapUtils {
     int minSize = 3; // only sizes are 1 or 2; start with something larger.
 
     numberActiveLocals = initialLocalsCount;
-    StackMapType[] typesOfActiveLocals = new StackMapType[numberActiveLocals];
+    StackMapType[] typesOfActiveLocals = Arrays.copyOf(initialTypeList, initialTypeList.length);
     for (int ii = 0; ii < numberActiveLocals; ii++) {
-      typesOfActiveLocals[ii] = initialTypeList[ii];
       localsOffsetHeight += getSize(initialTypeList[ii]);
     }
 
