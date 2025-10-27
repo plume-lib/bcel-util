@@ -742,7 +742,7 @@ public abstract class StackMapUtils {
           newLocalTypes[index] = oldLocalTypes[index];
         }
         newLocalTypes[index++] = generateStackMapTypeFromType(typeNewVar);
-        System.arraycopy(oldLocalTypes, index - 1, newLocalTypes, index, numLocals - index);
+        System.arraycopy(oldLocalTypes, index - 1, newLocalTypes, index, numLocals - index + 1);
 
         entry.setTypesOfLocals(newLocalTypes);
       }
