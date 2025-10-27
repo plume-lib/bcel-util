@@ -128,14 +128,14 @@ public final class BcelUtil {
    * @param m the method whose access flags to retrieve
    * @return a string representation of the access flags of method m
    */
+  @SuppressWarnings({"PMD.AvoidReassigningLoopVariables", "PMD.ForLoopVariableCount"})
   static String accessFlagsToString(Method m) {
 
     int flags = m.getAccessFlags();
 
     StringBuilder buf = new StringBuilder();
     // Note that pow is a binary mask for the flag (= 2^i).
-    int pow = 1;
-    for (int i = 0; i <= Const.MAX_ACC_FLAG_I; i++) {
+    for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG_I; i++) {
       if ((flags & pow) != 0) {
         if (buf.length() > 0) {
           buf.append(' ');
