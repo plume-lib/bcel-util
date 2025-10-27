@@ -3,7 +3,6 @@ package org.plumelib.bcelutil;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.bcel.Const;
@@ -118,7 +117,7 @@ public final class BcelUtil {
     if (argsExist) {
       sb.setLength(sb.length() - 2); // remove trailing ", "
     }
-    sb.append(")");
+    sb.append(')');
     return sb.toString();
   }
 
@@ -135,10 +134,11 @@ public final class BcelUtil {
 
     StringBuilder buf = new StringBuilder();
     // Note that pow is a binary mask for the flag (= 2^i).
-    for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG_I; i++) {
+    int pow = 1;
+    for (int i = 0; i <= Const.MAX_ACC_FLAG_I; i++) {
       if ((flags & pow) != 0) {
         if (buf.length() > 0) {
-          buf.append(" ");
+          buf.append(' ');
         }
         if (i < Const.ACCESS_NAMES_LENGTH) {
           buf.append(Const.getAccessName(i));
@@ -162,9 +162,9 @@ public final class BcelUtil {
   public static String instructionListToString(InstructionList il, ConstantPoolGen pool) {
 
     StringBuilder out = new StringBuilder();
-    for (Iterator<InstructionHandle> i = il.iterator(); i.hasNext(); ) {
-      InstructionHandle handle = i.next();
-      out.append(handle.getInstruction().toString(pool.getConstantPool()) + "\n");
+    for (InstructionHandle handle : il) {
+      out.append(handle.getInstruction().toString(pool.getConstantPool()));
+      out.append('\n');
     }
     return out.toString();
   }
@@ -369,7 +369,7 @@ public final class BcelUtil {
     }
 
     try {
-      @SuppressWarnings("UnusedVariable")
+      @SuppressWarnings({"UnusedVariable", "PMD.UnusedLocalVariable"})
       String ignore = mgen.toString(); // ensure it can be formatted without exceptions
       mgen.getLineNumberTable(mgen.getConstantPool());
 
@@ -412,18 +412,15 @@ public final class BcelUtil {
     }
 
     Method[] methods = gen.getMethods();
-    for (int i = 0; i < methods.length; i++) {
-      Method method = methods[i];
+    for (Method method : methods) {
       // System.out.println ("Checking method " + method + " in class "
       // + gen.getClassName());
       checkMgen(new MethodGen(method, gen.getClassName(), gen.getConstantPool()));
     }
 
     // Diagnostic output
-    if (false) {
-      dumpStackTrace();
-      dumpMethods(gen);
-    }
+    // dumpStackTrace();
+    // dumpMethods(gen);
   }
 
   // 'dump' methods
@@ -726,23 +723,21 @@ public final class BcelUtil {
    */
   public static Type binaryNameToType(@BinaryNameOrPrimitiveType String classname) {
 
-    classname = classname.intern();
-
-    if (classname == "int") { // interned
+    if (classname.equals("int")) {
       return Type.INT;
-    } else if (classname == "boolean") { // interned
+    } else if (classname.equals("boolean")) {
       return Type.BOOLEAN;
-    } else if (classname == "byte") { // interned
+    } else if (classname.equals("byte")) {
       return Type.BYTE;
-    } else if (classname == "char") { // interned
+    } else if (classname.equals("char")) {
       return Type.CHAR;
-    } else if (classname == "double") { // interned
+    } else if (classname.equals("double")) {
       return Type.DOUBLE;
-    } else if (classname == "float") { // interned
+    } else if (classname.equals("float")) {
       return Type.FLOAT;
-    } else if (classname == "long") { // interned
+    } else if (classname.equals("long")) {
       return Type.LONG;
-    } else if (classname == "short") { // interned
+    } else if (classname.equals("short")) {
       return Type.SHORT;
     } else {
       @SuppressWarnings("signature") // It's not a primitive, so it's a proper binary name.

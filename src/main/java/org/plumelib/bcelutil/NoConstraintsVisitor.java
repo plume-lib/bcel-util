@@ -178,6 +178,7 @@ import org.apache.bcel.verifier.structurals.InstConstraintVisitor;
  * symbolic execution in order to capture the state of the local variables and stack at the start of
  * each byte code instruction.
  */
+@SuppressWarnings("PMD.UncommentedEmptyMethodBody")
 public class NoConstraintsVisitor extends InstConstraintVisitor {
 
   /** The constructor. Constructs a new instance of this class. */
