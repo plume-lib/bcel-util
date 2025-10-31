@@ -76,7 +76,7 @@ public final class SimpleLog {
   public SimpleLog(@Nullable String filename, boolean enabled) {
     this.filename = (filename != null && filename.equals("-")) ? null : filename;
     this.enabled = enabled;
-    indentStrings = new ArrayList<String>();
+    indentStrings = new ArrayList<>();
     indentStrings.add("");
   }
 
