@@ -22,7 +22,7 @@
  * </pre>
  *
  * <p>At this point one would use the methods of {@link org.apache.bcel.classfile.JavaClass}, the
- * other members of the {@link org.apache.bcel.classfile} package and {@link
+ * other members of the {@code org.apache.bcel.classfile} package and {@link
  * org.plumelib.bcelutil.BcelUtil} to explore the class file of interest.
  *
  * @see org.plumelib.bcelutil.InstructionListUtils InstructionListUtils for notes on modifing a Java

@@ -72,7 +72,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *        buildUninitializedNewMap(il);
  *
  * This is where you would insert your code to modify the current method (mg).
- * Most often this is done with members of the {@link org.apache.bcel.generic}
+ * Most often this is done with members of the {@code org.apache.bcel.generic}
  * package.  However, you should use the members of InstrutionListUtils to update
  * the byte code instructions of mg rather than similar methods in the BCEL
  * generic package in order to maintain the integrity of the method's StackMapTable.
