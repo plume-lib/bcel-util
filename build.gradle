@@ -288,7 +288,7 @@ mavenPublishing {
 
   pom {
     name = "BCEL Util"
-    description = "Utility functions for BCEL."
+    description = "Utility functions for BCEL, the Byte Code Engineering Library."
     url = "https://github.com/plume-lib/${packageName}"
 
     scm {

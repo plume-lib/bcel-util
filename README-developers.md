@@ -31,7 +31,8 @@ Run these steps on any filesystem, except the `javadocWeb` step.
 * Add a git tag and commit:
 
   ```sh
-  VER=1.2.3 && git commit -m "Version $VER" && git push && \
+  VER=1.2.3 && \
+  git commit -m "Version $VER" && git push && \
   git tag -a v$VER -m "Version $VER" && git push && git push --tags
   ```
 
@@ -66,7 +67,7 @@ Run these steps on any filesystem, except the `javadocWeb` step.
       <!-- markdownlint-enable line-length -->
 
   * Approach 2:  to Maven Local
-    * ./gradlew PublishToMavenLocal
+    * ./gradlew publishToMavenLocal
     * In the clients' build.gradle: set version number and use:
 
       ```gradle
