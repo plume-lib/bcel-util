@@ -15,7 +15,7 @@ In a Gradle buildfile, write
 
 ```gradle
 dependencies {
-  implementation 'org.plumelib:bcel-util:1.2.3'
+  implementation("org.plumelib:bcel-util:1.2.3")
 }
 ```
 
