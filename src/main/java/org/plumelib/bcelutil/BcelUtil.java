@@ -67,6 +67,7 @@ public final class BcelUtil {
    * @return the major version of the Java runtime
    */
   private static int getJavaVersion() {
+
     String version = System.getProperty("java.version");
 
     // Up to Java 8, from a version string like "1.8.whatever", extract "8".
