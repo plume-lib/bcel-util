@@ -254,6 +254,7 @@ dependencies {
 tasks.register("requireJavadoc", JavaExec) {
   group = "Documentation"
   description = "Ensures that Javadoc documentation exists."
+  inputs.files(jar.getArchiveFile())
   mainClass = "org.plumelib.javadoc.RequireJavadoc"
   classpath = configurations.requireJavadoc
   args("src/main/java")
@@ -291,7 +292,7 @@ mavenPublishing {
     url = "https://github.com/plume-lib/${packageName}"
 
     scm {
-      url = "https://github.com:plume-lib/${packageName}/"
+      url = "https://github.com/plume-lib/${packageName}/"
       connection = "scm:git:git://github.com/plume-lib/${packageName}.git"
       developerConnection = "scm:git:ssh://git@github.com/plume-lib/${packageName}.git"
     }
@@ -333,4 +334,17 @@ tasks.withType(JavaCompile) {
 tasks.register("tags", Exec) {
   description = "Run etags to create an Emacs TAGS table"
   commandLine("bash", "-c", "find src/ -name '*.java' | sort | xargs etags")
+}
+
+
+// Debugging support
+
+tasks.register("printCompileClasspaths") {
+  description = "Print the compile-time classpaths"
+  doFirst {
+    println("Compile classpath:")
+    println(sourceSets.main.compileClasspath.asPath)
+    println("Compile test classpath:")
+    println(sourceSets.test.compileClasspath.asPath)
+  }
 }
