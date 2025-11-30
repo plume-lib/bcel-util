@@ -806,7 +806,9 @@ public abstract class StackMapUtils {
     initialLocalsCount++;
 
     // Update the method's parameter information.
-    argTypes = BcelUtil.postpendToArray(argTypes, argType);
+    @SuppressWarnings("deprecation") // use within the package is OK
+    Type[] newArgTypes = BcelUtil.postpendToArray(argTypes, argType);
+    argTypes = newArgTypes;
     String[] argNames = addString(mgen.getArgumentNames(), argName);
     mgen.setArgumentTypes(argTypes);
     mgen.setArgumentNames(argNames);
