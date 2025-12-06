@@ -89,13 +89,13 @@ public abstract class StackMapUtils {
   /** A log to which to print debugging information about program instrumentation. */
   protected SimpleLog debugInstrument = new SimpleLog(false);
 
-  /** True if the current method needs a StackMap; set by setCurrentStackMapTable. */
+  /** True if the current method needs a StackMap; set by {@link #setCurrentStackMapTable}. */
   protected boolean needStackMap = false;
 
-  /** Working copy of StackMapTable; set by setCurrentStackMapTable. */
+  /** Working copy of StackMapTable; set by {@link #setCurrentStackMapTable}. */
   protected StackMapEntry @Nullable [] stackMapTable = null;
 
-  /** Original stack map table attribute; set by setCurrentStackMapTable. */
+  /** Original stack map table attribute; set by {@link #setCurrentStackMapTable}. */
   protected @Nullable StackMap smta = null;
 
   /** Initial state of StackMapTypes for locals on method entry. */
@@ -530,15 +530,15 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Returns existing StackMapTable from the MethodGen argument. If there is none, create a new
-   * empty one. Sets both smta and stackMapTable. Must be called prior to any other methods that
-   * manipulate the stackMapTable!
+   * Sets the {@link #stackMapTable} and {@link #smta} fields from the MethodGen argument. If there
+   * is none, create a new empty one. Must be called prior to any other methods that manipulate the
+   * stackMapTable!
    *
    * @param mgen MethodGen to search
    * @param javaClassVersion Java version for the classfile; stackMapTable is optional before Java
    *     1.7 (= classfile version 51)
    */
-  @EnsuresNonNull({"stackMapTable"})
+  @EnsuresNonNull({"stackMapTable", "smta"})
   protected final void setCurrentStackMapTable(MethodGen mgen, int javaClassVersion) {
 
     needStackMap = false;
