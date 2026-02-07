@@ -20,5 +20,11 @@ jobs:
         run: sudo apt -qyy install shfmt
       - name: make showvars
         run: make showvars
+      - run: html-style-check
+      - run: markdown-style-check
+      - run: perl-style-check
+      - run: python-style-check python-typecheck
+      - run: shell-style-check
+      - run: yaml-style-check
       - name: make style-check
         run: make style-check
