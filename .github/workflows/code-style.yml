@@ -14,17 +14,17 @@ jobs:
           show-progress: false
       - name: Install markdownlint-cli2
         run: |
-          sudo apt -qqy install npm
+          sudo apt-get -qqy install npm
           npm install markdownlint-cli2 --global
       - name: Install shfmt
-        run: sudo apt -qyy install shfmt
+        run: sudo apt-get -qyy install shfmt
       - name: make showvars
         run: make showvars
-      - run: html-style-check
-      - run: markdown-style-check
-      - run: perl-style-check
-      - run: python-style-check python-typecheck
-      - run: shell-style-check
-      - run: yaml-style-check
+      - run: make html-style-check
+      - run: make markdown-style-check
+      - run: make perl-style-check
+      - run: make python-style-check python-typecheck
+      - run: make shell-style-check
+      - run: make yaml-style-check
       - name: make style-check
         run: make style-check
