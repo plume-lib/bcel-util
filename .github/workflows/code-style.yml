@@ -15,7 +15,7 @@ jobs:
       - name: Install markdownlint-cli2
         run: |
           sudo apt-get -qqy install npm
-          npm install markdownlint-cli2 --global
+          npm install --quiet markdownlint-cli2 --global
       - name: Install shfmt
         run: sudo apt-get -qyy install shfmt
       - name: make showvars
