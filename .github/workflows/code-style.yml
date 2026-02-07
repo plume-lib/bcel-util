@@ -12,22 +12,11 @@ jobs:
         with:
           fetch-depth: 1
           show-progress: false
-      # - name: Install markdownlint-cli2
-      - run: sudo apt-get -qqy install npm
-        env:
-          DEBIAN_FRONTEND: noninteractive
-      - run: npm install --quiet markdownlint-cli2 --global
-      - name: Install shfmt
-        run: sudo apt-get install -qyy shfmt
-        env:
-          DEBIAN_FRONTEND: noninteractive
+      - name: Install tools
+      - run: |
+          sudo apt-get -qqy install shfmt npm
+          npm install --quiet markdownlint-cli2 --global
       - name: make showvars
         run: make showvars
-      - run: make html-style-check
-      - run: make markdown-style-check
-      - run: make perl-style-check
-      - run: make python-style-check python-typecheck
-      - run: make shell-style-check
-      - run: make yaml-style-check
       - name: make style-check
         run: make style-check
