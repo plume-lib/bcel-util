@@ -12,6 +12,12 @@ jobs:
         with:
           fetch-depth: 1
           show-progress: false
+      - name: Install markdownlint-cli2
+        run: |
+          sudo apt -qqy install npm
+          npm install markdownlint-cli2 --global
+      - name: Install shfmt
+        run: sudo apt -qyy install shfmt
       - name: make showvars
         run: make showvars
       - name: make style-check
