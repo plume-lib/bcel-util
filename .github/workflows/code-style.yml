@@ -3,7 +3,7 @@ name: Check code style
 on: [push, pull_request]   # yamllint disable-line rule:truthy
 
 jobs:
-  build:
+  style-check:
 
     runs-on: ubuntu-latest
 
