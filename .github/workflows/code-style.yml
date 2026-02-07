@@ -18,7 +18,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
       - run: npm install --quiet markdownlint-cli2 --global
       - name: Install shfmt
-        run: sudo apt-get -qyy install shfmt
+        run: sudo apt-get install -qyy shfmt
         env:
           DEBIAN_FRONTEND: noninteractive
       - name: make showvars
