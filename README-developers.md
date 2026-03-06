@@ -20,18 +20,16 @@ Run these steps on any filesystem, except the `javadocWeb` step.
 
 * Make and test a snapshot release, see below.
 * git pull
-* In `build.gradle`, ensure that "To use a snapshot version" is not enabled.
-* Update the version number in `README.md`, `build.gradle`, and in this file
-  (multiple times in each).
-  Ensure the version number in `build.gradle` does not contain "-SNAPSHOT".
 * Update `CHANGELOG.md`.
+* Update the version number in `gradle.properties`, `README.md`, and
+  this file (possibly multiple times in each).
 * Save files and stage changes.
 * ./gradlew publishToMavenCentral
 * Browse to <https://central.sonatype.com/publishing/deployments>, click "publish".
 * Add a git tag and commit:
 
   ```sh
-  VER=1.2.3 && \
+  VER=1.2.4 && \
   git commit -m "Version $VER" && git push && \
   git tag -a v$VER -m "Version $VER" && git push && git push --tags
   ```
@@ -39,7 +37,7 @@ Run these steps on any filesystem, except the `javadocWeb` step.
 * Make a GitHub release.
   * Browse to <https://github.com/plume-lib/bcel-util/releases>
   * Click "draft a new release"
-  * Call it "bcel-util 1.2.3"
+  * Call it "bcel-util 1.2.4"
   * Use the text from `CHANGELOG.md` as the description
   * Attach the .jar and -all.jar files from `build/libs/`
   * Click "publish release"

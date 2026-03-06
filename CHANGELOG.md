@@ -1,6 +1,6 @@
 # BCEL-Util change log
 
-## 1.2.4 (??)
+## 1.2.4 (2026-03-05)
 
 - Tested under Java 25
 - Compiles and runs under Java 8.
