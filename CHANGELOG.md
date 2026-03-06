@@ -1,5 +1,9 @@
 # BCEL-Util change log
 
+## 2.0.0
+
+- Requires Java 21
+
 ## 1.2.4 (??)
 
 - Tested under Java 25
