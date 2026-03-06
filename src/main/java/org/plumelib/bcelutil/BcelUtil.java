@@ -579,10 +579,9 @@ public final class BcelUtil {
 
     Constant c = pool.getConstant(index);
     assert c != null : "Bad index " + index + " into pool";
-    if (c instanceof ConstantUtf8) {
-      return ((ConstantUtf8) c).getBytes();
-    } else if (c instanceof ConstantClass) {
-      ConstantClass cc = (ConstantClass) c;
+    if (c instanceof ConstantUtf8 cutf8) {
+      return cutf8.getBytes();
+    } else if (c instanceof ConstantClass cc) {
       return cc.getBytes(pool) + " [" + cc.getNameIndex() + "]";
     } else {
       throw new Error("unexpected constant " + c + " of class " + c.getClass());

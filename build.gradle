@@ -5,7 +5,6 @@ plugins {
   alias(libs.plugins.com.gradleup.shadow)
 
   // Code formatting; defines targets "spotlessApply" and "spotlessCheck"
-  // Version 8.0.0 and later requires Java 17+.
   alias(libs.plugins.com.diffplug.spotless)
 
   // Error Prone linter
@@ -117,10 +116,7 @@ tasks.withType(JavaCompile).configureEach {
     disable("EffectivelyPrivate") // Loses information about the abstraction.
     disable("ExtendsObject")  // Incorrect when using the Checker Framework.
     disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
-    disable("PatternMatchingInstanceof") // requires Java 16 or later
     disable("ReferenceEquality") // Use Interning Checker instead.
-    disable("StatementSwitchToExpressionSwitch") // requires Java 12 or later
-    disable("StringConcatToTextBlock") // requires Java 15 or later
     // Code copied from BCEL that we don't want to change gratuitously.
     excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
   }
@@ -180,22 +176,6 @@ javadoc {
   // Turn Javadoc warnings into errors.
   options.addStringOption("Xwerror", "-Xdoclint:all")
   options.addStringOption("private", "-quiet")
-  options.with {
-    // "linksOffline "https://docs.oracle.com/javase/8/docs/api/", ..."
-    // no longer works, because that URL redirects to https://docs.oracle.com/en/java/javase/19/ but not to any specific webpage under it.
-    // "linksOffline "https://docs.oracle.com/en/java/javase/17/docs/api/", ..."
-    // does not works under JDK <= 17.
-    // Under JDK 11 and JDK 17, even with "-source 8", it yields error:
-    //   The code being documented uses packages in the unnamed module, but the packages defined in
-    //   https://docs.oracle.com/en/java/javase/17/docs/api/ are in named modules.
-    // See https://bugs.openjdk.org/browse/JDK-8274639
-    // JDK 18 has a "--link-modularity-mismatch" command-line option which is "info" or "warn".
-    // I think it would work to:
-    //  * use JDK 11 links under JDK <= 17.
-    //  * use JDK 17 links, and "--link-modularity-mismatch info", under JDK > 17 (i.e., JDK >= 18).
-    // But it's easier to just not use "linksOffline".
-  }
-  options.addStringOption("source", "11")
   doLast {
     ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:"",
     flags:"g", byline:true) {
@@ -213,7 +193,6 @@ tasks.register("javadocWebUpload", Javadoc) {
   source = sourceSets.main.allJava
   destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
   classpath = project.sourceSets.main.compileClasspath
-  options.addStringOption("source", "11")
   doLast {
     ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:"",
     flags:"g", byline:true) {
