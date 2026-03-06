@@ -15,8 +15,8 @@ In a Gradle buildfile, write
 
 ```gradle
 dependencies {
-  implementation("org.plumelib:bcel-util:1.2.3")
+  implementation("org.plumelib:bcel-util:1.2.4")
 }
 ```
 
-Other build systems are [similar](https://search.maven.org/artifact/org.plumelib/bcel-util/1.2.3/jar).
+Other build systems are [similar](https://search.maven.org/artifact/org.plumelib/bcel-util/1.2.4/jar).
