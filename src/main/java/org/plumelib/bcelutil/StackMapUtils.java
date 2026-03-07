@@ -638,10 +638,7 @@ public abstract class StackMapUtils {
       case Const.T_ARRAY, Const.T_OBJECT ->
           new StackMapType(
               Const.ITEM_Object, pool.addClass(typeToClassGetName(t)), pool.getConstantPool());
-      // UNKNOWN seems to be used for Uninitialized objects.
-      // The second argument to the constructor should be the code offset
-      // of the corresponding 'new' instruction.  Just using 0 for now.
-      case Const.T_UNKNOWN -> new StackMapType(Const.ITEM_NewObject, 0, pool.getConstantPool());
+      // We think that Const.T_UNKNOWN should never happen.
       default -> {
         throw new RuntimeException("Invalid type: " + t + t.getType());
       }
