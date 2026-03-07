@@ -123,14 +123,11 @@ public abstract class InstructionListUtils extends StackMapUtils {
   protected final void append_inst(InstructionList il, Instruction inst) {
 
     // System.out.println ("append_inst: " + inst.getClass().getName());
-    if (inst instanceof LOOKUPSWITCH) {
-      LOOKUPSWITCH ls = (LOOKUPSWITCH) inst;
+    if (inst instanceof LOOKUPSWITCH ls) {
       il.append(new LOOKUPSWITCH(ls.getMatchs(), ls.getTargets(), ls.getTarget()));
-    } else if (inst instanceof TABLESWITCH) {
-      TABLESWITCH ts = (TABLESWITCH) inst;
+    } else if (inst instanceof TABLESWITCH ts) {
       il.append(new TABLESWITCH(ts.getMatchs(), ts.getTargets(), ts.getTarget()));
-    } else if (inst instanceof IfInstruction) {
-      IfInstruction ifi = (IfInstruction) inst;
+    } else if (inst instanceof IfInstruction ifi) {
       il.append(InstructionFactory.createBranchInstruction(inst.getOpcode(), ifi.getTarget()));
     } else {
       il.append(inst);
@@ -202,8 +199,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
       for (InstructionTargeter it : ih.getTargeters()) {
         if ((it instanceof LineNumberGen) && redirectBranches) {
           it.updateTarget(ih, newStart);
-        } else if (it instanceof LocalVariableGen) {
-          LocalVariableGen lvg = (LocalVariableGen) it;
+        } else if (it instanceof LocalVariableGen lvg) {
           // If ih is end of local variable range, leave as is.
           // If ih is start of local variable range and we are
           // at the begining of the method go ahead and change
@@ -212,8 +208,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           if ((lvg.getStart() == ih) && atStart) {
             it.updateTarget(ih, newStart);
           }
-        } else if ((it instanceof CodeExceptionGen) && redirectBranches) {
-          CodeExceptionGen exc = (CodeExceptionGen) it;
+        } else if ((it instanceof CodeExceptionGen exc) && redirectBranches) {
           if (exc.getStartPC() == ih) {
             exc.updateTarget(ih, newStart);
           } else if (exc.getEndPC() == ih) {
@@ -313,8 +308,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           it.updateTarget(startIh, newStart);
         } else if (it instanceof LocalVariableGen) {
           it.updateTarget(startIh, newStart);
-        } else if (it instanceof CodeExceptionGen) {
-          CodeExceptionGen exc = (CodeExceptionGen) it;
+        } else if (it instanceof CodeExceptionGen exc) {
           if (exc.getStartPC() == startIh) {
             exc.updateTarget(startIh, newStart);
           } else if (exc.getEndPC() == startIh) {
@@ -456,8 +450,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
             it.updateTarget(ih, newStart);
           } else if (it instanceof LocalVariableGen) {
             it.updateTarget(ih, newEnd);
-          } else if (it instanceof CodeExceptionGen) {
-            CodeExceptionGen exc = (CodeExceptionGen) it;
+          } else if (it instanceof CodeExceptionGen exc) {
             if (exc.getStartPC() == ih) {
               exc.updateTarget(ih, newStart);
             } else if (exc.getEndPC() == ih) {
@@ -651,8 +644,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
                             - 1
                             - stackMapTable[newIndex].getByteCodeOffset());
                     break l1;
-                  } else if (it instanceof CodeExceptionGen) {
-                    CodeExceptionGen exc = (CodeExceptionGen) it;
+                  } else if (it instanceof CodeExceptionGen exc) {
                     if (exc.getHandlerPC() == nih) {
                       stackMapTable[newIndex].updateByteCodeOffset(
                           nih.getPosition()
