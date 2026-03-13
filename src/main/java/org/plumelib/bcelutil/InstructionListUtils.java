@@ -290,12 +290,14 @@ public abstract class InstructionListUtils extends StackMapUtils {
   protected final void delete_instructions(
       MethodGen mg, InstructionHandle startIh, InstructionHandle endIh) {
     InstructionList il = mg.getInstructionList();
+
+    il.setPositions();
+
     InstructionHandle newStart = endIh.getNext();
     if (newStart == null) {
       throw new RuntimeException("Cannot delete last instruction.");
     }
 
-    il.setPositions();
     final int numDeleted = startIh.getPosition() - newStart.getPosition();
 
     // Move all of the branches from the first instruction to the new start
@@ -529,7 +531,6 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
           // Calculate the operand stack value(s) for revised code.
           mg.setMaxStack();
-          OperandStack stack;
           StackTypes stackTypes = bcelCalcStackTypes(mg);
           if (stackTypes == null) {
             Error e =
@@ -595,6 +596,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           System.arraycopy(stackMapTable, 0, newStackMapTable, 0, newIndex);
 
           boolean needFullMaps = false;
+          OperandStack stack;
           for (int i = 0; i < targetCount; i++) {
             stack = stackTypes.get(targetOffsets[i]);
             debugInstrument.log("stack: %s %n", stack);
