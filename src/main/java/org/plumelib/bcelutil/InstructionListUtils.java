@@ -304,22 +304,21 @@ public abstract class InstructionListUtils extends StackMapUtils {
     // Move other targeters to the new start.
     if (startIh.hasTargeters()) {
       for (InstructionTargeter it : startIh.getTargeters()) {
-        if (it instanceof LineNumberGen) {
-          it.updateTarget(startIh, newStart);
-        } else if (it instanceof LocalVariableGen) {
-          it.updateTarget(startIh, newStart);
-        } else if (it instanceof CodeExceptionGen exc) {
-          if (exc.getStartPC() == startIh) {
-            exc.updateTarget(startIh, newStart);
-          } else if (exc.getEndPC() == startIh) {
-            exc.updateTarget(startIh, newStart);
-          } else if (exc.getHandlerPC() == startIh) {
-            exc.setHandlerPC(newStart);
-          } else {
-            System.out.printf("Malformed CodeException: %s%n", exc);
+        switch (it) {
+          case LineNumberGen __ -> it.updateTarget(startIh, newStart); // NOPMD
+          case LocalVariableGen __ -> it.updateTarget(startIh, newStart); // NOPMD
+          case CodeExceptionGen exc -> {
+            if (exc.getStartPC() == startIh) {
+              exc.updateTarget(startIh, newStart);
+            } else if (exc.getEndPC() == startIh) {
+              exc.updateTarget(startIh, newStart);
+            } else if (exc.getHandlerPC() == startIh) {
+              exc.setHandlerPC(newStart);
+            } else {
+              System.out.printf("Malformed CodeException: %s%n", exc);
+            }
           }
-        } else {
-          System.out.printf("unexpected target %s%n", it);
+          default -> System.out.printf("unexpected target %s%n", it);
         }
       }
     }
@@ -446,22 +445,21 @@ public abstract class InstructionListUtils extends StackMapUtils {
       // Move other targets to the new instuctions.
       if (ih.hasTargeters()) {
         for (InstructionTargeter it : ih.getTargeters()) {
-          if (it instanceof LineNumberGen) {
-            it.updateTarget(ih, newStart);
-          } else if (it instanceof LocalVariableGen) {
-            it.updateTarget(ih, newEnd);
-          } else if (it instanceof CodeExceptionGen exc) {
-            if (exc.getStartPC() == ih) {
-              exc.updateTarget(ih, newStart);
-            } else if (exc.getEndPC() == ih) {
-              exc.updateTarget(ih, newEnd);
-            } else if (exc.getHandlerPC() == ih) {
-              exc.setHandlerPC(newStart);
-            } else {
-              System.out.printf("Malformed CodeException: %s%n", exc);
+          switch (it) {
+            case LineNumberGen __ -> it.updateTarget(ih, newStart); // NOPMD
+            case LocalVariableGen __ -> it.updateTarget(ih, newEnd); // NOPMD
+            case CodeExceptionGen exc -> {
+              if (exc.getStartPC() == ih) {
+                exc.updateTarget(ih, newStart);
+              } else if (exc.getEndPC() == ih) {
+                exc.updateTarget(ih, newEnd);
+              } else if (exc.getHandlerPC() == ih) {
+                exc.setHandlerPC(newStart);
+              } else {
+                System.out.printf("Malformed CodeException: %s%n", exc);
+              }
             }
-          } else {
-            System.out.printf("unexpected target %s%n", it);
+            default -> System.out.printf("unexpected target %s%n", it);
           }
         }
       }
