@@ -349,9 +349,6 @@ public abstract class StackMapUtils {
    * @param il instruction list to search
    */
   protected final void modifyStackMapsForSwitches(InstructionHandle ih, InstructionList il) {
-    Instruction inst;
-    short opcode;
-
     if (!needStackMap) {
       return;
     }
@@ -361,8 +358,8 @@ public abstract class StackMapUtils {
 
     // Loop through each instruction looking for a switch
     while (ih != null) {
-      inst = ih.getInstruction();
-      opcode = inst.getOpcode();
+      Instruction inst = ih.getInstruction();
+      short opcode = inst.getOpcode();
 
       if (opcode == Const.TABLESWITCH || opcode == Const.LOOKUPSWITCH) {
         int currentOffset = ih.getPosition();
