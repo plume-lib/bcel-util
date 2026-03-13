@@ -507,12 +507,12 @@ public abstract class StackMapUtils {
         if (indexInst.getIndex() >= indexFirstMovedlocal) {
           indexInst.setIndex(indexInst.getIndex() + size);
         }
-      } else if (inst instanceof LocalVariableInstruction) {
+      } else if (inst instanceof LocalVariableInstruction lvi) {
         // BCEL handles all the details of which opcode and if index
         // is implicit or explicit; also, and if needs to be WIDE.
-        operand = ((LocalVariableInstruction) inst).getIndex();
+        operand = lvi.getIndex();
         if (operand >= indexFirstMovedlocal) {
-          ((LocalVariableInstruction) inst).setIndex(operand + size);
+          lvi.setIndex(operand + size);
         }
       }
       // Unfortunately, BCEL doesn't take care of incrementing the
@@ -606,8 +606,8 @@ public abstract class StackMapUtils {
   @SuppressWarnings("signature") // conversion routine
   protected static @ClassGetName String typeToClassGetName(Type t) {
 
-    if (t instanceof ObjectType) {
-      return ((ObjectType) t).getClassName();
+    if (t instanceof ObjectType ot) {
+      return ot.getClassName();
     } else if (t instanceof BasicType) {
       // Use reserved keyword for basic type rather than signature to
       // avoid conflicts with user defined types.
@@ -626,27 +626,20 @@ public abstract class StackMapUtils {
    */
   protected final StackMapType generateStackMapTypeFromType(Type t) {
 
-    switch (t.getType()) {
-      case Const.T_BOOLEAN:
-      case Const.T_CHAR:
-      case Const.T_BYTE:
-      case Const.T_SHORT:
-      case Const.T_INT:
-        return new StackMapType(Const.ITEM_Integer, -1, pool.getConstantPool());
-      case Const.T_FLOAT:
-        return new StackMapType(Const.ITEM_Float, -1, pool.getConstantPool());
-      case Const.T_DOUBLE:
-        return new StackMapType(Const.ITEM_Double, -1, pool.getConstantPool());
-      case Const.T_LONG:
-        return new StackMapType(Const.ITEM_Long, -1, pool.getConstantPool());
-      case Const.T_ARRAY:
-      case Const.T_OBJECT:
-        return new StackMapType(
-            Const.ITEM_Object, pool.addClass(typeToClassGetName(t)), pool.getConstantPool());
+    return switch (t.getType()) {
+      case Const.T_BOOLEAN, Const.T_CHAR, Const.T_BYTE, Const.T_SHORT, Const.T_INT ->
+          new StackMapType(Const.ITEM_Integer, -1, pool.getConstantPool());
+      case Const.T_FLOAT -> new StackMapType(Const.ITEM_Float, -1, pool.getConstantPool());
+      case Const.T_DOUBLE -> new StackMapType(Const.ITEM_Double, -1, pool.getConstantPool());
+      case Const.T_LONG -> new StackMapType(Const.ITEM_Long, -1, pool.getConstantPool());
+      case Const.T_ARRAY, Const.T_OBJECT ->
+          new StackMapType(
+              Const.ITEM_Object, pool.addClass(typeToClassGetName(t)), pool.getConstantPool());
       // We think that Const.T_UNKNOWN should never happen.
-      default:
+      default -> {
         throw new RuntimeException("Invalid type: " + t + t.getType());
-    }
+      }
+    };
   }
 
   /**
@@ -657,33 +650,31 @@ public abstract class StackMapUtils {
    */
   protected final Type generate_Type_from_StackMapType(StackMapType smt) {
 
-    switch (smt.getType()) {
-      case Const.ITEM_Bogus: // 'top' (undefined) in JVM verification nomenclature
-      case Const.ITEM_Null: // no idea what this means, but Groovy generates it (mlr)
-        return null;
-      case Const.ITEM_Integer:
-        return Type.INT;
-      case Const.ITEM_Float:
-        return Type.FLOAT;
-      case Const.ITEM_Double:
-        return Type.DOUBLE;
-      case Const.ITEM_Long:
-        return Type.LONG;
-      case Const.ITEM_Object:
+    return switch (smt.getType()) {
+      // "ITEM_Bogus" is 'top' (undefined) in JVM verification nomenclature.
+      // I have no idea what "ITEM_Null means, but Groovy generates it (MLR).
+      case Const.ITEM_Bogus, Const.ITEM_Null -> null;
+      case Const.ITEM_Integer -> Type.INT;
+      case Const.ITEM_Float -> Type.FLOAT;
+      case Const.ITEM_Double -> Type.DOUBLE;
+      case Const.ITEM_Long -> Type.LONG;
+      case Const.ITEM_Object -> {
         Constant c = pool.getConstantPool().getConstant(smt.getIndex());
         @SuppressWarnings("signature") // ConstantPool CONSTANT_Class entry is a ClassName
         @BinaryName String className = ((ConstantClass) c).getBytes(pool.getConstantPool());
         if (className.charAt(0) == '[') {
           // special case, className is descriptor of array type
-          return Type.getType(className);
+          yield Type.getType(className);
         } else {
-          return new ObjectType(className);
+          yield new ObjectType(className);
         }
-      default:
+      }
+      default -> {
         Thread.dumpStack();
         assert false : "Invalid StackMapType: " + smt + smt.getType();
         throw new RuntimeException("Invalid StackMapType: " + smt + smt.getType());
-    }
+      }
+    };
   }
 
   /**
@@ -693,13 +684,10 @@ public abstract class StackMapUtils {
    * @return the operand size of this type
    */
   protected final int getSize(StackMapType smt) {
-    switch (smt.getType()) {
-      case Const.ITEM_Double:
-      case Const.ITEM_Long:
-        return 2;
-      default:
-        return 1;
-    }
+    return switch (smt.getType()) {
+      case Const.ITEM_Double, Const.ITEM_Long -> 2;
+      default -> 1;
+    };
   }
 
   /**
