@@ -112,26 +112,27 @@ tasks.withType(JavaCompile).configureEach {
   if (JavaVersion.current() < JavaVersion.VERSION_21) {
     options.compilerArgs << "-Xlint:all,-processing"
   } else {
-    options.compilerArgs << "-Xlint:all,-processing,-this-escape"
+    options.compilerArgs << "-Xlint:all,-processing"
   }
 }
-apply plugin: "net.ltgt.errorprone"
-dependencies {
-  errorprone(libs.error.prone.core)
-}
-tasks.withType(JavaCompile).configureEach {
-  options.errorprone {
-    disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
-    disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
-    disable("EffectivelyPrivate") // Loses information about the abstraction.
-    disable("ExtendsObject")  // Incorrect when using the Checker Framework.
-    disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
-    disable("ReferenceEquality") // Use Interning Checker instead.
-    // Code copied from BCEL that we don't want to change gratuitously.
-    excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
+if (JavaVersion.current() >= JavaVersion.VERSION_21) {
+  apply plugin: "net.ltgt.errorprone"
+  dependencies {
+    errorprone(libs.error.prone.core)
+  }
+  tasks.withType(JavaCompile).configureEach {
+    options.errorprone {
+      disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
+      disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
+      disable("EffectivelyPrivate") // Loses information about the abstraction.
+      disable("ExtendsObject")  // Incorrect when using the Checker Framework.
+      disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
+      disable("ReferenceEquality") // Use Interning Checker instead.
+      // Code copied from BCEL that we don't want to change gratuitously.
+      excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
+    }
   }
 }
-
 
 // PMD linter
 
