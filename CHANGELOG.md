@@ -2,7 +2,7 @@
 
 ## 2.0.0 (????-??-??)
 
-- Requires Java 21 to run.
+- Requires Java 17 to run.
 
 ## 1.2.4 (2026-03-05)
 
