@@ -684,10 +684,10 @@ public final class BcelUtil {
    *
    * @param types the array to extend
    * @param newType the element to add to the end of the array
-   * @return a new array, with newType at the end
+   * @return a new array, with {@code newType} at the end
    * @deprecated use ArraysPlume.append()
    */
-  @Deprecated // 2025-11-26; to make package-private
+  @Deprecated(since = "2025-11-26") // to make package-private
   public static Type[] postpendToArray(Type[] types, Type newType) {
     if (types.length == Integer.MAX_VALUE) {
       throw new Error("array " + Arrays.toString(types) + " is too large to extend");
