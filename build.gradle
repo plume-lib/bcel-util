@@ -48,8 +48,8 @@ java {
   }
 }
 tasks.withType(JavaCompile).configureEach {
-  // Set the language level and byte code to 21.
-  options.release = 21
+  // Set the language level and byte code to 17.
+  options.release = 17
 }
 
 test {
@@ -109,25 +109,26 @@ tasks.withType(JavaCompile).configureEach {
   options.forkOptions.jvmArgs += "-Xmx6g"
   options.compilerArgs << "-Werror"
   // "-processing" avoids javac warning "No processor claimed any of these annotations".
-  options.compilerArgs << "-Xlint:all,-processing,-this-escape"
+  options.compilerArgs << "-Xlint:all,-processing"
 }
-apply plugin: "net.ltgt.errorprone"
-dependencies {
-  errorprone(libs.error.prone.core)
-}
-tasks.withType(JavaCompile).configureEach {
-  options.errorprone {
-    disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
-    disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
-    disable("EffectivelyPrivate") // Loses information about the abstraction.
-    disable("ExtendsObject")  // Incorrect when using the Checker Framework.
-    disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
-    disable("ReferenceEquality") // Use Interning Checker instead.
-    // Code copied from BCEL that we don't want to change gratuitously.
-    excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
+if (JavaVersion.current() >= JavaVersion.VERSION_21) {
+  apply plugin: "net.ltgt.errorprone"
+  dependencies {
+    errorprone(libs.error.prone.core)
+  }
+  tasks.withType(JavaCompile).configureEach {
+    options.errorprone {
+      disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
+      disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
+      disable("EffectivelyPrivate") // Loses information about the abstraction.
+      disable("ExtendsObject")  // Incorrect when using the Checker Framework.
+      disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
+      disable("ReferenceEquality") // Use Interning Checker instead.
+      // Code copied from BCEL that we don't want to change gratuitously.
+      excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
+    }
   }
 }
-
 
 // PMD linter
 
