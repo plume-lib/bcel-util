@@ -502,8 +502,7 @@ public abstract class StackMapUtils {
       int origLength = inst.getLength();
       int operand;
 
-      if ((inst instanceof RET) || (inst instanceof IINC)) {
-        IndexedInstruction indexInst = (IndexedInstruction) inst;
+      if (inst instanceof IndexedInstruction indexInst && (inst instanceof RET || inst instanceof IINC)) {
         if (indexInst.getIndex() >= indexFirstMovedlocal) {
           indexInst.setIndex(indexInst.getIndex() + size);
         }
@@ -1320,8 +1319,8 @@ public abstract class StackMapUtils {
           "gen_locals_from_byte_codes for offset: %d :: position: %d, inst: %s%n",
           offset, ih.getPosition(), inst);
 
-      if (inst instanceof StoreInstruction) {
-        if (offset != ((LocalVariableInstruction) inst).getIndex()) {
+      if (inst instanceof StoreInstruction si) {
+        if (offset != si.getIndex()) {
           continue;
         }
         stack = stackTypes.get(ih.getPosition());
@@ -1340,8 +1339,8 @@ public abstract class StackMapUtils {
         // update liveRangeEnd
         liveRangeEnd = ih.getNext();
 
-      } else if (inst instanceof IINC) {
-        if (offset != ((IndexedInstruction) inst).getIndex()) {
+      } else if (inst instanceof IINC iinc) {
+        if (offset != iinc.getIndex()) {
           continue;
         }
         if (liveRangeType == null) {
@@ -1352,8 +1351,8 @@ public abstract class StackMapUtils {
         // update liveRangeEnd
         liveRangeEnd = ih.getNext();
 
-      } else if (inst instanceof RET) {
-        if (offset != ((IndexedInstruction) inst).getIndex()) {
+      } else if (inst instanceof RET ret) {
+        if (offset != ret.getIndex()) {
           continue;
         }
         if (liveRangeType == null) {
@@ -1365,8 +1364,8 @@ public abstract class StackMapUtils {
         // update liveRangeEnd
         liveRangeEnd = ih.getNext();
 
-      } else if (inst instanceof LoadInstruction) {
-        if (offset != ((LocalVariableInstruction) inst).getIndex()) {
+      } else if (inst instanceof LoadInstruction li) {
+        if (offset != li.getIndex()) {
           continue;
         }
         stack = stackTypes.get(ih.getPosition() + inst.getLength());
