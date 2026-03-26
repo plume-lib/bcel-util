@@ -502,7 +502,8 @@ public abstract class StackMapUtils {
       int origLength = inst.getLength();
       int operand;
 
-      if (inst instanceof IndexedInstruction indexInst && (inst instanceof RET || inst instanceof IINC)) {
+      if (inst instanceof IndexedInstruction indexInst
+          && (inst instanceof RET || inst instanceof IINC)) {
         if (indexInst.getIndex() >= indexFirstMovedlocal) {
           indexInst.setIndex(indexInst.getIndex() + size);
         }
