@@ -48,19 +48,8 @@ public final class BcelUtil {
   /** The type that represents String[]. */
   private static final Type stringArray = Type.getType("[Ljava.lang.String;");
 
-  /** The major version number of the Java runtime (JRE), such as 8, 11, or 17. */
-  public static final int javaVersion = getJavaVersion();
-
-  /**
-   * Returns the major version number of the Java runtime (JRE), such as 11 or 17.
-   *
-   * @return the major version of the Java runtime
-   * @deprecated use {@code Runtime.version().feature()}
-   */
-  @Deprecated(since = "2026-03-25")
-  private static int getJavaVersion() {
-    return Runtime.version().feature();
-  }
+  /** The major version number of the Java runtime (JRE), such as 17, 21, or 25. */
+  public static final int javaVersion = Runtime.version().feature();
 
   // 'ToString' methods
 
