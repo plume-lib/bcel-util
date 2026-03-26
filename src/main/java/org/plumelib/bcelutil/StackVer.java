@@ -233,11 +233,10 @@ public final class StackVer {
       final ArrayList<InstructionContext> newchain = (ArrayList<InstructionContext>) (ec.clone());
       newchain.add(u);
 
-      if ((u.getInstruction().getInstruction()) instanceof RET) {
+      if ((u.getInstruction().getInstruction()) instanceof RET ret) {
         // System.err.println(u);
         // We can only follow _one_ successor, the one after the
         // JSR that was recently executed.
-        final RET ret = (RET) (u.getInstruction().getInstruction());
         final ReturnaddressType t =
             (ReturnaddressType) u.getOutFrame(oldchain).getLocals().get(ret.getIndex());
         final InstructionContext theSuccessor = cfg.contextOf(t.getTarget());
