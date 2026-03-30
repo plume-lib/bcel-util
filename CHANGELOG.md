@@ -6,18 +6,18 @@
 
 ## 1.2.4 (2026-03-05)
 
-- Tested under Java 25
+- Tested under Java 25.
 - Compiles and runs under Java 8.
 - Deprecate `BcelUtil.postpendToArray()`
 
 ## 1.2.3 (June 5, 2025)
 
-- Tested under Java 24
+- Tested under Java 24.
 - Compiles and runs under Java 8.
 
 ## 1.2.2 (May 15, 2022)
 
-- Tested under Java 20
+- Tested under Java 20.
 - No longer compiles under Java 8, but still runs under Java 8.
 
 ## 1.2.1 (December 13, 2022)
