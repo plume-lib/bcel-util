@@ -126,7 +126,7 @@ public abstract class StackMapUtils {
 
   /** An empty StackMap used for initialization. */
   @SuppressWarnings("interning") // @InternedDistinct initalization with fresh object
-  private StackMapEntry @InternedDistinct [] emptyStackmaptable = {};
+  private StackMapEntry @InternedDistinct [] emptyStackMapTable = {};
 
   /**
    * A map from instructions that create uninitialized NEW objects to the corresponding StackMap
@@ -551,7 +551,7 @@ public abstract class StackMapUtils {
       // Delete existing stack map - we'll add a new one later.
       mgen.removeCodeAttribute(smta);
     } else {
-      stackMapTable = emptyStackmaptable;
+      stackMapTable = emptyStackMapTable;
       if (javaClassVersion > Const.MAJOR_1_6) {
         needStackMap = true;
       }
@@ -585,7 +585,7 @@ public abstract class StackMapUtils {
     if (!needStackMap) {
       return;
     }
-    if (stackMapTable == emptyStackmaptable) {
+    if (stackMapTable == emptyStackMapTable) {
       return;
     }
     printStackMapTable("Final");

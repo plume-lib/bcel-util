@@ -69,16 +69,14 @@ public final class BcelUtil {
 
     StringBuilder sb = new StringBuilder();
     String flags = accessFlagsToString(m);
-    boolean argsExist = false;
     if (flags != null && !flags.isEmpty()) {
       sb.append(String.format("%s ", flags));
     }
     sb.append(String.format("%s %s(", m.getReturnType(), m.getName()));
     for (Type at : m.getArgumentTypes()) {
       sb.append(String.format("%s, ", at));
-      argsExist = true;
     }
-    if (argsExist) {
+    if (m.getArgumentTypes().length > 0) {
       sb.setLength(sb.length() - 2); // remove trailing ", "
     }
     sb.append(')');
@@ -277,7 +275,7 @@ public final class BcelUtil {
         || classname.startsWith("com/sun/")
         || classname.startsWith("javax/")
         || classname.startsWith("jdk/")
-        || classname.startsWith("org/ietj/")
+        || classname.startsWith("org/ietf/")
         || classname.startsWith("org/jcp/")
         || classname.startsWith("org/w3c/")
         || classname.startsWith("org/xml/")

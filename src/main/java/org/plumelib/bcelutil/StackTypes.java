@@ -1,5 +1,6 @@
 package org.plumelib.bcelutil;
 
+import java.util.StringJoiner;
 import org.apache.bcel.generic.InstructionList;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.Type;
@@ -72,9 +73,7 @@ public final class StackTypes {
   @SideEffectFree
   @Override
   public String toString(@GuardSatisfied StackTypes this) {
-
     StringBuilder sb = new StringBuilder();
-
     for (int i = 0; i < operandStacks.length; i++) {
       if (operandStacks[i] != null) {
         sb.append(String.format("Instruction %d:\n", i));
@@ -82,7 +81,6 @@ public final class StackTypes {
         sb.append(String.format("  locals: %s\n", toString(localVariableses[i])));
       }
     }
-
     return sb.toString();
   }
 
@@ -92,24 +90,18 @@ public final class StackTypes {
    * @param os the OperandStack to print
    * @return a printed representation of {@code os}
    */
+  @SuppressWarnings({
+    "allcheckers:purity.not.sideeffectfree.call",
+    "lock:method.guarantee.violated"
+  }) // side effect to local state
   @SideEffectFree
   public String toString(@GuardSatisfied StackTypes this, OperandStack os) {
-
-    String buff = "";
-
+    StringJoiner sj = new StringJoiner(", ", "{", "}");
     for (int i = 0; i < os.size(); i++) {
-      if (buff.length() > 0) {
-        buff += ", ";
-      }
       Type t = os.peek(i);
-      if (t instanceof UninitializedObjectType) {
-        buff += "uninitialized-object";
-      } else {
-        buff += t;
-      }
+      sj.add(t instanceof UninitializedObjectType ? "uninitialized-object" : t.toString());
     }
-
-    return "{" + buff + "}";
+    return sj.toString();
   }
 
   /**
@@ -118,22 +110,17 @@ public final class StackTypes {
    * @param lv the LocalVariablesStack to print
    * @return a printed representation of {@code lv}
    */
+  @SuppressWarnings({
+    "allcheckers:purity.not.sideeffectfree.call",
+    "lock:method.guarantee.violated"
+  }) // side effect to local state
   @SideEffectFree
   public String toString(@GuardSatisfied StackTypes this, LocalVariables lv) {
-
-    String buff = "";
-
+    StringJoiner sj = new StringJoiner(", ", "{", "}");
     for (int i = 0; i < lv.maxLocals(); i++) {
-      if (buff.length() > 0) {
-        buff += ", ";
-      }
       Type t = lv.get(i);
-      if (t instanceof UninitializedObjectType) {
-        buff += "uninitialized-object";
-      } else {
-        buff += t;
-      }
+      sj.add(t instanceof UninitializedObjectType ? "uninitialized-object" : t.toString());
     }
-    return "{" + buff + "}";
+    return sj.toString();
   }
 }

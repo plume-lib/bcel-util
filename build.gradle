@@ -288,6 +288,12 @@ tasks.register("installGitHooks", Copy) {
   description = "Copies git hooks to .git directory"
   from("githooks")
   into(".git/hooks")
+  eachFile {
+    File target = file("$destinationDir/$relativePath")
+    if (java.nio.file.Files.isSymbolicLink(target.toPath())) {
+      target.delete() // Delete the link so Gradle writes a real file instead
+    }
+  }
 }
 
 tasks.withType(JavaCompile) {
