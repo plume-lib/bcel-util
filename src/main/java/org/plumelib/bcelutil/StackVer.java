@@ -502,7 +502,7 @@ public final class StackVer {
       re.printStackTrace(pw);
 
       throw new AssertionViolatedException(
-          "Some RuntimeException occured while verify()ing class '"
+          "Some RuntimeException occurred while verify()ing class '"
               + mg.getClassName()
               + "', method '"
               + mg
