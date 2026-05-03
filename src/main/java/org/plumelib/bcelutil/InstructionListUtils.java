@@ -202,7 +202,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
         } else if (it instanceof LocalVariableGen lvg) {
           // If ih is end of local variable range, leave as is.
           // If ih is start of local variable range and we are
-          // at the begining of the method go ahead and change
+          // at the beginning of the method go ahead and change
           // start to newStart.  This is to preserve live range
           // for variables that are live for entire method.
           if ((lvg.getStart() == ih) && atStart) {
@@ -443,7 +443,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
       printIl(newEnd, "replace_inst #1");
 
-      // Move other targets to the new instuctions.
+      // Move other targets to the new instructions.
       if (ih.hasTargeters()) {
         for (InstructionTargeter it : ih.getTargeters()) {
           if (it instanceof LineNumberGen || it instanceof LocalVariableGen) {
