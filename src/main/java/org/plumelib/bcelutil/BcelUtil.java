@@ -448,17 +448,12 @@ public final class BcelUtil {
       // Print the class, superclass, and interfaces
       p.printf("class %s extends %s%n", jc.getClassName(), jc.getSuperclassName());
       String[] inames = jc.getInterfaceNames();
-      boolean first = true;
       if ((inames != null) && (inames.length > 0)) {
-        p.printf("   implements ");
+        StringJoiner implementedInterfaces = new StringJoiner(", ", "   implements ", "");
         for (String iname : inames) {
-          if (!first) {
-            p.printf(", ");
-          }
-          p.printf("%s", iname);
-          first = false;
+          implementedInterfaces.add(iname);
         }
-        p.printf("%n");
+        p.printf("%s%n", implementedInterfaces);
       }
 
       // Print each field
