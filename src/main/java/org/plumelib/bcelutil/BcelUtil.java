@@ -3,6 +3,7 @@ package org.plumelib.bcelutil;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.StringJoiner;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
 import org.apache.bcel.classfile.Code;
@@ -72,14 +73,12 @@ public final class BcelUtil {
     if (flags != null && !flags.isEmpty()) {
       sb.append(String.format("%s ", flags));
     }
-    sb.append(String.format("%s %s(", m.getReturnType(), m.getName()));
+    sb.append(String.format("%s %s", m.getReturnType(), m.getName()));
+    StringJoiner args = new StringJoiner(", ", "(", ")");
     for (Type at : m.getArgumentTypes()) {
-      sb.append(String.format("%s, ", at));
+      args.add(at.toString());
     }
-    if (m.getArgumentTypes().length > 0) {
-      sb.setLength(sb.length() - 2); // remove trailing ", "
-    }
-    sb.append(')');
+    sb.append(args);
     return sb.toString();
   }
 
@@ -95,17 +94,14 @@ public final class BcelUtil {
 
     int flags = m.getAccessFlags();
 
-    StringBuilder buf = new StringBuilder();
+    StringJoiner buf = new StringJoiner(" ");
     // Note that pow is a binary mask for the flag (= 2^i).
     for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG_I; i++) {
       if ((flags & pow) != 0) {
-        if (buf.length() > 0) {
-          buf.append(' ');
-        }
         if (i < Const.ACCESS_NAMES_LENGTH) {
-          buf.append(Const.getAccessName(i));
+          buf.add(Const.getAccessName(i));
         } else {
-          buf.append(String.format("ACC_BIT(%x)", pow));
+          buf.add(String.format("ACC_BIT(%x)", pow));
         }
       }
       pow <<= 1;
@@ -452,17 +448,12 @@ public final class BcelUtil {
       // Print the class, superclass, and interfaces
       p.printf("class %s extends %s%n", jc.getClassName(), jc.getSuperclassName());
       String[] inames = jc.getInterfaceNames();
-      boolean first = true;
       if ((inames != null) && (inames.length > 0)) {
-        p.printf("   implements ");
+        StringJoiner implementedInterfaces = new StringJoiner(", ", "   implements ", "");
         for (String iname : inames) {
-          if (!first) {
-            p.printf(", ");
-          }
-          p.printf("%s", iname);
-          first = false;
+          implementedInterfaces.add(iname);
         }
-        p.printf("%n");
+        p.printf("%s%n", implementedInterfaces);
       }
 
       // Print each field
