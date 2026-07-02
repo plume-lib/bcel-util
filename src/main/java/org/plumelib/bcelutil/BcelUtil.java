@@ -59,9 +59,9 @@ public final class BcelUtil {
    * private, static, etc.), the return type, the method name, and the types of each of its
    * parameters.
    *
-   * <p>For example, if the original Java source declaration was: private final String
-   * constantToString (int index). Then the output of methodDeclarationToString would be: private
-   * final java.lang.String constantToString (int)
+   * <p>For example, if the original Java source declaration was: {@code private final String
+   * constantToString(int index)}, then the output of methodDeclarationToString would be: {@code
+   * private final java.lang.String constantToString(int)}.
    *
    * @param m the method
    * @return a string describing the method declaration

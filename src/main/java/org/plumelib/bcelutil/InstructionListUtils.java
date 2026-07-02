@@ -113,9 +113,9 @@ public abstract class InstructionListUtils extends StackMapUtils {
   public InstructionListUtils() {}
 
   /**
-   * Appends the specified instruction to the end of the specified list. This is required
-   * because for some reason you can't directly append jump instructions to the list -- but you
-   * can create new ones and append them.
+   * Appends the specified instruction to the end of the specified list. This is required because
+   * for some reason you can't directly append jump instructions to the list -- but you can create
+   * new ones and append them.
    *
    * @param il the InstructionList to be modified
    * @param inst the Instruction to be appended
