@@ -107,7 +107,7 @@ public final class StackTypes {
   /**
    * Returns a printed representation of the given LocalVariables.
    *
-   * @param lv the LocalVariablesStack to print
+   * @param lv the LocalVariables to print
    * @return a printed representation of {@code lv}
    */
   @SuppressWarnings({

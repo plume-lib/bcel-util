@@ -171,8 +171,9 @@ import org.apache.bcel.verifier.structurals.Frame;
 import org.apache.bcel.verifier.structurals.InstConstraintVisitor;
 
 /**
- * This class is dummy instruction constraint visitor that does no constraint checking at all. It is
- * used by StackVer as a replacement for org.apache.bcel.verifier.structurals.InstConstraintVisitor.
+ * This class is a dummy instruction constraint visitor that does no constraint checking at all. It
+ * is used by StackVer as a replacement for
+ * org.apache.bcel.verifier.structurals.InstConstraintVisitor.
  * InstConstraintVisitor appears to be quite out of date and incorrectly fails on many valid class
  * files. Hence, StackVer assumes the method is valid and is only interested in the result of the
  * symbolic execution in order to capture the state of the local variables and stack at the start of
@@ -181,7 +182,7 @@ import org.apache.bcel.verifier.structurals.InstConstraintVisitor;
 @SuppressWarnings("PMD.UncommentedEmptyMethodBody")
 public class NoConstraintsVisitor extends InstConstraintVisitor {
 
-  /** The constructor. Constructs a new instance of this class. */
+  /** Creates a new NoConstraintsVisitor. */
   public NoConstraintsVisitor() {}
 
   @Override

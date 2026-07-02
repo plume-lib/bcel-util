@@ -56,11 +56,11 @@ public final class BcelUtil {
 
   /**
    * Returns a string describing a method declaration. It contains the access flags (public,
-   * private, static, etc), the return type, the method name, and the types of each of its
+   * private, static, etc.), the return type, the method name, and the types of each of its
    * parameters.
    *
    * <p>For example, if the original Java source declaration was: private final String
-   * constantToString (int index) Then the output of methodDeclarationToString would be: private
+   * constantToString (int index). Then the output of methodDeclarationToString would be: private
    * final java.lang.String constantToString (int)
    *
    * @param m the method
@@ -316,9 +316,9 @@ public final class BcelUtil {
   /**
    * Checks the specified method for consistency.
    *
-   * <p>Does nothing if {@link #skipChecks} is false.
+   * <p>Does nothing if {@link #skipChecks} is true.
    *
-   * @param mgen the class to check
+   * @param mgen the method to check
    */
   public static void checkMgen(MethodGen mgen) {
 

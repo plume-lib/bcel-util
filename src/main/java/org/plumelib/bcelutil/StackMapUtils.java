@@ -48,7 +48,7 @@ import org.checkerframework.dataflow.qual.Pure;
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
  *
  * <p>This class cannot be a set of static methods (like {@link BcelUtil}) as it maintains state
- * during the client's processing of a method that must be available on a per thread basis. Thus it
+ * during the client's processing of a method that must be available on a per-thread basis. Thus it
  * is an abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}. A client
  * would not normally extend this class directly.
  */
@@ -424,9 +424,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * One of uninitialized NEW instructions has moved. Update its offset in StackMap entries. Note
-   * that more than one entry could refer to the same instruction. This is a helper routine used by
-   * updateUninitializedNewOffsets.
+   * One of the uninitialized NEW instructions has moved. Update its offset in StackMap entries.
+   * Note that more than one entry could refer to the same instruction. This is a helper routine
+   * used by updateUninitializedNewOffsets.
    *
    * @param oldOffset original location of NEW instruction
    * @param newOffset new location of NEW instruction
@@ -486,7 +486,7 @@ public abstract class StackMapUtils {
 
   /**
    * Process the instruction list, adding size (1 or 2) to the index of each Instruction that
-   * references a local that is equal or higher in the local map than indexFirstMovedlocal. Size
+   * references a local that is equal to or higher in the local map than indexFirstMovedlocal. Size
    * should be the size of the new local that was just inserted at indexFirstMovedlocal.
    *
    * @param mgen MethodGen to be modified
@@ -652,7 +652,7 @@ public abstract class StackMapUtils {
 
     return switch (smt.getType()) {
       // "ITEM_Bogus" is 'top' (undefined) in JVM verification nomenclature.
-      // I have no idea what "ITEM_Null means, but Groovy generates it (MLR).
+      // I have no idea what "ITEM_Null" means, but Groovy generates it (MLR).
       case Const.ITEM_Bogus, Const.ITEM_Null -> null;
       case Const.ITEM_Integer -> Type.INT;
       case Const.ITEM_Float -> Type.FLOAT;
@@ -850,7 +850,7 @@ public abstract class StackMapUtils {
     // us) and the StackMapTable (yes - BCEL should do this, but it doesn't).
     //
     // We never want to insert our local prior to any parameters.  This would
-    // happen naturally, but some old class files have non zero addresses
+    // happen naturally, but some old class files have non-zero addresses
     // for 'this' and/or the parameters so we need to add an explicit
     // check to make sure we skip these variables.
 
@@ -959,10 +959,10 @@ public abstract class StackMapUtils {
   /** The type of a local variable during its live range. */
   protected Type liveRangeType = null;
 
-  /** The storage size of local variable during its live range. */
+  /** The storage size of a local variable during its live range. */
   protected int liveRangeOperandSize = 0;
 
-  /** The types of elements on the operand stack for current method. */
+  /** The types of elements on the operand stack for the current method. */
   protected StackTypes stackTypes = null;
 
   /**
@@ -972,7 +972,7 @@ public abstract class StackMapUtils {
    * This routine creates LocalVariable entries for these missing items.
    *
    * <ol>
-   *   <li>The java Compiler allocates a hidden parameter for the constructor of an inner class.
+   *   <li>The Java compiler allocates a hidden parameter for the constructor of an inner class.
    *       These items are given the name $hidden$ appended with their offset.
    *   <li>The Java compiler allocates unnamed local temps for:
    *       <ul>
@@ -1042,7 +1042,7 @@ public abstract class StackMapUtils {
       offset = 1;
       firstLocalIndex++;
     } else {
-      // The java method sun/misc/ProxyGenerator generates proxy classes at run time.  For some
+      // The Java method sun/misc/ProxyGenerator generates proxy classes at run time.  For some
       // unknown reason when it generates code for <clinit> it allocates local 0 but never uses it.
       if (mgen.getClassName().startsWith("com.sun.proxy.") && mgen.getName().equals("<clinit>")) {
         newLvg = mgen.addLocalVariable("$clinit$hidden$" + offset, Type.INT, offset, null, null);
@@ -1073,7 +1073,7 @@ public abstract class StackMapUtils {
       offset += argType.getSize();
     }
 
-    // At this point the LocalVaraibles contain:
+    // At this point the LocalVariables contain:
     //   the 'this' pointer (if present)
     //   the parameters to the method
     // This will be used to construct the initial state of the

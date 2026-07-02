@@ -54,7 +54,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
- * This is a slightly modified version of Pass3bVerifier from BCEL. It uses NoConstaintsVisitor as
+ * This is a slightly modified version of Pass3bVerifier from BCEL. It uses NoConstraintsVisitor as
  * InstConstraintVisitor appears to be quite out of date and incorrectly fails on many valid class
  * files. Hence, StackVer assumes the method is valid and is only interested in the result of the
  * symbolic execution in order to capture the state of the local variables and stack at the start of
@@ -84,7 +84,7 @@ public final class StackVer {
    * in a Queue data structure. This is used to hold information about InstructionContext objects
    * externally --- i.e. that information is not saved inside the InstructionContext object itself.
    * This is useful to save the execution path of the symbolic execution of the Pass3bVerifier -
-   * this is not information that belongs into the InstructionContext object itself. Only at
+   * this is not information that belongs in the InstructionContext object itself. Only at
    * "execute()"ing time, an InstructionContext object will get the current information we have
    * about its symbolic execution predecessors.
    */
@@ -150,7 +150,7 @@ public final class StackVer {
     /**
      * Gets the size of the InstructionContext queue.
      *
-     * @return the size of the InstructionQueue
+     * @return the size of the InstructionContext queue
      */
     public int size() {
       return ics.size();

@@ -73,7 +73,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * This is where you would insert your code to modify the current method (mg).
  * Most often this is done with members of the {@code org.apache.bcel.generic}
- * package.  However, you should use the members of InstrutionListUtils to update
+ * package.  However, you should use the members of InstructionListUtils to update
  * the byte code instructions of mg rather than similar methods in the BCEL
  * generic package in order to maintain the integrity of the method's StackMapTable.
  *
@@ -113,9 +113,9 @@ public abstract class InstructionListUtils extends StackMapUtils {
   public InstructionListUtils() {}
 
   /**
-   * Appends the specified instruction to the end of the specified list. Required because for some
-   * reason you can't directly append jump instructions to the list -- but you can create new ones
-   * and append them.
+   * Appends the specified instruction to the end of the specified list. This is required
+   * because for some reason you can't directly append jump instructions to the list -- but you
+   * can create new ones and append them.
    *
    * @param il the InstructionList to be modified
    * @param inst the Instruction to be appended
@@ -545,7 +545,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           // inserted code.  There may not be one; in which case newIndex == origSize.
           int newIndex = findStackMapIndexBefore(targetOffsets[0]) + 1;
 
-          // The Java compiler can 'simplfy' the generated class file by not
+          // The Java compiler can 'simplify' the generated class file by not
           // inserting a stack map entry every time a local is defined if
           // that stack map entry is not needed as a branch target.  Thus,
           // there can be more live locals than defined by the stack maps.
@@ -559,7 +559,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           // stack map entry after our inserted code and that
           // would also cause a verification error. Dicey stuff.
 
-          // I think one possibllity would be to insert a nop instruction
+          // I think one possibility would be to insert a nop instruction
           // with a stack map of CHOP right after the last use of an 'extra'
           // local prior to the next stack map entry. An interesting alternative
           // might be, right as we start to process a method, make a pass over
@@ -578,7 +578,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           // possibility that the compiler has already allocated extra local items
           // that it plans to identify in a subsequent StackMap APPEND entry.
 
-          // First, lets calculate the number and types of the live locals.
+          // First, let's calculate the number and types of the live locals.
           StackMapType[] localMapTypes = calculateLiveLocalTypes(mg, curLoc);
           int localMapIndex = localMapTypes.length;
 
@@ -586,7 +586,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
           // numberActiveLocals has been calculated from the existing StackMap.
           // If these two are equal, we should be ok.
           int numberExtraLocals = localMapIndex - numberActiveLocals;
-          // lets do a sanity check
+          // Let's do a sanity check.
           assert numberExtraLocals >= 0
               : "invalid extra locals count: " + numberActiveLocals + ", " + localMapIndex;
 
