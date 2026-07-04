@@ -15,7 +15,7 @@
 - Tested under Java 24.
 - Compiles and runs under Java 8.
 
-## 1.2.2 (May 15, 2022)
+## 1.2.2 (May 15, 2023)
 
 - Tested under Java 20.
 - No longer compiles under Java 8, but still runs under Java 8.
