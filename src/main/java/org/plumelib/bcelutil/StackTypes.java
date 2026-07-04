@@ -62,7 +62,7 @@ public final class StackTypes {
   /**
    * Returns the stack contents at the specified offset.
    *
-   * @param offset the offset to which to get the stack contents
+   * @param offset the offset at which to get the stack contents
    * @return the stack at the (instruction at the) given offset
    */
   public OperandStack get(@IndexFor({"localVariableses", "operandStacks"}) int offset) {

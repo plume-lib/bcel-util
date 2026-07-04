@@ -443,7 +443,7 @@ public final class BcelUtil {
    */
   public static void dump(JavaClass jc, File dumpDir) {
 
-    dumpDir.mkdir();
+    dumpDir.mkdirs();
     try (PrintStream p = new PrintStream(new File(dumpDir, jc.getClassName() + ".bcel"))) {
       // Print the class, superclass, and interfaces
       p.printf("class %s extends %s%n", jc.getClassName(), jc.getSuperclassName());
