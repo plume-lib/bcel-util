@@ -90,8 +90,8 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/astral-sh/ty-pre-commit"
-rev = "v0.0.62"                                     # ty version.
-hooks = [{ id = "ty" }]
+rev = "v0.0.62" # ty version.
+hooks = [{ id = "ty", types_or = ["python", "pyi"] }]
 
 [[repos]]
 repo = "https://github.com/asottile/pyupgrade"
@@ -132,7 +132,17 @@ hooks = [
 [[repos]]
 repo = "https://github.com/scop/pre-commit-shfmt"
 rev = "v3.13.1-1"
-hooks = [{ id = "shfmt", exclude = { glob = ["gradlew"] } }]
+hooks = [
+  { id = "shfmt", args = [
+    "-i",
+    "2",
+    "-ci",
+    "-bn",
+    "-sr",
+  ], exclude = { glob = [
+    "gradlew", "share/addrfilter", "dots/conda-initialize.sh", "conda-initialize.sh"
+  ] } },
+]
 
 # TODO: Make this also install the program if necessary.
 [[repos]]
