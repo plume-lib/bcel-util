@@ -59,9 +59,6 @@ Run these steps on any filesystem, except the `javadocWeb` step.
            url = uri("https://central.sonatype.com/repository/maven-snapshots/")
          }
        }
-       configurations.all {
-         resolutionStrategy.cacheChangingModulesFor(0, "minutes")
-       }
        ```
 
   * Approach 2:  to Maven Local
@@ -69,9 +66,9 @@ Run these steps on any filesystem, except the `javadocWeb` step.
     * In the clients' build.gradle: set version number and use:
 
        ```gradle
-         repositories {
-           mavenLocal()
-         }
+       repositories {
+         mavenLocal()
+       }
        ```
 
 * Test the test snapshot release on some clients:
