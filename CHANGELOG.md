@@ -1,6 +1,6 @@
 # BCEL-Util change log
 
-## 2.0.0 (????-??-??)
+## 2.0.0 (2026-??-??)
 
 - Requires Java 17 to run.
 

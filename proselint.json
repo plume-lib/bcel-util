@@ -1,0 +1,10 @@
+{
+  "checks": {
+    "annotations.misc": false
+  },
+  "per_file_checks": {
+    "CHANGELOG.md": {
+      "typography.punctuation.hyperbole": false
+    }
+  }
+}
