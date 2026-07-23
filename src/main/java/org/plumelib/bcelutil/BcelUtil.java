@@ -694,8 +694,8 @@ public final class BcelUtil {
   /**
    * Returns the type corresponding to a given fully-qualified binary name.
    *
-   * @param classname the fully-qualified binary name of a type, which is like a
-   *     fully-qualified name but uses "$" rather than "." for nested classes
+   * @param classname the fully-qualified binary name of a type, which is like a fully-qualified
+   *     name but uses "$" rather than "." for nested classes
    * @return the type corresponding to the given name
    */
   public static Type fqBinaryNameToType(@FqBinaryName String classname) {
