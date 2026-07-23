@@ -37,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *   import org.apache.bcel.generic.*;
  *
  *  try {
- *    // Parse the bytes of the classfile, die on any errors
+ *    // Parse the bytes of the class file, die on any errors
  *    ClassParser parser = new ClassParser(new ByteArrayInputStream(classfileBuffer), className);
  *    JavaClass jc = parser.parse();
  *
@@ -278,10 +278,10 @@ public abstract class InstructionListUtils extends StackMapUtils {
   }
 
   /**
-   * Delete instruction(s) from startIh thru endIh in an instruction list. startIh may be the first
-   * instruction of the list, but endIh must not be the last instruction of the list. startIh may be
-   * equal to endIh. There must not be any targeters on any of the instructions to be deleted except
-   * for startIh. Those targeters will be moved to the first instruction following endIh.
+   * Delete instruction(s) from startIh through endIh in an instruction list. startIh may be the
+   * first instruction of the list, but endIh must not be the last instruction of the list. startIh
+   * may be equal to endIh. There must not be any targeters on any of the instructions to be deleted
+   * except for startIh. Those targeters will be moved to the first instruction following endIh.
    *
    * @param mg MethodGen containing the instruction handles
    * @param startIh InstructionHandle indicating first instruction to be deleted
@@ -338,7 +338,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
     // Check to see if the deletion caused any changes
     // in the amount of switch instruction padding bytes.
-    // If so, we may need to update the corresponding stackmap.
+    // If so, we may need to update the corresponding stack map.
     modifyStackMapsForSwitches(newStart, il);
   }
 
@@ -424,7 +424,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
       // We need to see if inserting the additional instructions caused
       // a change in the amount of switch instruction padding bytes.
-      // If so, we may need to update the corresponding stackmap.
+      // If so, we may need to update the corresponding stack map.
       modifyStackMapsForSwitches(newEnd, il);
     } else {
       printStackMapTable("replace_inst_with_inst_list B");
@@ -486,7 +486,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
 
         // We need to see if inserting the additional instructions caused
         // a change in the amount of switch instruction padding bytes.
-        // If so, we may need to update the corresponding stackmap.
+        // If so, we may need to update the corresponding stack map.
         modifyStackMapsForSwitches(newEnd, il);
         printStackMapTable("replace_inst_with_inst_list C");
 
@@ -521,7 +521,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
         printIl(newEnd, "replace_inst #4");
 
         if (targetCount != 0) {
-          // Currently, targetCount is always 2; but code is
+          // Currently, targetCount is always 2, but code is
           // written to allow more.
           int curLoc = newStart.getPosition();
           int origSize = stackMapTable.length;
@@ -621,7 +621,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
                       calculateLiveStackTypes(stack),
                       pool.getConstantPool());
             }
-            // now set the offset from the previous Stack Map entry to our new one.
+            // now set the offset from the previous stack map entry to our new one.
             newStackMapTable[newIndex + i].updateByteCodeOffset(
                 targetOffsets[i] - (runningOffset + 1));
             runningOffset = targetOffsets[i];

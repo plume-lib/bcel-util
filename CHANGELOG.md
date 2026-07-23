@@ -8,7 +8,7 @@
 
 - Tested under Java 25.
 - Compiles and runs under Java 8.
-- Deprecate `BcelUtil.postpendToArray()`
+- Deprecate `BcelUtil.postpendToArray()`.
 
 ## 1.2.3 (June 5, 2025)
 

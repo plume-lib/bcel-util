@@ -74,8 +74,8 @@ public abstract class StackMapUtils {
    *     or 'slot number' to describe this second case.
    *
    * Unfortunately, BCEL uses the method names getIndex and setIndex
-   * to refer to 'offset's into the local stack frame.
-   * It uses getPosition and setPosition to refer to 'offset's into
+   * to refer to offsets into the local stack frame.
+   * It uses getPosition and setPosition to refer to offsets into
    * the byte codes.
    */
 
@@ -516,7 +516,7 @@ public abstract class StackMapUtils {
         }
       }
       // Unfortunately, BCEL doesn't take care of incrementing the
-      // offset within StackMapEntrys.
+      // offset within StackMapEntry objects.
       int delta = inst.getLength() - origLength;
       if (delta > 0) {
         il.setPositions();
@@ -532,8 +532,8 @@ public abstract class StackMapUtils {
    * stackMapTable!
    *
    * @param mgen MethodGen to search
-   * @param javaClassVersion Java version for the classfile; stackMapTable is optional before Java
-   *     1.7 (= classfile version 51)
+   * @param javaClassVersion Java version for the class file; stackMapTable is optional before Java
+   *     1.7 (= class file version 51)
    */
   @EnsuresNonNull({"stackMapTable", "smta"})
   protected final void setCurrentStackMapTable(MethodGen mgen, int javaClassVersion) {
@@ -731,9 +731,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Add a new parameter to the method. This will be added after last current parameter and before
-   * the first local variable. This might have the side effect of causing us to rewrite the method
-   * byte codes to adjust the offsets for the local variables - see below for details.
+   * Add a new parameter to the method. This will be added after the last current parameter and
+   * before the first local variable. This might have the side effect of causing us to rewrite the
+   * method byte codes to adjust the offsets for the local variables - see below for details.
    *
    * <p>Must call fixLocalVariableTable (just once per method) before calling this routine.
    *
@@ -1016,7 +1016,7 @@ public abstract class StackMapUtils {
     // Index into locals of the first parameter
     int locIndex = 0;
 
-    // Rarely, the java compiler gets the max locals count wrong (too big).
+    // Rarely, the Java compiler gets the max locals count wrong (too big).
     // This would cause problems for us later, so we need to recalculate
     // the highest local used based on looking at code offsets.
     mgen.setMaxLocals();
@@ -1043,7 +1043,7 @@ public abstract class StackMapUtils {
       firstLocalIndex++;
     } else {
       // The Java class sun/misc/ProxyGenerator generates proxy classes at run time.  For some
-      // unknown reason when it generates code for <clinit> it allocates local 0 but never uses it.
+      // unknown reason, when it generates code for <clinit> it allocates local 0 but never uses it.
       if (mgen.getClassName().startsWith("com.sun.proxy.") && mgen.getName().equals("<clinit>")) {
         newLvg = mgen.addLocalVariable("$clinit$hidden$" + offset, Type.INT, offset, null, null);
         debugInstrument.log(
@@ -1329,7 +1329,7 @@ public abstract class StackMapUtils {
         Type tos = stack.peek(0);
         // System.out.printf ("tos: %s, liveType: %s%n", tos, liveRangeType);
         // Store of a null does not change type.
-        // UNDONE: if tos is subclass of liveRangeType, should not start new range
+        // UNDONE: if tos is a subclass of liveRangeType, should not start a new range
         if (liveRangeStart == null || (!tos.equals(Type.NULL) && !tos.equals(liveRangeType))) {
           // close current live range
           create_local_from_live_range(mgen, offset);
@@ -1375,7 +1375,7 @@ public abstract class StackMapUtils {
         if (liveRangeType == null) {
           throw new RuntimeException("gen_locals_from_byte_code: no store before load");
         } else if (!tos.equals(liveRangeType)) {
-          // Load type can be super class of store type.  Rather than write code
+          // Load type can be a superclass of store type.  Rather than write code
           // using reflection to verify, we just assume compiler got it right.
           // throw new RuntimeException("gen_locals_from_byte_code: store/load types do not match");
         }
@@ -1406,7 +1406,7 @@ public abstract class StackMapUtils {
     if (liveRangeStart == null) {
       return;
     }
-    // Type.getType doesn't understand NULL which is the type of the top of operand stack
+    // Type.getType doesn't understand NULL which is the type of the top of the operand stack
     // after the JVM aconst_null instruction.
     if (Type.NULL.equals(liveRangeType)) {
       liveRangeType = Type.OBJECT;
