@@ -14,7 +14,7 @@ org-checkerframework = { id = "org.checkerframework", version = "1.0.2" }
 
 checker-framework = "4.2.1"
 
-jacoco = "0.8.14"
+jacoco = "0.8.15"
 
 junit-jupiter = "6.1.2"
 
@@ -30,8 +30,8 @@ checker-framework = { module = "org.checkerframework:checker", version.ref = "ch
 
 error-prone-core = "com.google.errorprone:error_prone_core:2.50.0"
 
-# Not a dependency; declared so that the JaCoCo tool version is tracked like every other version.
-jacoco-ant = { module = "org.jacoco:org.jacoco.ant", version.ref = "jacoco" }
+# Not a dependency; only its version is read, for the JaCoCo plugin's `toolVersion`.
+jacoco = { group = "org.jacoco", name = "org.jacoco.core", version.ref = "jacoco" }
 
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit-jupiter" }
 

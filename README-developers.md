@@ -7,11 +7,11 @@
 Your `~/.gradle/gradle.properties` file must contain:
 
 ```properties
-signing.keyId=…
-signing.password=…
-signing.secretKeyRingFile=…
-mavenCentralUsername=…
-mavenCentralPassword=…
+signing.keyId=...
+signing.password=...
+signing.secretKeyRingFile=...
+mavenCentralUsername=...
+mavenCentralPassword=...
 ```
 
 ### Steps
@@ -28,7 +28,7 @@ Run these steps on any filesystem, except the `javadocWeb` step.
   snapshot, because the dependency versions appear in the published `.pom` file.
 * Save files and stage changes.
 * `./gradlew publishToMavenCentral`
-* Browse to <https://central.sonatype.com/publishing/deployments>, click “publish”.
+* Browse to <https://central.sonatype.com/publishing/deployments>, click "publish".
 * Add a git tag and commit:
 
   ```sh
@@ -39,18 +39,18 @@ Run these steps on any filesystem, except the `javadocWeb` step.
 
 * Make a GitHub release.
   * Browse to <https://github.com/plume-lib/bcel-util/releases>
-  * Click “draft a new release”
-  * Call it “bcel-util 1.2.4”
+  * Click "draft a new release"
+  * Call it "bcel-util 1.2.4"
   * Use the text from `CHANGELOG.md` as the description
   * Attach the .jar and -all.jar files from `build/libs/`
-  * Click “publish release”
+  * Click "publish release"
 * Finally, run on the CSE filesystem:  `git pull && ./gradlew javadocWeb`
 * Update clients and test, so that if it's broken we can re-release.
 
 ### Making a snapshot release
 
 * `git pull`
-* Set version number in `gradle.properties` to end in “-SNAPSHOT”.
+* Set version number in `gradle.properties` to end in "-SNAPSHOT".
 * Make the snapshot release.
   * Approach 1:  to Maven Central
     * `./gradlew publishToMavenCentral`
@@ -74,7 +74,7 @@ Run these steps on any filesystem, except the `javadocWeb` step.
        }
        ```
 
-* Test the test snapshot release on some clients:
+* Test the snapshot release on some clients:
   * For the Checker Framework (don't skip running the tests):
 
     ```sh

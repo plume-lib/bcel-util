@@ -20,12 +20,22 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: ${{ matrix.java }}
+          java-version: |
+            ${{ matrix.java }}
+            21
           check-latest: true
           cache: 'gradle'
       - name: java -version
         run: java -version
+      - name: Cache Spotless P2 artifacts
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/dev/equo/p2-data
+          key: p2-data-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: p2-data-${{ runner.os }}-
       - name: Warm up Gradle cache
         run: ./gradlew spotlessCheck > /dev/null 2>&1 || (sleep 60 && true)
+      # Gradle does not auto-detect the JDKs that "setup-java" installs, because
+      # they are in the tool cache rather than in a standard location.
       - name: ./gradlew build
-        run: ./gradlew build
+        run: ./gradlew build -PtestJavaVersion=${{ matrix.java }} -Porg.gradle.java.installations.fromEnv=JAVA_HOME_${{ matrix.java }}_${{ runner.arch }},JAVA_HOME_21_${{ runner.arch }}

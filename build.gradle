@@ -70,8 +70,6 @@ java {
 }
 
 tasks.withType(JavaCompile).configureEach {
-  // Set the language level and byte code to 17, the oldest version that
-  // .github/workflows/gradle.yml tests under.
   options.release = 17
   options.forkOptions.jvmArgs += "-Xmx6g"
   options.compilerArgs << "-Werror"
@@ -82,7 +80,8 @@ tasks.withType(JavaCompile).configureEach {
 
 // Testing
 
-// Test using various Java versions.  The `java.toolchain` setting above applies to Test tasks as
+// Compilation always uses Java 21. Tests run under
+// various Java versions.  The `java.toolchain` setting above applies to Test tasks as
 // well as to compilation, so without this the tests would always run under Java 21.  By default
 // tests run under the JVM that Gradle itself is running under, which is what the job matrix in
 // .github/workflows/gradle.yml varies.  Override with, for example:
@@ -151,13 +150,9 @@ spotless {
   groovyGradle {
     target("**/*.gradle")
     // `greclipse()` specifies the formatter that Spotless uses for .gradle files.
-    // It provisions the Eclipse platform from eclipse.org, whose flakiness leads
-    // to "Failed to provision P2 dependencies".  Two mitigations:  the
-    // provisioned artifacts are cached (in ~/.m2/repository/dev/equo/p2-data
-    // locally, and by an explicit step in .github/workflows/gradle.yml on
-    // continuous integration), and a mirror avoids eclipse.org itself.
-    // Configuring any mirror obliges every P2 repository to have one, and
-    // Groovy-Eclipse has no mirror, so groovy.jfrog.io maps to itself.
+    // It provisions the Eclipse platform from eclipse.org, which is flaky.
+    // Configuring any mirror obliges every P2 repository to have one, so
+    // groovy.jfrog.io maps to itself.
     greclipse().withP2Mirrors([
       "https://download.eclipse.org/": "https://mirror.umd.edu/eclipse/",
       "https://groovy.jfrog.io/": "https://groovy.jfrog.io/",
@@ -201,7 +196,6 @@ pmd {
 
 
 // Checker Framework pluggable type-checking
-// (The plugin is applied in the `plugins` block at the top of this file.)
 
 checkerFramework {
   version = libs.versions.checker.framework.get()
@@ -257,8 +251,6 @@ class JavadocFonts {
   }
 }
 
-// Settings that every Javadoc task shares, so that the documentation on the website and in the
-// published -javadoc.jar is generated the same way as the documentation that `check` verifies.
 tasks.withType(Javadoc).configureEach {
   options.noTimestamp = true
   options.quiet()
@@ -353,18 +345,13 @@ javadocWebUpload.configure {
 
 // Publishing, see README-developers.md
 
-// The Shadow plugin adds its fat jar to the `java` component, which would publish
-// ...-all.jar to Maven Central along with a "shadowed" variant that declares no dependencies.
-// A consumer that resolved that variant would get a second, un-relocated copy of BCEL.  The fat
-// jar is still built by `./gradlew shadowJar`, for attaching to a GitHub release by hand.
-components.named("java") {
-  withVariantsFromConfiguration(configurations.shadowRuntimeElements) {
-    skip()
-  }
+// The fat jar is attached to GitHub releases, not published to Maven Central,
+// so keep the `shadowRuntimeElements` variant out of the Gradle module metadata.
+shadow {
+  addShadowVariantIntoJavaComponent = false
 }
 
-// Make the published archives byte-for-byte reproducible, for the same reason that
-// `options.noTimestamp` is set on the Javadoc tasks above.
+// Make the published archives byte-for-byte reproducible.
 tasks.withType(AbstractArchiveTask).configureEach {
   preserveFileTimestamps = false
   reproducibleFileOrder = true
