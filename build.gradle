@@ -201,11 +201,10 @@ pmd {
 
 
 // Checker Framework pluggable type-checking
-
-apply plugin: "org.checkerframework"
+// (The plugin is applied in the `plugins` block at the top of this file.)
 
 checkerFramework {
-  version = libs.checker.framework.get().version
+  version = libs.versions.checker.framework.get()
   checkers = [
     // No need to run CalledMethodsChecker, because ResourceLeakChecker does so.
     // "org.checkerframework.checker.calledmethods.CalledMethodsChecker",
@@ -258,29 +257,39 @@ class JavadocFonts {
   }
 }
 
+// Settings that every Javadoc task shares, so that the documentation on the website and in the
+// published -javadoc.jar is generated the same way as the documentation that `check` verifies.
 tasks.withType(Javadoc).configureEach {
   options.noTimestamp = true
-}
-tasks.named("javadoc") {
+  options.quiet()
+  // Code copied from BCEL that we do not want to change gratuitously.
   exclude("org/plumelib/bcelutil/StackVer.java")
   // Turn Javadoc warnings into errors.
-  options.addStringOption("Xwerror", "-Xdoclint:all")
-  options.addStringOption("private", "-quiet")
+  options.addBooleanOption("Xdoclint:all", true)
+  options.addBooleanOption("Xwerror", true)
   doLast {
     JavadocFonts.removeDejaVuFontImport(it.destinationDir)
   }
 }
+
+// The `javadoc` task documents only the public API, because the gradle-maven-publish-plugin
+// packages this task's output into the published -javadoc.jar.  `javadocPrivate` below applies the
+// same doclint checks to private members, so nothing goes unchecked.
+def javadocPrivate = tasks.register("javadocPrivate", Javadoc) {
+  description = "Generate Javadoc for all members, including private ones."
+  source = sourceSets.main.allJava
+  classpath = sourceSets.main.compileClasspath
+  destinationDir = layout.buildDirectory.dir("docs/javadocPrivate").get().asFile
+  options.addBooleanOption("private", true)
+}
 tasks.named("check") {
-  dependsOn(tasks.named("javadoc"))
+  dependsOn(tasks.named("javadoc"), javadocPrivate)
 }
 
 def javadocWebUpload = tasks.register("javadocWebUpload", Javadoc) {
   source = sourceSets.main.allJava
   destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
-  classpath = project.sourceSets.main.compileClasspath
-  doLast {
-    JavadocFonts.removeDejaVuFontImport(it.destinationDir)
-  }
+  classpath = sourceSets.main.compileClasspath
 }
 // Set permissions
 def javadocWebChgrp = tasks.register("javadocWebChgrp", Exec) {
@@ -299,9 +308,9 @@ def javadocWeb = tasks.register("javadocWeb", DefaultTask) {
 }
 
 
-configurations {
-  requireJavadoc
-}
+// `resolvable` rather than the `configurations { requireJavadoc }` shorthand, which creates a
+// configuration that is both resolvable and consumable and that Gradle reports as legacy.
+configurations.resolvable("requireJavadoc")
 dependencies {
   requireJavadoc(libs.require.javadoc)
 }
@@ -335,12 +344,31 @@ def requireJavadoc = tasks.register("requireJavadoc", JavaExec) {
 tasks.named("check") {
   dependsOn(requireJavadoc)
 }
-javadocWeb.configure {
+// On javadocWebUpload rather than on javadocWeb, so that the check runs *before* the upload.  A
+// dependency of javadocWeb would be unordered with respect to javadocWebUpload.
+javadocWebUpload.configure {
   dependsOn(requireJavadoc)
 }
 
 
 // Publishing, see README-developers.md
+
+// The Shadow plugin adds its fat jar to the `java` component, which would publish
+// ...-all.jar to Maven Central along with a "shadowed" variant that declares no dependencies.
+// A consumer that resolved that variant would get a second, un-relocated copy of BCEL.  The fat
+// jar is still built by `./gradlew shadowJar`, for attaching to a GitHub release by hand.
+components.named("java") {
+  withVariantsFromConfiguration(configurations.shadowRuntimeElements) {
+    skip()
+  }
+}
+
+// Make the published archives byte-for-byte reproducible, for the same reason that
+// `options.noTimestamp` is set on the Javadoc tasks above.
+tasks.withType(AbstractArchiveTask).configureEach {
+  preserveFileTimestamps = false
+  reproducibleFileOrder = true
+}
 
 mavenPublishing {
   coordinates("org.plumelib", project.name, project.version)
@@ -400,10 +428,14 @@ tasks.register("tags", Exec) {
 tasks.register("printCompileClasspaths") {
   group = "Help"
   description = "Print the compile-time classpaths"
+  // Resolve the classpaths when the task is configured, not when it runs.  Reading `sourceSets`
+  // from a task action would capture the `Project` object, which the configuration cache forbids.
+  def mainClasspath = sourceSets.main.compileClasspath
+  def testClasspath = sourceSets.test.compileClasspath
   doFirst {
     println("Compile classpath:")
-    println(sourceSets.main.compileClasspath.asPath)
+    println(mainClasspath.asPath)
     println("Compile test classpath:")
-    println(sourceSets.test.compileClasspath.asPath)
+    println(testClasspath.asPath)
   }
 }

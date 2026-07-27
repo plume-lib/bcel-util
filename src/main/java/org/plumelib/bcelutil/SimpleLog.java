@@ -131,13 +131,23 @@ public final class SimpleLog {
     }
   }
 
-  /** Print a stack trace to the log. */
+  /**
+   * Print a stack trace to the log.
+   *
+   * <p>The trace starts with the caller of the caller of this method; the immediate caller does not
+   * appear. That is why {@link #exdent} logs a trace that starts at the caller of {@code exdent}.
+   */
   public void logStackTrace() {
     if (enabled) {
       setLogfile();
       Throwable t = new Throwable();
       t.fillInStackTrace();
       StackTraceElement[] stackTrace = t.getStackTrace();
+      // Element 0 is this method, where the Throwable was created, and element 1 is the caller of
+      // this method, so starting at element 2 omits the caller of this method.  By contrast,
+      // BcelUtil.dumpStackTrace also starts at element 2, but BcelUtil.dumpStackTrace reads
+      // Thread.currentThread().getStackTrace(), whose element 0 is getStackTrace itself, so there
+      // element 2 is the caller of dumpStackTrace.
       for (int ii = 2; ii < stackTrace.length; ii++) {
         StackTraceElement ste = stackTrace[ii];
         logfile.printf("%s  %s%n", getIndentString(), ste);

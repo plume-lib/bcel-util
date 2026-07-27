@@ -544,6 +544,11 @@ public final class BcelUtil {
    * Sets the locals to be the formal parameters. Any other locals are removed. An instruction list
    * with at least one instruction must exist.
    *
+   * <p>This method names the new locals using {@link MethodGen#getArgumentNames}. When {@code mg}
+   * was created from a {@link Method}, BCEL synthesizes those names as "arg0", "arg1", and so on,
+   * rather than reading them from the LocalVariableTable. In that case this method does not
+   * preserve the declared parameter names.
+   *
    * @param mg the method whose locals to set
    */
   public static void resetLocalsToFormals(MethodGen mg) {

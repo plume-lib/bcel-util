@@ -24,6 +24,8 @@ pmd = "7.26.0"
 
 bcel = "org.checkerframework.annotatedlib:bcel:6.5.0"
 
+# Not a dependency; declared so that the Checker Framework version is tracked like every other
+# version.  The org.checkerframework Gradle plugin adds the dependency, from `checkerFramework.version`.
 checker-framework = { module = "org.checkerframework:checker", version.ref = "checker-framework" }
 
 error-prone-core = "com.google.errorprone:error_prone_core:2.50.0"
