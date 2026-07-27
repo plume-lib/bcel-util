@@ -69,6 +69,16 @@ java {
   }
 }
 
+tasks.withType(JavaCompile).configureEach {
+  // Set the language level and byte code to 17, the oldest version that
+  // .github/workflows/gradle.yml tests under.
+  options.release = 17
+  options.forkOptions.jvmArgs += "-Xmx6g"
+  options.compilerArgs << "-Werror"
+  // "-processing" avoids javac warning "No processor claimed any of these annotations".
+  options.compilerArgs << "-Xlint:all,-processing"
+}
+
 
 // Testing
 
@@ -81,8 +91,8 @@ def testJavaVersion = JavaLanguageVersion.of(
     (project.findProperty("testJavaVersion") ?: JavaVersion.current().majorVersion).toString())
 tasks.withType(Test).configureEach {
   javaLauncher = javaToolchains.launcherFor {
-    languageVersion = testJavaVersion.map { JavaLanguageVersion.of(it) }
-}
+    languageVersion = testJavaVersion
+  }
 
   useJUnitPlatform {
     includeEngines("junit-jupiter")
@@ -155,6 +165,25 @@ spotless {
     leadingTabsToSpaces(2)
     trimTrailingWhitespace()
     // endWithNewline() // Don't want to end empty files with a newline
+  }
+}
+
+
+// Error Prone linter
+
+dependencies {
+  errorprone(libs.error.prone.core)
+}
+tasks.withType(JavaCompile).configureEach {
+  options.errorprone {
+    disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
+    disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
+    disable("EffectivelyPrivate") // Loses information about the abstraction.
+    disable("ExtendsObject")  // Incorrect when using the Checker Framework.
+    disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
+    disable("ReferenceEquality") // Use Interning Checker instead.
+    // Code copied from BCEL that we don't want to change gratuitously.
+    excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
   }
 }
 
@@ -354,12 +383,15 @@ tasks.register("tags", Exec) {
   def javaFiles = fileTree("src") {
     include("**/*.java")
   }
+  // `projectPath` in a build script is Gradle's project path (such as ":"), not a file system
+  // path, so compute the project directory explicitly.
+  def projectDirPath = layout.projectDirectory.asFile.toPath()
   inputs.files(javaFiles)
   outputs.file(layout.projectDirectory.file("TAGS"))
   executable("etags")
   // Compute the arguments when the task runs, not when it is configured.
   argumentProviders.add({
-    javaFiles.files.sort()*.toPath().collect { projectPath.relativize(it).toString() }
+    javaFiles.files.sort()*.toPath().collect { projectDirPath.relativize(it).toString() }
   } as CommandLineArgumentProvider)
 }
 
