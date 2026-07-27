@@ -14,7 +14,11 @@ org-checkerframework = { id = "org.checkerframework", version = "1.0.2" }
 
 checker-framework = "4.2.1"
 
+jacoco = "0.8.14"
+
 junit-jupiter = "6.1.2"
+
+pmd = "7.26.0"
 
 [libraries]
 
@@ -22,13 +26,17 @@ bcel = "org.checkerframework.annotatedlib:bcel:6.5.0"
 
 checker-framework = { module = "org.checkerframework:checker", version.ref = "checker-framework" }
 
-checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-framework" }
-
 error-prone-core = "com.google.errorprone:error_prone_core:2.50.0"
+
+# Not a dependency; declared so that the JaCoCo tool version is tracked like every other version.
+jacoco-ant = { module = "org.jacoco:org.jacoco.ant", version.ref = "jacoco" }
 
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit-jupiter" }
 
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junit-jupiter" }
+
+# Not a dependency; declared so that the PMD tool version is tracked like every other version.
+pmd-java = { module = "net.sourceforge.pmd:pmd-java", version.ref = "pmd" }
 
 reflection-util = "org.plumelib:reflection-util:2.0.0-SNAPSHOT"
 

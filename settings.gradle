@@ -1,8 +1,5 @@
-buildscript {
-  if (JavaVersion.current() < JavaVersion.VERSION_17) {
-    throw new GradleException("Use Java 17 or later.")
-  }
-}
+// Gradle 9 requires a JVM between 17 and 26 to run, so no explicit Java version check is needed
+// here; Gradle itself reports a clear error on an unsupported JVM.
 
 // Project name is read-only in build scripts, and defaults to directory name.
 rootProject.name = "bcel-util"

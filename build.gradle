@@ -5,10 +5,11 @@ plugins {
   alias(libs.plugins.com.gradleup.shadow)
 
   // Code formatting; defines targets "spotlessApply" and "spotlessCheck"
+  // which is run by "check" (which is itself run by "build").
   alias(libs.plugins.com.diffplug.spotless)
 
   // Error Prone linter
-  alias(libs.plugins.net.ltgt.errorprone) apply false
+  alias(libs.plugins.net.ltgt.errorprone)
 
   // PMD linter
   id("pmd")
@@ -24,10 +25,23 @@ plugins {
 }
 
 repositories {
-  mavenLocal()
+  // mavenLocal() comes first so that a locally-installed snapshot of a plume-lib dependency
+  // (see README-developers.md, "Making a snapshot release") takes precedence.
+  // Restricting this to snapshots prevents a stale locally-installed
+  // release from shadowing the one on Maven Central.  To build against a
+  // locally-installed release, temporarily remove "snapshotsOnly()".
+  mavenLocal {
+    mavenContent {
+      snapshotsOnly()
+    }
+  }
   mavenCentral()
-  maven { url = "https://central.sonatype.com/repository/maven-snapshots/" }
-  gradlePluginPortal()
+  maven {
+    url = "https://central.sonatype.com/repository/maven-snapshots/"
+    mavenContent {
+      snapshotsOnly()
+    }
+  }
 }
 
 dependencies {
@@ -36,37 +50,63 @@ dependencies {
   // implementation fileTree(dir: "$System.env.BCEL/target", include: "bcel-6.2.0.2.jar")
 
   implementation(libs.reflection.util)
+  // Including error_prone_annotations leads to javac warnings (not errors, but
+  // annoying nonetheless) when a client of plume-util doesn't itself depend on
+  // error_prone_annotations.  (Even if the dependency is "compileOnly".)
+  // implementation("com.google.errorprone:error_prone_annotations")
 
   testImplementation(libs.junit.jupiter)
   testRuntimeOnly(libs.junit.platform.launcher)
 }
 
+
+// Compilation
+
 java {
   toolchain {
-    // Always compile using Java 21, but test using various Java versions.
+    // Always compile using Java 21.
     languageVersion = JavaLanguageVersion.of(21)
   }
 }
-tasks.withType(JavaCompile).configureEach {
-  // Set the language level and byte code to 17.
-  options.release = 17
+
+
+// Testing
+
+// Test using various Java versions.  The `java.toolchain` setting above applies to Test tasks as
+// well as to compilation, so without this the tests would always run under Java 21.  By default
+// tests run under the JVM that Gradle itself is running under, which is what the job matrix in
+// .github/workflows/gradle.yml varies.  Override with, for example:
+//   ./gradlew test -PtestJavaVersion=17
+def testJavaVersion = JavaLanguageVersion.of(
+    (project.findProperty("testJavaVersion") ?: JavaVersion.current().majorVersion).toString())
+tasks.withType(Test).configureEach {
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = testJavaVersion.map { JavaLanguageVersion.of(it) }
 }
 
-test {
   useJUnitPlatform {
     includeEngines("junit-jupiter")
     excludeEngines("junit-vintage")
   }
 
+  // Always re-run the tests, so that their output always appears.  Both lines
+  // are needed:  "upToDateWhen" alone would still permit the build cache to
+  // supply the outputs of a previous run.
+  outputs.upToDateWhen { false }
+  outputs.cacheIf { false }
+
   testLogging {
-    outputs.upToDateWhen{false}
     showStandardStreams = true
     events("failed")
     exceptionFormat = "full"
   }
 }
 
-jacocoTestReport {
+jacoco {
+  toolVersion = libs.versions.jacoco.get()
+}
+
+tasks.named("jacocoTestReport") {
   reports {
     xml.required = false
     csv.required = true // Output is written to build/reports/jacoco/test/jacocoTestReport.csv
@@ -75,9 +115,14 @@ jacocoTestReport {
 }
 // Two possible configurations:
 // Configuration A: report is always generated after tests run.
-test.finalizedBy(jacocoTestReport)
+tasks.named("test") {
+  finalizedBy(tasks.named("jacocoTestReport"))
+}
 // Configuration B: user must run `jacocoTestReport` explicitly.
-// jacocoTestReport.dependsOn(test)
+// tasks.named("jacocoTestReport") { dependsOn(tasks.named("test")) }
+
+
+// Code formatting
 
 spotless {
   format "misc", {
@@ -90,53 +135,35 @@ spotless {
     endWithNewline()
   }
   java {
-    targetExclude("**/WeakIdentityHashMap.java")
     googleJavaFormat()
     formatAnnotations()
   }
-  // eclipse.org flakiness leads to "Failed to provision P2 dependencies".
-  if (false) {
-    groovyGradle {
-      target("**/*.gradle")
-      greclipse()  // which formatter Spotless should use to format .gradle files.
-      leadingTabsToSpaces(2)
-      trimTrailingWhitespace()
-      // endWithNewline() // Don't want to end empty files with a newline
-    }
+  groovyGradle {
+    target("**/*.gradle")
+    // `greclipse()` specifies the formatter that Spotless uses for .gradle files.
+    // It provisions the Eclipse platform from eclipse.org, whose flakiness leads
+    // to "Failed to provision P2 dependencies".  Two mitigations:  the
+    // provisioned artifacts are cached (in ~/.m2/repository/dev/equo/p2-data
+    // locally, and by an explicit step in .github/workflows/gradle.yml on
+    // continuous integration), and a mirror avoids eclipse.org itself.
+    // Configuring any mirror obliges every P2 repository to have one, and
+    // Groovy-Eclipse has no mirror, so groovy.jfrog.io maps to itself.
+    greclipse().withP2Mirrors([
+      "https://download.eclipse.org/": "https://mirror.umd.edu/eclipse/",
+      "https://groovy.jfrog.io/": "https://groovy.jfrog.io/",
+    ])
+    leadingTabsToSpaces(2)
+    trimTrailingWhitespace()
+    // endWithNewline() // Don't want to end empty files with a newline
   }
 }
 
-// Error Prone linter
-
-tasks.withType(JavaCompile).configureEach {
-  options.forkOptions.jvmArgs += "-Xmx6g"
-  options.compilerArgs << "-Werror"
-  // "-processing" avoids javac warning "No processor claimed any of these annotations".
-  options.compilerArgs << "-Xlint:all,-processing"
-}
-if (JavaVersion.current() >= JavaVersion.VERSION_21) {
-  apply plugin: "net.ltgt.errorprone"
-  dependencies {
-    errorprone(libs.error.prone.core)
-  }
-  tasks.withType(JavaCompile).configureEach {
-    options.errorprone {
-      disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
-      disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
-      disable("EffectivelyPrivate") // Loses information about the abstraction.
-      disable("ExtendsObject")  // Incorrect when using the Checker Framework.
-      disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
-      disable("ReferenceEquality") // Use Interning Checker instead.
-      // Code copied from BCEL that we don't want to change gratuitously.
-      excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
-    }
-  }
-}
 
 // PMD linter
 
 pmd {
-  toolVersion = "7.26.0"
+  toolVersion = libs.versions.pmd.get()
+  ruleSets = []                 // Prevent the default errorprone.xml from being applied.
   ruleSetFiles = files("${rootDir}/.pmd-ruleset.xml")
   consoleOutput = true
   ignoreFailures = false
@@ -178,49 +205,69 @@ checkerFramework {
 
 // Javadoc
 
-tasks.withType(Javadoc) {
+// Javadoc generates a CSS import of a font that is not distributed alongside
+// the documentation, so remove the import.  Cannot use "ant.replaceregexp",
+// because the Ant builder is reachable only through the "Project" object, which
+// the configuration cache forbids a task action from using.
+//
+// This is a static method of a class rather than a method of the build script,
+// because the configuration cache nulls out a closure's owner when it serializes
+// the closure.
+class JavadocFonts {
+  static void removeDejaVuFontImport(File javadocDir) {
+    javadocDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+      if (!(file.name.endsWith(".css") || file.name.endsWith(".html"))) {
+        return
+      }
+      String contents = file.getText("UTF-8")
+      String newContents =
+          contents.replaceAll(/@import url\('(?:resources\/)?fonts\/dejavu\.css'\);[ \t]*/, "")
+      if (newContents != contents) {
+        file.setText(newContents, "UTF-8")
+      }
+    }
+  }
+}
+
+tasks.withType(Javadoc).configureEach {
   options.noTimestamp = true
 }
-javadoc {
+tasks.named("javadoc") {
   exclude("org/plumelib/bcelutil/StackVer.java")
   // Turn Javadoc warnings into errors.
   options.addStringOption("Xwerror", "-Xdoclint:all")
   options.addStringOption("private", "-quiet")
   doLast {
-    ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:"",
-    flags:"g", byline:true) {
-      fileset(dir: destinationDir)
-    }
+    JavadocFonts.removeDejaVuFontImport(it.destinationDir)
   }
 }
-check.dependsOn(javadoc)
-
-tasks.register("javadocWeb", DefaultTask) {
-  description = "Upload API documentation to website."
-  dependsOn(javadocWebUpload, javadocWebChgrp, javadocWebChmod)
+tasks.named("check") {
+  dependsOn(tasks.named("javadoc"))
 }
-tasks.register("javadocWebUpload", Javadoc) {
+
+def javadocWebUpload = tasks.register("javadocWebUpload", Javadoc) {
   source = sourceSets.main.allJava
   destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
   classpath = project.sourceSets.main.compileClasspath
   doLast {
-    ant.replaceregexp(match:"@import url\\('resources/fonts/dejavu.css'\\);\\s*", replace:"",
-    flags:"g", byline:true) {
-      fileset(dir: destinationDir)
-    }
+    JavadocFonts.removeDejaVuFontImport(it.destinationDir)
   }
 }
 // Set permissions
-tasks.register("javadocWebChgrp", Exec) {
+def javadocWebChgrp = tasks.register("javadocWebChgrp", Exec) {
   commandLine("chgrp", "-R",  "plse_www", "/cse/web/research/plumelib/${project.name}/api")
   ignoreExitValue = true
+  mustRunAfter(javadocWebUpload)
 }
-javadocWebChgrp.mustRunAfter("javadocWebUpload")
-tasks.register("javadocWebChmod", Exec) {
+def javadocWebChmod = tasks.register("javadocWebChmod", Exec) {
   commandLine("chmod", "-R",  "g+w", "/cse/web/research/plumelib/${project.name}/api")
   ignoreExitValue = true
+  mustRunAfter(javadocWebUpload)
 }
-javadocWebChmod.mustRunAfter("javadocWebUpload")
+def javadocWeb = tasks.register("javadocWeb", DefaultTask) {
+  description = "Upload API documentation to website."
+  dependsOn(javadocWebUpload, javadocWebChgrp, javadocWebChmod)
+}
 
 
 configurations {
@@ -229,10 +276,14 @@ configurations {
 dependencies {
   requireJavadoc(libs.require.javadoc)
 }
+// RequireJavadoc produces no output of its own, so write a marker file.  Without a declared output,
+// the task could never be up to date and the declared inputs would have no effect.
+def requireJavadocMarker = layout.buildDirectory.file("requireJavadoc/requireJavadoc.txt")
 def requireJavadoc = tasks.register("requireJavadoc", JavaExec) {
   group = "Documentation"
   description = "Ensures that Javadoc documentation exists."
   inputs.files(sourceSets.main.allJava)
+  outputs.file(requireJavadocMarker)
   mainClass = "org.plumelib.javadoc.RequireJavadoc"
   classpath = configurations.requireJavadoc
   args(sourceSets.main.allJava.srcDirs.collect{it.getAbsolutePath()})
@@ -246,25 +297,34 @@ def requireJavadoc = tasks.register("requireJavadoc", JavaExec) {
     "--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
     "--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
   ]
+  doLast {
+    File marker = requireJavadocMarker.get().asFile
+    marker.parentFile.mkdirs()
+    marker.text = ""
+  }
 }
-check.dependsOn(requireJavadoc)
-javadocWeb.dependsOn(requireJavadoc)
+tasks.named("check") {
+  dependsOn(requireJavadoc)
+}
+javadocWeb.configure {
+  dependsOn(requireJavadoc)
+}
 
 
 // Publishing, see README-developers.md
 
 mavenPublishing {
-  coordinates("org.plumelib", "${project.packageName}", "${project.version}")
+  coordinates("org.plumelib", project.name, project.version)
 
   pom {
     name = "BCEL Util"
     description = "Utility functions for BCEL, the Byte Code Engineering Library."
-    url = "https://github.com/plume-lib/${project.packageName}"
+    url = "https://github.com/plume-lib/${project.name}"
 
     scm {
-      url = "https://github.com/plume-lib/${project.packageName}/"
-      connection = "scm:git:git://github.com/plume-lib/${project.packageName}.git"
-      developerConnection = "scm:git:ssh://git@github.com/plume-lib/${project.packageName}.git"
+      url = "https://github.com/plume-lib/${project.name}/"
+      connection = "scm:git:git://github.com/plume-lib/${project.name}.git"
+      developerConnection = "scm:git:ssh://git@github.com/plume-lib/${project.name}.git"
     }
 
     licenses {
@@ -285,37 +345,28 @@ mavenPublishing {
 }
 
 
-// Git hooks
-
-tasks.register("installGitHooks", Copy) {
-  description = "Copies git hooks to .git directory"
-  from("githooks")
-  into(".git/hooks")
-  eachFile {
-    File target = file("$destinationDir/$relativePath")
-    if (java.nio.file.Files.isSymbolicLink(target.toPath())) {
-      java.nio.file.Files.delete(target.toPath()) // Fail if the symlink cannot be removed
-    }
-  }
-}
-
-tasks.withType(JavaCompile) {
-  dependsOn(":installGitHooks")
-}
-
-
 // Emacs support
 
 /* Make Emacs TAGS table */
 tasks.register("tags", Exec) {
+  group = "Emacs"
   description = "Run etags to create an Emacs TAGS table"
-  commandLine("bash", "-c", "find src/ -name '*.java' | sort | xargs etags")
+  def javaFiles = fileTree("src") {
+    include("**/*.java")
+  }
+  inputs.files(javaFiles)
+  outputs.file(layout.projectDirectory.file("TAGS"))
+  executable("etags")
+  // Compute the arguments when the task runs, not when it is configured.
+  argumentProviders.add({
+    javaFiles.files.sort()*.toPath().collect { projectPath.relativize(it).toString() }
+  } as CommandLineArgumentProvider)
 }
-
 
 // Debugging support
 
 tasks.register("printCompileClasspaths") {
+  group = "Help"
   description = "Print the compile-time classpaths"
   doFirst {
     println("Compile classpath:")
