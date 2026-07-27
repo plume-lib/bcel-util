@@ -122,13 +122,10 @@ tasks.named("jacocoTestReport") {
     html.required = true // Output is written to build/reports/jacoco/test/html/index.html
   }
 }
-// Two possible configurations:
-// Configuration A: report is always generated after tests run.
+// Report is always generated after tests run.
 tasks.named("test") {
   finalizedBy(tasks.named("jacocoTestReport"))
 }
-// Configuration B: user must run `jacocoTestReport` explicitly.
-// tasks.named("jacocoTestReport") { dependsOn(tasks.named("test")) }
 
 
 // Code formatting
@@ -275,7 +272,7 @@ def javadocPrivate = tasks.register("javadocPrivate", Javadoc) {
   options.addBooleanOption("private", true)
 }
 tasks.named("check") {
-  dependsOn(tasks.named("javadoc"), javadocPrivate)
+  dependsOn("javadoc", javadocPrivate)
 }
 
 def javadocWebUpload = tasks.register("javadocWebUpload", Javadoc) {
@@ -310,7 +307,7 @@ dependencies {
 // the task could never be up to date and the declared inputs would have no effect.
 def requireJavadocMarker = layout.buildDirectory.file("requireJavadoc/requireJavadoc.txt")
 def requireJavadoc = tasks.register("requireJavadoc", JavaExec) {
-  group = "Documentation"
+  group = "documentation"
   description = "Ensures that Javadoc documentation exists."
   inputs.files(sourceSets.main.allJava)
   outputs.file(requireJavadocMarker)
@@ -393,8 +390,8 @@ mavenPublishing {
 
 /* Make Emacs TAGS table */
 tasks.register("tags", Exec) {
-  group = "Emacs"
   description = "Run etags to create an Emacs TAGS table"
+  group = "IDE"
   def javaFiles = fileTree("src") {
     include("**/*.java")
   }
@@ -413,7 +410,7 @@ tasks.register("tags", Exec) {
 // Debugging support
 
 tasks.register("printCompileClasspaths") {
-  group = "Help"
+  group = "help"
   description = "Print the compile-time classpaths"
   // Resolve the classpaths when the task is configured, not when it runs.  Reading `sourceSets`
   // from a task action would capture the `Project` object, which the configuration cache forbids.
