@@ -179,7 +179,7 @@ tasks.withType(JavaCompile).configureEach {
     disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
     disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
     disable("EffectivelyPrivate") // Loses information about the abstraction.
-    disable("ExtendsObject")  // Incorrect when using the Checker Framework.
+    disable("ExtendsObject") // Incorrect when using the Checker Framework.
     disable("InlineMeSuggester") // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
     disable("ReferenceEquality") // Use Interning Checker instead.
     // Code copied from BCEL that we don't want to change gratuitously.
@@ -192,7 +192,7 @@ tasks.withType(JavaCompile).configureEach {
 
 pmd {
   toolVersion = libs.versions.pmd.get()
-  ruleSets = []                 // Prevent the default errorprone.xml from being applied.
+  ruleSets = [] // Prevent the default errorprone.xml from being applied.
   ruleSetFiles = files("${rootDir}/.pmd-ruleset.xml")
   consoleOutput = true
 }
@@ -293,13 +293,13 @@ def javadocWebUpload = tasks.register("javadocWebUpload", Javadoc) {
 def javadocWebChgrp = tasks.register("javadocWebChgrp", Exec) {
   description = "Set the Unix group of the website's API documentation."
   mustRunAfter("javadocWebUpload")
-  commandLine("chgrp", "-R",  "plse_www", "/cse/web/research/plumelib/${project.name}/api")
+  commandLine("chgrp", "-R", "plse_www", "/cse/web/research/plumelib/${project.name}/api")
   ignoreExitValue = true
 }
 def javadocWebChmod = tasks.register("javadocWebChmod", Exec) {
   description = "Set the Unix permissions of the website's API documentation."
   mustRunAfter("javadocWebUpload")
-  commandLine("chmod", "-R",  "g+w", "/cse/web/research/plumelib/${project.name}/api")
+  commandLine("chmod", "-R", "g+w", "/cse/web/research/plumelib/${project.name}/api")
   ignoreExitValue = true
 }
 def javadocWeb = tasks.register("javadocWeb", DefaultTask) {
@@ -415,7 +415,9 @@ tasks.register("tags", Exec) {
   executable("etags")
   // Compute the arguments when the task runs, not when it is configured.
   argumentProviders.add({
-    javaFiles.files.sort()*.toPath().collect { projectDirPath.relativize(it).toString() }
+    javaFiles.files.sort()*.toPath().collect {
+      projectDirPath.relativize(it).toString()
+    }
   } as CommandLineArgumentProvider)
 }
 

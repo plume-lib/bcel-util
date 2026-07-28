@@ -2,6 +2,10 @@
 
 checker-framework = "4.2.1"
 
+# Not a dependency; only its version is read.  Pinning the version means that
+# a Spotless upgrade does not silently change the .gradle file formatting.
+greclipse = "4.40"
+
 jacoco = "0.8.15"
 
 junit-jupiter = "6.1.2"
