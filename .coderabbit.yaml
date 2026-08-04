@@ -15,6 +15,7 @@ reviews:
   path_filters:
     - "!**/.gradle/**"
     - "!**/.idea/**"
+    - "!**/__init__.py"
     - "!**/build/**"
     - "!**/node_modules/**"
     - "!**/out/**"
