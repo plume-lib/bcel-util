@@ -1,7 +1,7 @@
 # Plume-lib Bcel-Util:  utility methods for BCEL
 
 Static utility methods for working with the [Apache Commons
-BCEL](https://commons.apache.org/proper/commons-bcel/) bytecode engineering
+BCEL](https://commons.apache.org/proper/commons-bcel/) byte code engineering
 library.
 
 For details, see the [API documentation](http://plumelib.org/bcel-util/api/).

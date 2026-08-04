@@ -36,8 +36,8 @@ public final class SimpleLog {
   private static final String INDENT_STR_ONE_LEVEL = "  ";
 
   /**
-   * Cache for the current indentation string, or null if needs to be recomputed. Never access this
-   * directly; always call {@link #getIndentString}.
+   * Cache for the current indentation string, or null if it needs to be recomputed. Never access
+   * this directly; always call {@link #getIndentString}.
    */
   private @Nullable String indentString = null;
 

@@ -1,5 +1,5 @@
 /**
- * Utility methods for BCEL, the bytecode engineering library.
+ * Utility methods for BCEL, the byte code engineering library.
  *
  * <p>The Byte Code Engineering Library (Apache Commons BCEL) enables users to analyze, create, and
  * manipulate (binary) Java class files (those ending with .class). Classes are represented by
@@ -13,7 +13,7 @@
  *   import org.apache.bcel.classfile.*;
  *
  *   try {
- *     // Parse the bytes of the classfile, die on any errors
+ *     // Parse the bytes of the class file, die on any errors
  *     ClassParser parser = new ClassParser("path to class file of interest");
  *     JavaClass jc = parser.parse();
  *   } catch (Exception e) {
