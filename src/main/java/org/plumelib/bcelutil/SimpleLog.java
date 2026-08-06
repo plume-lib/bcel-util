@@ -136,7 +136,6 @@ public final class SimpleLog {
     if (enabled) {
       setLogfile();
       Throwable t = new Throwable();
-      t.fillInStackTrace();
       StackTraceElement[] stackTrace = t.getStackTrace();
       for (int ii = 2; ii < stackTrace.length; ii++) {
         StackTraceElement ste = stackTrace[ii];
