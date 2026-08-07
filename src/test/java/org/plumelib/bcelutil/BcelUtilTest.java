@@ -25,6 +25,7 @@ import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 /** Tests for {@link BcelUtil}. */
 final class BcelUtilTest {
@@ -275,6 +276,7 @@ final class BcelUtilTest {
   // Consistency checks
 
   @Test
+  @ResourceLock("BcelUtil.skipChecks")
   void skipChecksIsFalseByDefault() {
     assertFalse(BcelUtil.skipChecks);
   }
@@ -295,6 +297,7 @@ final class BcelUtilTest {
   }
 
   @Test
+  @ResourceLock("BcelUtil.skipChecks")
   void skipChecksSuppressesChecking() {
     boolean saved = BcelUtil.skipChecks;
     try {

@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.Resources;
 
 /** Tests for {@link SimpleLog}. */
 final class SimpleLogTest {
@@ -156,6 +158,7 @@ final class SimpleLogTest {
   }
 
   @Test
+  @ResourceLock(Resources.SYSTEM_OUT)
   void dashFilenameMeansStandardOutput() {
     PrintStream savedOut = System.out;
     ByteArrayOutputStream captured = new ByteArrayOutputStream();
@@ -171,6 +174,7 @@ final class SimpleLogTest {
   }
 
   @Test
+  @ResourceLock(Resources.SYSTEM_OUT)
   void nullFilenameMeansStandardOutput() {
     PrintStream savedOut = System.out;
     ByteArrayOutputStream captured = new ByteArrayOutputStream();
