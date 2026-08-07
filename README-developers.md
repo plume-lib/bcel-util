@@ -32,15 +32,14 @@ Run these steps on any filesystem, except the `javadocWeb` step.
 * Add a git tag and commit:
 
   ```sh
-  VER=1.2.4 && \
+  VER=2.0.0 && \
   git commit -m "Version $VER" && git push && \
   git tag -a v$VER -m "Version $VER" && git push && git push --tags
   ```
 
 * Make a GitHub release.
-  * Browse to <https://github.com/plume-lib/bcel-util/releases>
-  * Click "draft a new release"
-  * Call it "bcel-util 1.2.4"
+  * Browse to <https://github.com/plume-lib/bcel-util/releases/new>
+  * Call it “bcel-util 2.0.0”
   * Use the text from `CHANGELOG.md` as the description
   * Attach the .jar and -all.jar files from `build/libs/`
   * Click "publish release"
@@ -86,4 +85,4 @@ Run these steps on any filesystem, except the `javadocWeb` step.
     checker/bin-devel/test-plume-lib.sh
     ```
 
-* For Daikon: `make compile junit test`
+  * For Daikon: `make compile junit test`

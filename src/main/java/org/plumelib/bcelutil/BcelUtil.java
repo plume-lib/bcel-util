@@ -521,11 +521,11 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns the constant string at the specified offset.
+   * Returns the constant string at the specified index in the constant pool.
    *
    * @param pool the constant pool
    * @param index the index in the constant pool
-   * @return the constant string at the specified offset in the constant pool
+   * @return the constant string at the specified index in the constant pool
    */
   public static String getConstantString(ConstantPool pool, int index) {
 

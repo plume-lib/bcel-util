@@ -141,7 +141,6 @@ public final class SimpleLog {
     if (enabled) {
       setLogfile();
       Throwable t = new Throwable();
-      t.fillInStackTrace();
       StackTraceElement[] stackTrace = t.getStackTrace();
       // Element 0 is this method, where the Throwable was created, and element 1 is the caller of
       // this method, so starting at element 2 omits the caller of this method.  By contrast,
