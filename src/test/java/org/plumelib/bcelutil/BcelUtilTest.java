@@ -273,7 +273,7 @@ final class BcelUtilTest {
   void getConstantStringRejectsAnUnsuitableConstant() {
     // Index 0 of a constant pool is always unused, so BCEL stores null there.
     assertThrows(
-        Throwable.class, () -> BcelUtil.getConstantString(Fixtures.javaClass.getConstantPool(), 0));
+        Error.class, () -> BcelUtil.getConstantString(Fixtures.javaClass.getConstantPool(), 0));
   }
 
   // Consistency checks

@@ -527,7 +527,9 @@ public final class BcelUtil {
   public static String getConstantString(ConstantPool pool, int index) {
 
     Constant c = pool.getConstant(index);
-    assert c != null : "Bad index " + index + " into pool";
+    if (c == null) {
+      throw new Error("Bad index " + index + " into pool");
+    }
     if (c instanceof ConstantUtf8 cutf8) {
       return cutf8.getBytes();
     } else if (c instanceof ConstantClass cc) {

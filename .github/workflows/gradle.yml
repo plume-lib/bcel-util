@@ -52,6 +52,7 @@ jobs:
           key: ${{ steps.spotless-p2-key.outputs.key }}
           restore-keys: ${{ steps.spotless-p2-key.outputs.key }}-partial-
       - name: ./gradlew spotlessCheck
+        id: spotless-check
         run: |
           set -o pipefail
           for attempt in 1 2 3; do
@@ -65,6 +66,9 @@ jobs:
             fi
             sleep $((30 * attempt))
           done
+          # Every attempt failed to download the formatter, so this run holds at most part of it.
+          # The step below reads this output to decide whether caching that part is worthwhile.
+          echo "p2_failure=true" >> "$GITHUB_OUTPUT"
           exit 1
       # A cache that a successful run saves is complete, so later runs can use it without any
       # network access.  Saving is skipped after an exact cache hit, because a cache entry that
@@ -80,13 +84,14 @@ jobs:
       # never masquerade as a complete one:  it is reachable only through "restore-keys", and the
       # next successful run supersedes it.
       #
-      # Nothing is saved if the restore was an exact hit, because then the cache already holds
-      # everything that this run had, and the failure lies elsewhere.  Without that condition, every
-      # such failure would write another ~140MB entry that duplicates the complete one.  Entries are
-      # evicted least-recently-used once a repository holds 10GB of them, so needless entries push
-      # out the Gradle caches that "setup-java" maintains.
+      # Nothing is saved unless the download is what failed, and unless the restore missed.  A
+      # formatting violation leaves this run with no more of the formatter than the cache already
+      # holds, and an exact cache hit likewise means that the failure lies elsewhere.  Without those
+      # conditions, every such failure would write another ~140MB entry.  Entries are evicted
+      # least-recently-used once a repository holds 10GB of them, so needless entries push out the
+      # Gradle caches that "setup-java" maintains.
       - name: Save a partial Spotless P2 cache
-        if: failure() && steps.restore-spotless-p2.outputs.cache-hit != 'true'
+        if: failure() && steps.spotless-check.outputs.p2_failure == 'true' && steps.restore-spotless-p2.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: ~/.gradle/spotless-p2

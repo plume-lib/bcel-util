@@ -166,14 +166,27 @@ class SpotlessP2 {
   // one whose owner has not yet written its PID.
   private static final long EMPTY_LOCK_FILE_GRACE_MILLIS = 60000
 
+  // How old a lock file must be before it is treated as abandoned no matter what its PID says.
+  // Provisioning downloads about 140MB, so no live process holds the lock for anywhere near this
+  // long.
+  private static final long STALE_LOCK_FILE_MILLIS = 30 * 60 * 1000
+
   static void deleteStaleLockFile(File cacheDirectory, Logger logger) {
     File lockFile = new File(new File(cacheDirectory, "metadata"), ".lock")
     if (!lockFile.isFile()) {
       return
     }
+    String lockFileContents
+    try {
+      lockFileContents = lockFile.getText("UTF-8")
+    } catch (IOException e) {
+      // Some other process deleted the lock file between the check above and this read, which is
+      // the state that this method is trying to reach anyway.
+      return
+    }
     long pid
     try {
-      pid = Long.parseLong(lockFile.getText("UTF-8").trim())
+      pid = Long.parseLong(lockFileContents.trim())
     } catch (NumberFormatException e) {
       // Solstice creates the lock file and then writes its PID into it, so a lock file that holds
       // no PID usually belongs to a live process that is between those two steps.  A process that
@@ -183,6 +196,18 @@ class SpotlessP2 {
       if (System.currentTimeMillis() - lockFile.lastModified() > EMPTY_LOCK_FILE_GRACE_MILLIS
           && lockFile.delete()) {
         logger.lifecycle("Deleted abandoned Spotless P2 lock file that holds no PID: ${lockFile}")
+      }
+      return
+    }
+    // A lock file that arrives in a restored cache was written on some other machine, where the
+    // PID means nothing:  on this machine that PID is as likely to name an unrelated live process
+    // as to name nothing at all.  The PID check below therefore cannot recognize such a lock file,
+    // so condemn any lock file that is old enough that no live owner could still hold it.
+    long ageMillis = System.currentTimeMillis() - lockFile.lastModified()
+    if (ageMillis > STALE_LOCK_FILE_MILLIS) {
+      if (lockFile.delete()) {
+        logger.lifecycle(
+            "Deleted Spotless P2 lock file that is ${ageMillis.intdiv(60000)} minutes old: ${lockFile}")
       }
       return
     }
