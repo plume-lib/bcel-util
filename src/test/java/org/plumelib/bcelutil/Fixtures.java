@@ -96,6 +96,19 @@ final class Fixtures {
   }
 
   /**
+   * Returns a MethodGen for the fixture class's method with the given name and signature.
+   *
+   * @param name the name of the method to return
+   * @param signature the JVM signature of the method to return
+   * @return a MethodGen for the fixture class's method named {@code name} with signature {@code
+   *     signature}
+   */
+  static MethodGen methodGen(String name, String signature) {
+    return new MethodGen(
+        method(name, signature), classGen.getClassName(), classGen.getConstantPool());
+  }
+
+  /**
    * Returns the Code attribute of the fixture class's method with the given name.
    *
    * @param name the name of the method whose Code attribute to return

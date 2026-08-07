@@ -348,13 +348,10 @@ public final class BcelUtil {
       MethodGen nmg = new MethodGen(mgen.getMethod(), mgen.getClassName(), mgen.getConstantPool());
       nmg.getLineNumberTable(mgen.getConstantPool());
     } catch (Throwable t) {
-      Error e =
-          new Error(
-              String.format(
-                  "failure while checking method %s.%s%n", mgen.getClassName(), mgen.getName()),
-              t);
-      e.printStackTrace();
-      throw e;
+      throw new Error(
+          String.format(
+              "failure while checking method %s.%s%n", mgen.getClassName(), mgen.getName()),
+          t);
     }
   }
 

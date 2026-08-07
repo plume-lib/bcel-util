@@ -181,7 +181,11 @@ final class BcelUtilTest {
 
   @Test
   void isConstructorRecognizesInit() {
-    assertTrue(BcelUtil.isConstructor(method("<init>")));
+    // The fixture declares two constructors, so a constructor must be named by its signature.
+    assertTrue(BcelUtil.isConstructor(method("<init>", "()V")));
+    assertTrue(BcelUtil.isConstructor(methodGen("<init>", "()V")));
+    assertTrue(BcelUtil.isConstructor(method("<init>", "(I)V")));
+    assertTrue(BcelUtil.isConstructor(methodGen("<init>", "(I)V")));
     assertFalse(BcelUtil.isConstructor(method("sum")));
     assertFalse(BcelUtil.isConstructor(methodGen("sum")));
     assertFalse(BcelUtil.isConstructor(method("<clinit>")));
@@ -191,6 +195,7 @@ final class BcelUtilTest {
   void isClinitRecognizesClassInitializers() {
     assertTrue(BcelUtil.isClinit(method("<clinit>")));
     assertTrue(BcelUtil.isClinit(methodGen("<clinit>")));
+    assertFalse(BcelUtil.isClinit(method("<init>", "()V")));
     assertFalse(BcelUtil.isClinit(methodGen("sum")));
   }
 
