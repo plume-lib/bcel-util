@@ -286,9 +286,8 @@ tasks.named("javadoc", Javadoc) {
   strictJavadoc(it)
 }
 
-// The `javadoc` task documents only the public API, which is what a published -javadoc.jar should
-// contain.  `javadocPrivate` below applies the same doclint checks to private members, so nothing
-// goes unchecked.
+// The `javadoc` task documents only the public API.
+// `javadocPrivate` applies the same doclint checks to private members.
 def javadocPrivate = tasks.register("javadocPrivate", Javadoc) {
   description = "Generate Javadoc for all members, including private ones."
   source = sourceSets.main.allJava
