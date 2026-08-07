@@ -72,9 +72,9 @@ final class Fixtures {
   /**
    * Returns the fixture class's method with the given name and signature.
    *
-   * `@param` name the name of the method to return
-   * `@param` signature the JVM signature of the method to return
-   * `@return` the fixture class's method named {`@code` name} with signature {`@code` signature}
+   * @param name the name of the method to return
+   * @param signature the JVM signature of the method to return
+   * @return the fixture class's method named {@code name} with signature {@code signature}
    */
   static Method method(String name, String signature) {
     for (Method m : javaClass.getMethods()) {
@@ -82,8 +82,7 @@ final class Fixtures {
         return m;
       }
     }
-    throw new AssertionError(
-        "no method " + name + signature + " in " + javaClass.getClassName());
+    throw new AssertionError("no method " + name + signature + " in " + javaClass.getClassName());
   }
 
   /**
