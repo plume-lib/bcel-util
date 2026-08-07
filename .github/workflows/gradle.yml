@@ -30,7 +30,7 @@ jobs:
       - name: Cache Spotless P2 artifacts
         uses: actions/cache@v4
         with:
-          path: ~/.m2/repository/dev/equo/p2-data
+          path: ~/.gradle/spotless-p2
           key: p2-data-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
           restore-keys: p2-data-${{ runner.os }}-
       - name: Warm up Gradle cache
