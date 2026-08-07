@@ -173,13 +173,11 @@ dependencies { errorprone(libs.error.prone.core) }
 
 tasks.withType<JavaCompile>().configureEach {
   options.errorprone {
-    // Error Prone doesn't know about Checker Framework @FormatMethod.
-    disable("AnnotateFormatMethod")
+    disable("AnnotateFormatMethod")    // Error Prone doesn't know about CF @FormatMethod.
     disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
     disable("EffectivelyPrivate") // Loses information about the abstraction.
     disable("ExtendsObject") // Incorrect when using the Checker Framework.
-    // Using `@InlineMe` requires clients to declare a dependency on error_prone_annotations.
-    disable("InlineMeSuggester")
+    disable("InlineMeSuggester") // `@InlineMe` requires a dependency on error_prone_annotations.
     disable("ReferenceEquality") // Use Interning Checker instead.
     // Code copied from BCEL that we don't want to change gratuitously.
     excludedPaths = ".*/org/plumelib/bcelutil/StackVer.java"
