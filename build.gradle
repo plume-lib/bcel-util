@@ -15,23 +15,22 @@ plugins {
   // PMD linter
   id("pmd")
 
-  // code coverage
+  // Code coverage
   id("jacoco")
 
   // Checker Framework pluggable type-checking
   alias(libs.plugins.org.checkerframework)
 
-  // Publishing to Maven Central.
+  // Publishing to Maven Central
   alias(libs.plugins.com.vanniktech.maven.publish)
 }
 
 repositories {
-  // mavenLocal() comes first so that a locally-installed snapshot takes
-  // precedence.  Restricting this to snapshots prevents a stale
-  // locally-installed non-snapshot release from shadowing the one on Maven
-  // Central.  One consequence is that a locally-installed *release* build of,
-  // say, plume-util is ignored.  To build against a locally-installed release,
-  // temporarily remove "snapshotsOnly()" OR install such a build as a snapshot.
+  // mavenLocal() comes first so that a locally-installed snapshot of a dependency takes
+  // precedence.  Restricting this to snapshots prevents a stale locally-installed non-snapshot
+  // release from shadowing the one on Maven Central.  One consequence is that a locally-installed
+  // *release* build of a dependency is ignored; to build against such a build, either temporarily
+  // remove "snapshotsOnly()" or install the build as a snapshot.
   mavenLocal {
     mavenContent {
       snapshotsOnly()
@@ -53,7 +52,7 @@ dependencies {
 
   implementation(libs.reflection.util)
   // Including error_prone_annotations leads to javac warnings (not errors, but
-  // annoying nonetheless) when a client of plume-util doesn't itself depend on
+  // annoying nonetheless) when a client of this library doesn't itself depend on
   // error_prone_annotations.  (Even if the dependency is "compileOnly".)
   // implementation("com.google.errorprone:error_prone_annotations")
 
@@ -87,14 +86,21 @@ tasks.withType(JavaCompile).configureEach {
 
 // Testing
 
-// Compilation always uses Java 21. Tests run under
-// various Java versions.  The `java.toolchain` setting above applies to Test tasks as
-// well as to compilation, so without this the tests would always run under Java 21.  By default
-// tests run under the JVM that Gradle itself is running under, which is what the job matrix in
-// .github/workflows/gradle.yml varies.  Override with, for example:
+// Compilation always uses Java 21, but the tests run under various Java versions.  The
+// `java.toolchain` setting above applies to Test tasks as well as to compilation, so without this
+// the tests would always run under Java 21.  By default the tests run under the JVM that Gradle
+// itself is running under, which is what the job matrix in .github/workflows/gradle.yml varies.
+// Override with, for example:
 //   ./gradlew test -PtestJavaVersion=17
+def testJavaVersionProperty = project.findProperty("testJavaVersion")
+// Compare to null rather than writing `?:`, which would also treat the empty string as absent.
+// `./gradlew test -PtestJavaVersion` (no "=" and no value) supplies the empty string, and silently
+// testing under the default version is not what someone who wrote that on the command line meant.
 def testJavaVersion = JavaLanguageVersion.of(
-    (project.findProperty("testJavaVersion") ?: JavaVersion.current().majorVersion).toString())
+    (testJavaVersionProperty != null
+    ? testJavaVersionProperty
+    : JavaVersion.current().majorVersion).toString())
+
 tasks.withType(Test).configureEach {
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = testJavaVersion
@@ -134,6 +140,7 @@ tasks.named("jacocoTestReport") {
   }
 }
 
+
 // Code formatting
 
 spotless {
@@ -141,13 +148,13 @@ spotless {
     // Define the files to apply `misc` to.  prek handles `.gitignore`.
     target("**/*.md")
 
-    // define the steps to apply to those files
+    // Define the steps to apply to those files.
     trimTrailingWhitespace()
     leadingTabsToSpaces(2)
     endWithNewline()
   }
   java {
-    googleJavaFormat()
+    googleJavaFormat(libs.versions.google.java.format.get())
     formatAnnotations()
   }
   groovyGradle {
@@ -174,6 +181,7 @@ spotless {
 dependencies {
   errorprone(libs.error.prone.core)
 }
+
 tasks.withType(JavaCompile).configureEach {
   options.errorprone {
     disable("AnnotateFormatMethod") // Error Prone doesn't know about Checker Framework @FormatMethod.
@@ -240,6 +248,9 @@ checkerFramework {
 // the closure.
 class JavadocFonts {
   static void removeDejaVuFontImport(File javadocDir) {
+    if (!javadocDir.isDirectory()) {
+      return
+    }
     javadocDir.eachFileRecurse(groovy.io.FileType.FILES) { file ->
       if (!(file.name.endsWith(".css") || file.name.endsWith(".html"))) {
         return
@@ -259,13 +270,20 @@ tasks.withType(Javadoc).configureEach {
   options.quiet()
   // Code copied from BCEL that we do not want to change gratuitously.
   exclude("org/plumelib/bcelutil/StackVer.java")
-  // Turn Javadoc warnings into errors.
-  options.addBooleanOption("Xwerror", true)
-  options.addBooleanOption("Xdoclint:all", true)
-  options.quiet()
   doLast {
     JavadocFonts.removeDejaVuFontImport(it.destinationDir)
   }
+}
+
+// Turns Javadoc warnings into errors.  This is applied to individual tasks rather than to every
+// Javadoc task, because a task that uses a custom doclet rejects the standard doclet's options.
+def strictJavadoc = { Javadoc javadocTask ->
+  javadocTask.options.addBooleanOption("Xdoclint:all", true)
+  javadocTask.options.addBooleanOption("Xwerror", true)
+}
+
+tasks.named("javadoc", Javadoc) {
+  strictJavadoc(it)
 }
 
 // The `javadoc` task documents only the public API, because the gradle-maven-publish-plugin
@@ -277,6 +295,7 @@ def javadocPrivate = tasks.register("javadocPrivate", Javadoc) {
   classpath = sourceSets.main.compileClasspath
   destinationDir = layout.buildDirectory.dir("docs/javadocPrivate").get().asFile
   options.addBooleanOption("private", true)
+  strictJavadoc(it)
 }
 tasks.named("check") {
   dependsOn("javadoc", javadocPrivate)
@@ -284,29 +303,60 @@ tasks.named("check") {
 
 def javadocWebUpload = tasks.register("javadocWebUpload", Javadoc) {
   description = "Write API documentation to the website directory."
-  dependsOn("requireJavadoc")
   source = sourceSets.main.allJava
-  destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
   classpath = sourceSets.main.compileClasspath
+  destinationDir = file("/cse/web/research/plumelib/${project.name}/api")
+  strictJavadoc(it)
 }
 // Set permissions
 def javadocWebChgrp = tasks.register("javadocWebChgrp", Exec) {
   description = "Set the Unix group of the website's API documentation."
-  mustRunAfter("javadocWebUpload")
+  mustRunAfter(javadocWebUpload)
   commandLine("chgrp", "-R", "plse_www", "/cse/web/research/plumelib/${project.name}/api")
+  // A file that another user owns cannot be chgrped, which is not worth failing the build over.
   ignoreExitValue = true
+  doLast {
+    int exitValue = executionResult.get().exitValue
+    if (exitValue != 0) {
+      logger.warn("chgrp of the uploaded API documentation exited with status ${exitValue}.")
+    }
+  }
 }
 def javadocWebChmod = tasks.register("javadocWebChmod", Exec) {
   description = "Set the Unix permissions of the website's API documentation."
-  mustRunAfter("javadocWebUpload")
+  mustRunAfter(javadocWebUpload)
   commandLine("chmod", "-R", "g+w", "/cse/web/research/plumelib/${project.name}/api")
+  // A file that another user owns cannot be chmoded, which is not worth failing the build over.
   ignoreExitValue = true
+  doLast {
+    int exitValue = executionResult.get().exitValue
+    if (exitValue != 0) {
+      logger.warn("chmod of the uploaded API documentation exited with status ${exitValue}.")
+    }
+  }
 }
-def javadocWeb = tasks.register("javadocWeb", DefaultTask) {
+// The three tasks above are steps of "javadocWeb", so they have no group and thus do not appear in
+// the output of `./gradlew tasks`.
+tasks.register("javadocWeb", DefaultTask) {
+  group = "documentation"
   description = "Upload API documentation to website."
   dependsOn(javadocWebUpload, javadocWebChgrp, javadocWebChmod)
 }
 
+
+// RequireJavadoc calls javac internals, which the jdk.compiler module does not export.
+def javacInternalPackages = [
+  "file",
+  "parser",
+  "tree",
+  "util"
+]
+def addExportsArgs = javacInternalPackages.collect {
+  "--add-exports=jdk.compiler/com.sun.tools.javac.${it}=ALL-UNNAMED".toString()
+}
+def addOpensArgs = javacInternalPackages.collect {
+  "--add-opens=jdk.compiler/com.sun.tools.javac.${it}=ALL-UNNAMED".toString()
+}
 
 // `resolvable` rather than the `configurations { requireJavadoc }` shorthand, which creates a
 // configuration that is both resolvable and consumable and that Gradle reports as legacy.
@@ -324,17 +374,11 @@ def requireJavadoc = tasks.register("requireJavadoc", JavaExec) {
   outputs.file(requireJavadocMarker)
   mainClass = "org.plumelib.javadoc.RequireJavadoc"
   classpath = configurations.requireJavadoc
-  args(sourceSets.main.allJava.srcDirs.collect{it.getAbsolutePath()})
-  jvmArgs += [
-    "--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
-    "--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
-    "--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
-    "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-    "--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
-    "--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
-    "--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
-    "--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
-  ]
+  args(sourceSets.main.allJava.srcDirs.collect { it.absolutePath })
+  jvmArgs += addExportsArgs
+  jvmArgs += addOpensArgs
+  // Runs only if the tool found no problems, so that a failure does not leave behind a marker file
+  // that would mark this task up to date.
   doLast {
     File marker = requireJavadocMarker.get().asFile
     marker.parentFile.mkdirs()
@@ -342,7 +386,6 @@ def requireJavadoc = tasks.register("requireJavadoc", JavaExec) {
   }
 }
 tasks.named("check") {
-  dependsOn("javadoc", "requireJavadoc")
   dependsOn(requireJavadoc)
 }
 // On javadocWebUpload rather than on javadocWeb, so that the check runs *before* the upload.  A
@@ -402,24 +445,26 @@ mavenPublishing {
 
 /* Make Emacs TAGS table */
 tasks.register("tags", Exec) {
-  description = "Run etags to create an Emacs TAGS table"
   group = "IDE"
-  def javaFiles = fileTree("src") {
+  description = "Run etags to create an Emacs TAGS table"
+  def sourceFiles = fileTree("src") {
     include("**/*.java")
+    include("**/*.sh")
   }
   // `projectPath` in a build script is Gradle's project path (such as ":"), not a file system
   // path, so compute the project directory explicitly.
   def projectDirPath = layout.projectDirectory.asFile.toPath()
-  inputs.files(javaFiles)
+  inputs.files(sourceFiles)
   outputs.file(layout.projectDirectory.file("TAGS"))
   executable("etags")
   // Compute the arguments when the task runs, not when it is configured.
   argumentProviders.add({
-    javaFiles.files.sort()*.toPath().collect {
+    sourceFiles.files.sort()*.toPath().collect {
       projectDirPath.relativize(it).toString()
     }
   } as CommandLineArgumentProvider)
 }
+
 
 // Debugging support
 
