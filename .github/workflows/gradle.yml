@@ -99,6 +99,9 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
+          # "setup-java" makes the last version listed the default JAVA_HOME, so Gradle itself runs
+          # under Java 21 no matter which version this job tests.  When "matrix.java" is 21, the
+          # list names 21 twice, which "setup-java" tolerates.
           java-version: |
             ${{ matrix.java }}
             21

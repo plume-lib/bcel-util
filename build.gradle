@@ -60,6 +60,19 @@ dependencies {
   testRuntimeOnly(libs.junit.platform.launcher)
 }
 
+// RequireJavadoc calls javac internals, which the jdk.compiler module does not export.
+def javacInternalPackages = [
+  "file",
+  "parser",
+  "tree",
+  "util"
+]
+def javacExportTargets = javacInternalPackages.collect {
+  "jdk.compiler/com.sun.tools.javac.${it}=ALL-UNNAMED".toString()
+}
+def addExportsArgs = javacExportTargets.collect { "--add-exports=${it}".toString() }
+def addOpensArgs = javacExportTargets.collect { "--add-opens=${it}".toString() }
+
 
 // Compilation
 
@@ -89,7 +102,9 @@ tasks.withType(JavaCompile).configureEach {
 // Compilation always uses Java 21, but the tests run under various Java versions.  The
 // `java.toolchain` setting above applies to Test tasks as well as to compilation, so without this
 // the tests would always run under Java 21.  By default the tests run under the JVM that Gradle
-// itself is running under, which is what the job matrix in .github/workflows/gradle.yml varies.
+// itself is running under.  The job matrix in .github/workflows/gradle.yml does not rely on that
+// default:  it runs Gradle under Java 21 in every job and selects the test JVM by passing
+// `-PtestJavaVersion`.
 // Override with, for example:
 //   ./gradlew test -PtestJavaVersion=17
 def testJavaVersionProperty = project.findProperty("testJavaVersion")
@@ -344,21 +359,6 @@ tasks.register("javadocWeb", DefaultTask) {
   group = "documentation"
   description = "Upload API documentation to website."
   dependsOn(javadocWebUpload, javadocWebChgrp, javadocWebChmod)
-}
-
-
-// RequireJavadoc calls javac internals, which the jdk.compiler module does not export.
-def javacInternalPackages = [
-  "file",
-  "parser",
-  "tree",
-  "util"
-]
-def addExportsArgs = javacInternalPackages.collect {
-  "--add-exports=jdk.compiler/com.sun.tools.javac.${it}=ALL-UNNAMED".toString()
-}
-def addOpensArgs = javacInternalPackages.collect {
-  "--add-opens=jdk.compiler/com.sun.tools.javac.${it}=ALL-UNNAMED".toString()
 }
 
 // `resolvable` rather than the `configurations { requireJavadoc }` shorthand, which creates a
