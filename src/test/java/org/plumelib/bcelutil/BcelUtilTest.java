@@ -181,6 +181,7 @@ final class BcelUtilTest {
 
   @Test
   void isConstructorRecognizesInit() {
+    assertTrue(BcelUtil.isConstructor(method("<init>")));
     assertFalse(BcelUtil.isConstructor(method("sum")));
     assertFalse(BcelUtil.isConstructor(methodGen("sum")));
     assertFalse(BcelUtil.isConstructor(method("<clinit>")));
