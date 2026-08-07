@@ -134,20 +134,26 @@ public final class SimpleLog {
   /**
    * Print a stack trace to the log.
    *
-   * <p>The trace starts with the caller of the caller of this method; the immediate caller does not
-   * appear. That is why {@link #exdent} logs a trace that starts at the caller of {@code exdent}.
+   * <p>The trace starts with the caller of this method, as {@link BcelUtil#dumpStackTrace} does.
    */
   public void logStackTrace() {
+    logStackTrace(1);
+  }
+
+  /**
+   * Print a stack trace to the log, omitting the innermost frames.
+   *
+   * @param framesToSkip how many frames to omit, counting outward from the caller of this method; 1
+   *     means that the trace starts with the caller of that caller
+   */
+  private void logStackTrace(int framesToSkip) {
     if (enabled) {
       setLogfile();
       Throwable t = new Throwable();
       StackTraceElement[] stackTrace = t.getStackTrace();
       // Element 0 is this method, where the Throwable was created, and element 1 is the caller of
-      // this method, so starting at element 2 omits the caller of this method.  By contrast,
-      // BcelUtil.dumpStackTrace also starts at element 2, but BcelUtil.dumpStackTrace reads
-      // Thread.currentThread().getStackTrace(), whose element 0 is getStackTrace itself, so there
-      // element 2 is the caller of dumpStackTrace.
-      for (int ii = 2; ii < stackTrace.length; ii++) {
+      // this method, which every caller passes a nonzero framesToSkip in order to omit.
+      for (int ii = 1 + framesToSkip; ii < stackTrace.length; ii++) {
         StackTraceElement ste = stackTrace[ii];
         logfile.printf("%s  %s%n", getIndentString(), ste);
       }
@@ -184,7 +190,8 @@ public final class SimpleLog {
     if (enabled) {
       if (indentLevel == 0) {
         log("Called exdent when indentation level was 0.");
-        logStackTrace();
+        // Skip this method, so that the trace starts with the caller of exdent.
+        logStackTrace(1);
       } else {
         indentLevel--;
         indentString = null;

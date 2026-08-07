@@ -1,6 +1,0 @@
-#!/bin/sh
-
-# Verify all .java files compile prior to checkin.
-./gradlew compileJava compileTestJava
-
-# Don't check code formatting here; it is run as part of `gradlew check`.
