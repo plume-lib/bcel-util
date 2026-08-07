@@ -173,7 +173,7 @@ dependencies { errorprone(libs.error.prone.core) }
 
 tasks.withType<JavaCompile>().configureEach {
   options.errorprone {
-    disable("AnnotateFormatMethod")    // Error Prone doesn't know about CF @FormatMethod.
+    disable("AnnotateFormatMethod") // Error Prone doesn't know about CF @FormatMethod.
     disable("DoNotCallSuggester") // Suggests use of an Error Prone annotation.
     disable("EffectivelyPrivate") // Loses information about the abstraction.
     disable("ExtendsObject") // Incorrect when using the Checker Framework.
