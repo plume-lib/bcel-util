@@ -128,8 +128,8 @@ hooks = [
 repo = "local"
 hooks = [
   { id = "gradle-spotless", name = "spotless formatting", language = "unsupported", entry = "bash -c 'if [ -f ./gradlew ] ; then ./gradlew spotlessApply; fi'", files = { glob = [
-    "\\.java$",
-    "\\.gradle\\.kts$",
+    "*.java",
+    "*.gradle.kts",
   ] }, pass_filenames = false },
 ]
 
