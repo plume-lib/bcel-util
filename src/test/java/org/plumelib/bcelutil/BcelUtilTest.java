@@ -17,12 +17,14 @@ import java.nio.file.Path;
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.Attribute;
 import org.apache.bcel.generic.ArrayType;
+import org.apache.bcel.generic.InstructionConst;
 import org.apache.bcel.generic.InstructionList;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.NOP;
 import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
+import org.apache.bcel.verifier.VerificationResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -354,17 +356,66 @@ final class BcelUtilTest {
 
   @Test
   void makeMethodBodyEmptyLeavesOnlyAReturn() {
-    MethodGen mg = methodGen("parseOrDefault");
-    assertTrue(mg.getExceptionHandlers().length > 0, "the fixture method should have a handler");
+    MethodGen mg = methodGen("main");
+    assertEquals(Type.VOID, mg.getReturnType(), "the fixture method should return void");
 
     BcelUtil.makeMethodBodyEmpty(mg);
 
     InstructionList il = nonNull(mg.getInstructionList(), "instruction list");
     assertEquals(1, il.getLength());
     assertEquals("return", il.getStart().getInstruction().getName());
+  }
+
+  @Test
+  void makeMethodBodyEmptyReturnsADefaultValue() {
+    // parseOrDefault returns an int, so the emptied body must return an int, not fall off the end.
+    MethodGen mg = methodGen("parseOrDefault");
+    assertTrue(mg.getExceptionHandlers().length > 0, "the fixture method should have a handler");
+
+    BcelUtil.makeMethodBodyEmpty(mg);
+
+    InstructionList il = nonNull(mg.getInstructionList(), "instruction list");
+    assertEquals(2, il.getLength());
+    assertEquals("iconst_0", il.getStart().getInstruction().getName());
+    assertEquals("ireturn", il.getEnd().getInstruction().getName());
     assertEquals(0, mg.getExceptionHandlers().length);
     assertEquals(0, mg.getLineNumbers().length);
     assertEquals(0, nonNull(mg.getLocalVariables(), "local variables").length);
+    // A method that falls off its end without returning a value does not verify.
+    il.setPositions();
+    assertEquals(VerificationResult.VERIFIED_OK, new StackVer().do_stack_ver(mg).getStatus());
+  }
+
+  @Test
+  void makeMethodBodyEmptyReturnsNullForAReferenceType() {
+    MethodGen mg = stringReturningMethod();
+
+    BcelUtil.makeMethodBodyEmpty(mg);
+
+    InstructionList il = nonNull(mg.getInstructionList(), "instruction list");
+    assertEquals(2, il.getLength());
+    assertEquals("aconst_null", il.getStart().getInstruction().getName());
+    assertEquals("areturn", il.getEnd().getInstruction().getName());
+  }
+
+  /**
+   * Returns a method whose return type is a reference type. The fixture class declares no such
+   * method.
+   *
+   * @return a method that returns a String
+   */
+  private static MethodGen stringReturningMethod() {
+    InstructionList body = new InstructionList(InstructionConst.ACONST_NULL);
+    body.append(InstructionConst.ARETURN);
+    return new MethodGen(
+        Const.ACC_PUBLIC | Const.ACC_STATIC,
+        Type.STRING,
+        new Type[0],
+        new String[0],
+        "describe",
+        Fixtures.classGen.getClassName(),
+        body,
+        Fixtures.classGen.getConstantPool());
   }
 
   @Test

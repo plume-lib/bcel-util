@@ -3,6 +3,7 @@ package org.plumelib.bcelutil;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.plumelib.bcelutil.Fixtures.methodGen;
+import static org.plumelib.bcelutil.Fixtures.nonNull;
 
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.Type;
@@ -95,5 +96,7 @@ final class StackTypesTest {
     frame.getLocals().set(0, Type.INT);
 
     assertEquals("{int}", st.toString(st.get(0)));
+    // The locals must be snapshotted too, not aliased.
+    assertEquals(Type.STRING, nonNull(st.localVariableses[0], "recorded locals").get(0));
   }
 }

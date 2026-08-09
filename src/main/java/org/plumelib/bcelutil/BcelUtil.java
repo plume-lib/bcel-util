@@ -18,6 +18,7 @@ import org.apache.bcel.generic.ArrayType;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.CodeExceptionGen;
 import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.InstructionFactory;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InstructionList;
 import org.apache.bcel.generic.InstructionTargeter;
@@ -25,7 +26,6 @@ import org.apache.bcel.generic.LineNumberGen;
 import org.apache.bcel.generic.LocalVariableGen;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.ObjectType;
-import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
 import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.signature.qual.BinaryName;
@@ -578,17 +578,26 @@ public final class BcelUtil {
 
   /**
    * Empties the method of all code (except for a return). This includes line numbers, exceptions,
-   * local variables, etc.
+   * local variables, etc. If the method's return type is not void, the body pushes a default value
+   * (zero or null) and returns it, so that the resulting method is verifiable.
    *
    * @param mg the method to clear out
    */
   public static void makeMethodBodyEmpty(MethodGen mg) {
 
-    mg.setInstructionList(new InstructionList(new RETURN()));
+    Type returnType = mg.getReturnType();
+    InstructionList il = new InstructionList();
+    if (returnType.getType() != Const.T_VOID) {
+      il.append(InstructionFactory.createNull(returnType));
+    }
+    il.append(InstructionFactory.createReturn(returnType));
+
+    mg.setInstructionList(il);
     mg.removeExceptionHandlers();
     mg.removeLineNumbers();
     mg.removeLocalVariables();
     mg.setMaxLocals();
+    mg.setMaxStack();
   }
 
   /**
