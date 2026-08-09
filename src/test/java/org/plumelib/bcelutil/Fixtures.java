@@ -53,12 +53,36 @@ final class Fixtures {
    * @return the fixture class's method named {@code name}
    */
   static Method method(String name) {
+    Method result = null;
     for (Method m : javaClass.getMethods()) {
       if (m.getName().equals(name)) {
+        if (result != null) {
+          throw new AssertionError(
+              "multiple methods named " + name + " in " + javaClass.getClassName());
+        }
+        result = m;
+      }
+    }
+    if (result == null) {
+      throw new AssertionError("no method named " + name + " in " + javaClass.getClassName());
+    }
+    return result;
+  }
+
+  /**
+   * Returns the fixture class's method with the given name and signature.
+   *
+   * @param name the name of the method to return
+   * @param signature the JVM signature of the method to return
+   * @return the fixture class's method named {@code name} with signature {@code signature}
+   */
+  static Method method(String name, String signature) {
+    for (Method m : javaClass.getMethods()) {
+      if (m.getName().equals(name) && m.getSignature().equals(signature)) {
         return m;
       }
     }
-    throw new AssertionError("no method named " + name + " in " + javaClass.getClassName());
+    throw new AssertionError("no method " + name + signature + " in " + javaClass.getClassName());
   }
 
   /**
@@ -69,6 +93,19 @@ final class Fixtures {
    */
   static MethodGen methodGen(String name) {
     return new MethodGen(method(name), classGen.getClassName(), classGen.getConstantPool());
+  }
+
+  /**
+   * Returns a MethodGen for the fixture class's method with the given name and signature.
+   *
+   * @param name the name of the method to return
+   * @param signature the JVM signature of the method to return
+   * @return a MethodGen for the fixture class's method named {@code name} with signature {@code
+   *     signature}
+   */
+  static MethodGen methodGen(String name, String signature) {
+    return new MethodGen(
+        method(name, signature), classGen.getClassName(), classGen.getConstantPool());
   }
 
   /**

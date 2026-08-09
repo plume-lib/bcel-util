@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.Resources;
 
 /** Tests for {@link SimpleLog}. */
 final class SimpleLogTest {
@@ -105,8 +107,12 @@ final class SimpleLogTest {
         logged.startsWith("Called exdent when indentation level was 0."),
         "unexpected log contents: " + logged);
     assertTrue(
-        logged.contains(SimpleLogTest.class.getName()),
+        logged.contains(
+            SimpleLogTest.class.getName() + ".exdentBelowZeroWarnsInsteadOfUnderflowing"),
         "exdent should log a stack trace naming the caller: " + logged);
+    assertFalse(
+        logged.contains(SimpleLog.class.getName() + ".exdent"),
+        "exdent itself should not appear in the trace: " + logged);
 
     // The indentation level must still be 0, not -1.
     log.log("after%n");
@@ -132,17 +138,20 @@ final class SimpleLogTest {
     callLogStackTrace(log);
     String logged = contents(logFile);
 
-    // logStackTrace starts at index 2 of `new Throwable().getStackTrace()`.  Index 0 is
-    // logStackTrace itself and index 1 is its caller, so the log begins with the caller's caller
-    // and the immediate caller does not appear.  (BcelUtil.dumpStackTrace also starts at index 2,
-    // but it reads Thread.currentThread().getStackTrace(), whose index 0 is getStackTrace, so
-    // there index 2 really is the caller.)
+    // The trace starts with the method that called logStackTrace, and continues outward.
+    assertTrue(
+        logged.contains(SimpleLogTest.class.getName() + ".callLogStackTrace"),
+        "the immediate caller should appear: " + logged);
     assertTrue(
         logged.contains(SimpleLogTest.class.getName() + ".logStackTraceWritesFrames"),
         "the caller's caller should appear: " + logged);
     assertFalse(
-        logged.contains(SimpleLogTest.class.getName() + ".callLogStackTrace"),
-        "the immediate caller is skipped: " + logged);
+        logged.contains(SimpleLog.class.getName() + ".logStackTrace"),
+        "logStackTrace itself should not appear: " + logged);
+    assertTrue(
+        logged.indexOf(SimpleLogTest.class.getName() + ".callLogStackTrace")
+            < logged.indexOf(SimpleLogTest.class.getName() + ".logStackTraceWritesFrames"),
+        "the trace should run from innermost to outermost: " + logged);
   }
 
   /**
@@ -156,6 +165,7 @@ final class SimpleLogTest {
   }
 
   @Test
+  @ResourceLock(Resources.SYSTEM_OUT)
   void dashFilenameMeansStandardOutput() {
     PrintStream savedOut = System.out;
     ByteArrayOutputStream captured = new ByteArrayOutputStream();
@@ -171,6 +181,7 @@ final class SimpleLogTest {
   }
 
   @Test
+  @ResourceLock(Resources.SYSTEM_OUT)
   void nullFilenameMeansStandardOutput() {
     PrintStream savedOut = System.out;
     ByteArrayOutputStream captured = new ByteArrayOutputStream();

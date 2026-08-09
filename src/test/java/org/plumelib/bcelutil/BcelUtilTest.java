@@ -25,6 +25,7 @@ import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 /** Tests for {@link BcelUtil}. */
 final class BcelUtilTest {
@@ -180,8 +181,11 @@ final class BcelUtilTest {
 
   @Test
   void isConstructorRecognizesInit() {
-    assertTrue(BcelUtil.isConstructor(method("<init>")));
-    assertTrue(BcelUtil.isConstructor(methodGen("<init>")));
+    // The fixture declares two constructors, so a constructor must be named by its signature.
+    assertTrue(BcelUtil.isConstructor(method("<init>", "()V")));
+    assertTrue(BcelUtil.isConstructor(methodGen("<init>", "()V")));
+    assertTrue(BcelUtil.isConstructor(method("<init>", "(I)V")));
+    assertTrue(BcelUtil.isConstructor(methodGen("<init>", "(I)V")));
     assertFalse(BcelUtil.isConstructor(method("sum")));
     assertFalse(BcelUtil.isConstructor(methodGen("sum")));
     assertFalse(BcelUtil.isConstructor(method("<clinit>")));
@@ -191,7 +195,7 @@ final class BcelUtilTest {
   void isClinitRecognizesClassInitializers() {
     assertTrue(BcelUtil.isClinit(method("<clinit>")));
     assertTrue(BcelUtil.isClinit(methodGen("<clinit>")));
-    assertFalse(BcelUtil.isClinit(method("<init>")));
+    assertFalse(BcelUtil.isClinit(method("<init>", "()V")));
     assertFalse(BcelUtil.isClinit(methodGen("sum")));
   }
 
@@ -269,12 +273,13 @@ final class BcelUtilTest {
   void getConstantStringRejectsAnUnsuitableConstant() {
     // Index 0 of a constant pool is always unused, so BCEL stores null there.
     assertThrows(
-        Throwable.class, () -> BcelUtil.getConstantString(Fixtures.javaClass.getConstantPool(), 0));
+        Error.class, () -> BcelUtil.getConstantString(Fixtures.javaClass.getConstantPool(), 0));
   }
 
   // Consistency checks
 
   @Test
+  @ResourceLock("BcelUtil.skipChecks")
   void skipChecksIsFalseByDefault() {
     assertFalse(BcelUtil.skipChecks);
   }
@@ -295,6 +300,7 @@ final class BcelUtilTest {
   }
 
   @Test
+  @ResourceLock("BcelUtil.skipChecks")
   void skipChecksSuppressesChecking() {
     boolean saved = BcelUtil.skipChecks;
     try {

@@ -348,13 +348,10 @@ public final class BcelUtil {
       MethodGen nmg = new MethodGen(mgen.getMethod(), mgen.getClassName(), mgen.getConstantPool());
       nmg.getLineNumberTable(mgen.getConstantPool());
     } catch (Throwable t) {
-      Error e =
-          new Error(
-              String.format(
-                  "failure while checking method %s.%s%n", mgen.getClassName(), mgen.getName()),
-              t);
-      e.printStackTrace();
-      throw e;
+      throw new Error(
+          String.format(
+              "failure while checking method %s.%s%n", mgen.getClassName(), mgen.getName()),
+          t);
     }
   }
 
@@ -521,16 +518,18 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns the constant string at the specified offset.
+   * Returns the constant string at the specified index in the constant pool.
    *
    * @param pool the constant pool
    * @param index the index in the constant pool
-   * @return the constant string at the specified offset in the constant pool
+   * @return the constant string at the specified index in the constant pool
    */
   public static String getConstantString(ConstantPool pool, int index) {
 
     Constant c = pool.getConstant(index);
-    assert c != null : "Bad index " + index + " into pool";
+    if (c == null) {
+      throw new Error("Bad index " + index + " into pool");
+    }
     if (c instanceof ConstantUtf8 cutf8) {
       return cutf8.getBytes();
     } else if (c instanceof ConstantClass cc) {
@@ -543,6 +542,11 @@ public final class BcelUtil {
   /**
    * Sets the locals to be the formal parameters. Any other locals are removed. An instruction list
    * with at least one instruction must exist.
+   *
+   * <p>This method names the new locals using {@link MethodGen#getArgumentNames}. When {@code mg}
+   * was created from a {@link Method}, BCEL synthesizes those names as "arg0", "arg1", and so on,
+   * rather than reading them from the LocalVariableTable. In that case this method does not
+   * preserve the declared parameter names.
    *
    * @param mg the method whose locals to set
    */

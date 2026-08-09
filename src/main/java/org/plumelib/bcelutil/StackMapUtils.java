@@ -382,11 +382,14 @@ public abstract class StackMapUtils {
     }
   }
 
-  // TODO: From the documentation, I am not sure what this method does or when it should be called.
   /**
    * We need to locate and remember any NEW instructions that create uninitialized objects. Their
    * offset may be contained in a StackMap entry and will probably need to be updated as we add
    * instrumentation code. Note that these instructions are fairly rare.
+   *
+   * <p>Call this once per method, after {@link #fixLocalVariableTable} and before modifying the
+   * method's instructions. After the modifications, call {@link #updateUninitializedNewOffsets}.
+   * See the template in {@link InstructionListUtils}.
    *
    * @param il instruction list to search
    */

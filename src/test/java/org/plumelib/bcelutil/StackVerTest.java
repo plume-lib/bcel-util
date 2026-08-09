@@ -19,7 +19,9 @@ final class StackVerTest {
   @Test
   void everyFixtureMethodVerifies() {
     for (Method m : Fixtures.javaClass.getMethods()) {
-      MethodGen mg = methodGen(m.getName());
+      // Look the method up by signature as well as name, because the fixture declares overloads
+      // (two constructors), for which a lookup by name alone is ambiguous.
+      MethodGen mg = methodGen(m.getName(), m.getSignature());
       StackVer sv = new StackVer();
       VerificationResult vr = sv.do_stack_ver(mg);
       assertEquals(
@@ -59,7 +61,7 @@ final class StackVerTest {
 
   @Test
   void aConstructorHasAnUninitializedObjectBeforeSuperIsCalled() {
-    MethodGen mg = methodGen("<init>");
+    MethodGen mg = methodGen("<init>", "(I)V");
     StackVer sv = new StackVer();
     assertEquals(VerificationResult.VERIFIED_OK, sv.do_stack_ver(mg).getStatus());
 
