@@ -581,9 +581,22 @@ public final class BcelUtil {
    * local variables, etc. If the method's return type is not void, the body pushes a default value
    * (zero or null) and returns it, so that the resulting method is verifiable.
    *
+   * <p>The method must not be a constructor. A constructor body must call a superclass or sibling
+   * constructor, which an empty body does not do, so emptying a constructor yields a class that
+   * does not verify.
+   *
    * @param mg the method to clear out
    */
   public static void makeMethodBodyEmpty(MethodGen mg) {
+
+    if (isConstructor(mg)) {
+      throw new Error(
+          "cannot empty the body of constructor "
+              + mg.getClassName()
+              + "."
+              + mg.getName()
+              + mg.getSignature());
+    }
 
     Type returnType = mg.getReturnType();
     InstructionList il = new InstructionList();

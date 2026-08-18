@@ -398,6 +398,24 @@ final class BcelUtilTest {
     assertEquals("areturn", il.getEnd().getInstruction().getName());
   }
 
+  @Test
+  void makeMethodBodyEmptyRejectsAConstructor() {
+    // A constructor body must call a superclass or sibling constructor, so it cannot be emptied.
+    MethodGen mg = methodGen("<init>", "(I)V");
+    InstructionList original = nonNull(mg.getInstructionList(), "instruction list");
+    int originalLength = original.getLength();
+
+    Error e = assertThrows(Error.class, () -> BcelUtil.makeMethodBodyEmpty(mg));
+
+    assertTrue(
+        nonNull(e.getMessage(), "exception message").contains("<init>"),
+        "the message should name the constructor: " + e.getMessage());
+    assertEquals(
+        originalLength,
+        nonNull(mg.getInstructionList(), "instruction list").getLength(),
+        "the constructor should be unchanged");
+  }
+
   /**
    * Returns a method whose return type is a reference type. The fixture class declares no such
    * method.
