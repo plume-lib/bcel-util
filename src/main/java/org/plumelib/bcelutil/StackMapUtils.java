@@ -52,7 +52,7 @@ import org.checkerframework.dataflow.qual.Pure;
  * is an abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}. A client
  * would not normally extend this class directly.
  */
-@SuppressWarnings({"nullness", "PMD.AbstractClassWithoutAbstractMethod", "PMD.TooManyFields"})
+@SuppressWarnings({"nullness", "PMD.AbstractClassWithoutAbstractMethod"})
 public abstract class StackMapUtils {
 
   /** Create a new StackMapUtils object. */
