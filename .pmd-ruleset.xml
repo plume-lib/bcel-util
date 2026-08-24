@@ -18,7 +18,6 @@
     <rule ref="category/java/bestpractices.xml/DefaultLabelNotLastInSwitch" />
     <rule ref="category/java/bestpractices.xml/DoubleBraceInitialization" />
     <rule ref="category/java/bestpractices.xml/ForLoopCanBeForeach" />
-    <rule ref="category/java/bestpractices.xml/ForLoopVariableCount" />
     <rule ref="category/java/bestpractices.xml/GuardLogStatement">
         <properties>
             <property name="logLevels" value="trace,debug,warn,error,log,finest,finer,fine,info,warning,severe" />
@@ -58,6 +57,7 @@
     <rule ref="category/java/bestpractices.xml/AvoidReassigningCatchVariables" />
     <rule ref="category/java/bestpractices.xml/AvoidReassigningLoopVariables" />
     <rule ref="category/java/bestpractices.xml/ExhaustiveSwitchHasDefault" /> Including a default is protection against future changes to the enum.
+    <rule ref="category/java/bestpractices.xml/ForLoopVariableCount" />
     <rule ref="category/java/bestpractices.xml/LiteralsFirstInComparisons" />
     <rule ref="category/java/bestpractices.xml/LooseCoupling" />
     <rule ref="category/java/bestpractices.xml/PreserveStackTrace" />

@@ -990,7 +990,6 @@ public abstract class StackMapUtils {
    *
    * @param mgen MethodGen to be modified
    */
-  @SuppressWarnings("PMD.AvoidReassigningLoopVariables")
   @EnsuresNonNull("initialTypeList")
   protected final void fixLocalVariableTable(MethodGen mgen) {
     InstructionList il = mgen.getInstructionList();
