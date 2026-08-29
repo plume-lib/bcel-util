@@ -89,7 +89,6 @@ public final class BcelUtil {
    * @param m the method whose access flags to retrieve
    * @return a string representation of the access flags of method m
    */
-  @SuppressWarnings({"PMD.ForLoopVariableCount"})
   static String accessFlagsToString(Method m) {
 
     int flags = m.getAccessFlags();
