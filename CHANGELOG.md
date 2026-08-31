@@ -3,6 +3,9 @@
 ## 9.9.9 (2026-08-??)
 
 - Requires Java 21 to run.
+- In `InstructionListUtils`:
+  * renamed `append_inst()` to `appendInst()`
+  * renamed `delete_instructions()` to `deleteInstructions()`
 
 ## 2.0.0 (2026-08-05)
 

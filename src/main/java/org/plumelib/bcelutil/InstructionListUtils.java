@@ -110,7 +110,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public abstract class InstructionListUtils extends StackMapUtils {
 
   /** Create a new InstructionListUtils. */
-  public InstructionListUtils() {}
+  public InstructionListUtils() {
+    super();
+  }
 
   /**
    * Appends the specified instruction to the end of the specified list. This is required because
@@ -120,7 +122,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @param il the InstructionList to be modified
    * @param inst the Instruction to be appended
    */
-  protected final void append_inst(InstructionList il, Instruction inst) {
+  protected final void appendInst(InstructionList il, Instruction inst) {
 
     // System.out.println ("append_inst: " + inst.getClass().getName());
     if (inst instanceof LOOKUPSWITCH ls) {
@@ -132,6 +134,21 @@ public abstract class InstructionListUtils extends StackMapUtils {
     } else {
       il.append(inst);
     }
+  }
+
+  /**
+   * Appends the specified instruction to the end of the specified list. This is required because
+   * for some reason you can't directly append jump instructions to the list -- but you can create
+   * new ones and append them.
+   *
+   * @param il the InstructionList to be modified
+   * @param inst the Instruction to be appended
+   * @deprecated use {@link appendInst}
+   */
+  @Deprecated // 2026-08-30
+  @SuppressWarnings("PMD.MethodNamingConventions")
+  protected final void append_inst(InstructionList il, Instruction inst) {
+    appendInst(il, inst);
   }
 
   /**
@@ -176,14 +193,14 @@ public abstract class InstructionListUtils extends StackMapUtils {
       return;
     }
 
-    boolean atStart = (ih.getPrev() == null);
-    newIl.setPositions();
-    InstructionHandle newEnd = newIl.getEnd();
-    final int newLength = newEnd.getPosition() + newEnd.getInstruction().getLength();
-
     printIl(ih, "Before insert_inst");
     debugInstrument.log("  insert_inst: %d%n%s%n", newIl.getLength(), newIl);
     debugInstrument.log("  ih: %s%n", ih);
+
+    boolean atStart = ih.getPrev() == null;
+    newIl.setPositions();
+    InstructionHandle newEnd = newIl.getEnd();
+    final int newLength = newEnd.getPosition() + newEnd.getInstruction().getLength();
 
     // Add the new code in front of the instruction handle.
     InstructionHandle newStart = il.insert(ih, newIl);
@@ -264,20 +281,6 @@ public abstract class InstructionListUtils extends StackMapUtils {
   }
 
   /**
-   * Convenience function to build an instruction list.
-   *
-   * @param instructions a variable number of BCEL instructions
-   * @return an InstructionList
-   */
-  protected final InstructionList build_il(Instruction... instructions) {
-    InstructionList il = new InstructionList();
-    for (Instruction inst : instructions) {
-      append_inst(il, inst);
-    }
-    return il;
-  }
-
-  /**
    * Delete instruction(s) from startIh through endIh in an instruction list. startIh may be the
    * first instruction of the list, but endIh must not be the last instruction of the list. startIh
    * may be equal to endIh. There must not be any targeters on any of the instructions to be deleted
@@ -287,7 +290,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @param startIh InstructionHandle indicating first instruction to be deleted
    * @param endIh InstructionHandle indicating last instruction to be deleted
    */
-  protected final void delete_instructions(
+  protected final void deleteInstructions(
       MethodGen mg, InstructionHandle startIh, InstructionHandle endIh) {
     InstructionList il = mg.getInstructionList();
 
@@ -340,6 +343,24 @@ public abstract class InstructionListUtils extends StackMapUtils {
     // in the amount of switch instruction padding bytes.
     // If so, we may need to update the corresponding stack map.
     modifyStackMapsForSwitches(newStart, il);
+  }
+
+  /**
+   * Delete instruction(s) from startIh through endIh in an instruction list. startIh may be the
+   * first instruction of the list, but endIh must not be the last instruction of the list. startIh
+   * may be equal to endIh. There must not be any targeters on any of the instructions to be deleted
+   * except for startIh. Those targeters will be moved to the first instruction following endIh.
+   *
+   * @param mg MethodGen containing the instruction handles
+   * @param startIh InstructionHandle indicating first instruction to be deleted
+   * @param endIh InstructionHandle indicating last instruction to be deleted
+   * @deprecated use {@link #deleteInstructions}
+   */
+  @Deprecated // 2026-08-30
+  @SuppressWarnings("PMD.MethodNamingConventions")
+  protected final void delete_instructions(
+      MethodGen mg, InstructionHandle startIh, InstructionHandle endIh) {
+    deleteInstructions(mg, startIh, endIh);
   }
 
   /**
@@ -420,7 +441,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
       il.setPositions();
       newEnd = ih;
       // Update stack map for change in length of instruction bytes.
-      updateStackMapOffset(ih.getPosition(), (newLength - oldLength));
+      updateStackMapOffset(ih.getPosition(), newLength - oldLength);
 
       // We need to see if inserting the additional instructions caused
       // a change in the amount of switch instruction padding bytes.
@@ -470,8 +491,11 @@ public abstract class InstructionListUtils extends StackMapUtils {
       try {
         il.delete(ih);
       } catch (Exception e) {
-        System.out.printf("Can't delete instruction: %s at %s%n", mg.getClassName(), mg.getName());
-        throw new Error("Can't delete instruction", e);
+        String msg =
+            String.format(
+                "Can't delete instruction %s in %s.%s", ih, mg.getClassName(), mg.getName());
+        System.out.println(msg);
+        throw new Error(msg, e);
       }
       // Need to update instruction address due to delete above.
       il.setPositions();
@@ -482,7 +506,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
         // Before we look for branches in the inserted code we need
         // to update any existing stack maps for locations in the old
         // code that are after the inserted code.
-        updateStackMapOffset(newStart.getPosition(), (newLength - oldLength));
+        updateStackMapOffset(newStart.getPosition(), newLength - oldLength);
 
         // We need to see if inserting the additional instructions caused
         // a change in the amount of switch instruction padding bytes.
