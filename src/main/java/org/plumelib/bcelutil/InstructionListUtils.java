@@ -316,10 +316,14 @@ public abstract class InstructionListUtils extends StackMapUtils {
           } else if (exc.getHandlerPC() == startIh) {
             exc.setHandlerPC(newStart);
           } else {
-            System.out.printf("Malformed CodeException: %s%n", exc);
+            Error e = new Error(String.format("Malformed CodeException: %s%n", exc));
+            e.printStackTrace();
+            throw e;
           }
         } else {
-          System.out.printf("unexpected target %s%n", it);
+          Error e = new Error(String.format("Unexpected target: %s%n", it));
+          e.printStackTrace();
+          throw e;
         }
       }
     }
