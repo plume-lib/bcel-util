@@ -91,7 +91,7 @@ public final class StackTypes {
    * @return a printed representation of {@code os}
    */
   @SuppressWarnings({
-    "allcheckers:purity.not.sideeffectfree.call",
+    "allcheckers:purity.call",
     "lock:method.guarantee.violated"
   }) // side effect to local state
   @SideEffectFree
@@ -111,7 +111,7 @@ public final class StackTypes {
    * @return a printed representation of {@code lv}
    */
   @SuppressWarnings({
-    "allcheckers:purity.not.sideeffectfree.call",
+    "allcheckers:purity.call",
     "lock:method.guarantee.violated"
   }) // side effect to local state
   @SideEffectFree
