@@ -1,6 +1,11 @@
 # BCEL-Util change log
 
-## 2.0.0 (????-??-??)
+## 9.9.9 (2026-08-??)
+
+- Tested under Java 27.
+- Requires Java 21 to run.
+
+## 2.0.0 (2026-08-05)
 
 - Requires Java 17 to run.
 
@@ -8,14 +13,14 @@
 
 - Tested under Java 25.
 - Compiles and runs under Java 8.
-- Deprecate `BcelUtil.postpendToArray()`
+- Deprecate `BcelUtil.postpendToArray()`.
 
 ## 1.2.3 (June 5, 2025)
 
 - Tested under Java 24.
 - Compiles and runs under Java 8.
 
-## 1.2.2 (May 15, 2022)
+## 1.2.2 (May 15, 2023)
 
 - Tested under Java 20.
 - No longer compiles under Java 8, but still runs under Java 8.

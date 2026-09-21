@@ -18,6 +18,7 @@ import org.apache.bcel.generic.ArrayType;
 import org.apache.bcel.generic.ClassGen;
 import org.apache.bcel.generic.CodeExceptionGen;
 import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.InstructionFactory;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InstructionList;
 import org.apache.bcel.generic.InstructionTargeter;
@@ -25,7 +26,6 @@ import org.apache.bcel.generic.LineNumberGen;
 import org.apache.bcel.generic.LocalVariableGen;
 import org.apache.bcel.generic.MethodGen;
 import org.apache.bcel.generic.ObjectType;
-import org.apache.bcel.generic.RETURN;
 import org.apache.bcel.generic.Type;
 import org.checkerframework.checker.index.qual.SameLen;
 import org.checkerframework.checker.signature.qual.BinaryName;
@@ -33,7 +33,7 @@ import org.checkerframework.checker.signature.qual.BinaryNameOrPrimitiveType;
 import org.checkerframework.checker.signature.qual.ClassGetName;
 import org.checkerframework.checker.signature.qual.FqBinaryName;
 import org.checkerframework.checker.signature.qual.InternalForm;
-import org.plumelib.reflection.ReflectionPlume;
+import org.plumelib.reflection.ReflectionP;
 import org.plumelib.reflection.Signatures;
 
 /** Static utility methods for working with BCEL. */
@@ -56,12 +56,12 @@ public final class BcelUtil {
 
   /**
    * Returns a string describing a method declaration. It contains the access flags (public,
-   * private, static, etc), the return type, the method name, and the types of each of its
+   * private, static, etc.), the return type, the method name, and the types of each of its
    * parameters.
    *
-   * <p>For example, if the original Java source declaration was: private final String
-   * constantToString (int index) Then the output of methodDeclarationToString would be: private
-   * final java.lang.String constantToString (int)
+   * <p>For example, if the original Java source declaration was: {@code private final String
+   * constantToString(int index)}, then the output of methodDeclarationToString would be: {@code
+   * private final java.lang.String constantToString(int)}.
    *
    * @param m the method
    * @return a string describing the method declaration
@@ -89,7 +89,6 @@ public final class BcelUtil {
    * @param m the method whose access flags to retrieve
    * @return a string representation of the access flags of method m
    */
-  @SuppressWarnings({"PMD.AvoidReassigningLoopVariables", "PMD.ForLoopVariableCount"})
   static String accessFlagsToString(Method m) {
 
     int flags = m.getAccessFlags();
@@ -316,9 +315,9 @@ public final class BcelUtil {
   /**
    * Checks the specified method for consistency.
    *
-   * <p>Does nothing if {@link #skipChecks} is false.
+   * <p>Does nothing if {@link #skipChecks} is true.
    *
-   * @param mgen the class to check
+   * @param mgen the method to check
    */
   public static void checkMgen(MethodGen mgen) {
 
@@ -348,13 +347,10 @@ public final class BcelUtil {
       MethodGen nmg = new MethodGen(mgen.getMethod(), mgen.getClassName(), mgen.getConstantPool());
       nmg.getLineNumberTable(mgen.getConstantPool());
     } catch (Throwable t) {
-      Error e =
-          new Error(
-              String.format(
-                  "failure while checking method %s.%s%n", mgen.getClassName(), mgen.getName()),
-              t);
-      e.printStackTrace();
-      throw e;
+      throw new Error(
+          String.format(
+              "failure while checking method %s.%s%n", mgen.getClassName(), mgen.getName()),
+          t);
     }
   }
 
@@ -383,7 +379,7 @@ public final class BcelUtil {
 
   // 'dump' methods
 
-  /** Print the current java call stack. */
+  /** Prints the current Java call stack. */
   public static void dumpStackTrace() {
 
     StackTraceElement[] ste = Thread.currentThread().getStackTrace();
@@ -407,7 +403,7 @@ public final class BcelUtil {
   }
 
   /**
-   * Print the methods in the class, to standard output.
+   * Prints the methods in the class, to standard output.
    *
    * @param gen the class whose methods to print
    */
@@ -443,7 +439,7 @@ public final class BcelUtil {
    */
   public static void dump(JavaClass jc, File dumpDir) {
 
-    dumpDir.mkdir();
+    dumpDir.mkdirs();
     try (PrintStream p = new PrintStream(new File(dumpDir, jc.getClassName() + ".bcel"))) {
       // Print the class, superclass, and interfaces
       p.printf("class %s extends %s%n", jc.getClassName(), jc.getSuperclassName());
@@ -521,16 +517,18 @@ public final class BcelUtil {
   }
 
   /**
-   * Returns the constant string at the specified offset.
+   * Returns the constant string at the specified index in the constant pool.
    *
    * @param pool the constant pool
    * @param index the index in the constant pool
-   * @return the constant string at the specified offset in the constant pool
+   * @return the constant string at the specified index in the constant pool
    */
   public static String getConstantString(ConstantPool pool, int index) {
 
     Constant c = pool.getConstant(index);
-    assert c != null : "Bad index " + index + " into pool";
+    if (c == null) {
+      throw new Error("Bad index " + index + " into pool");
+    }
     if (c instanceof ConstantUtf8 cutf8) {
       return cutf8.getBytes();
     } else if (c instanceof ConstantClass cc) {
@@ -543,6 +541,11 @@ public final class BcelUtil {
   /**
    * Sets the locals to be the formal parameters. Any other locals are removed. An instruction list
    * with at least one instruction must exist.
+   *
+   * <p>This method names the new locals using {@link MethodGen#getArgumentNames}. When {@code mg}
+   * was created from a {@link Method}, BCEL synthesizes those names as "arg0", "arg1", and so on,
+   * rather than reading them from the LocalVariableTable. In that case this method does not
+   * preserve the declared parameter names.
    *
    * @param mg the method whose locals to set
    */
@@ -574,21 +577,43 @@ public final class BcelUtil {
 
   /**
    * Empties the method of all code (except for a return). This includes line numbers, exceptions,
-   * local variables, etc.
+   * local variables, etc. If the method's return type is not void, the body pushes a default value
+   * (zero or null) and returns it, so that the resulting method is verifiable.
+   *
+   * <p>The method must not be a constructor. A constructor body must call a superclass or sibling
+   * constructor, which an empty body does not do, so emptying a constructor yields a class that
+   * does not verify.
    *
    * @param mg the method to clear out
    */
   public static void makeMethodBodyEmpty(MethodGen mg) {
 
-    mg.setInstructionList(new InstructionList(new RETURN()));
+    if (isConstructor(mg)) {
+      throw new Error(
+          "cannot empty the body of constructor "
+              + mg.getClassName()
+              + "."
+              + mg.getName()
+              + mg.getSignature());
+    }
+
+    Type returnType = mg.getReturnType();
+    InstructionList il = new InstructionList();
+    if (returnType.getType() != Const.T_VOID) {
+      il.append(InstructionFactory.createNull(returnType));
+    }
+    il.append(InstructionFactory.createReturn(returnType));
+
+    mg.setInstructionList(il);
     mg.removeExceptionHandlers();
     mg.removeLineNumbers();
     mg.removeLocalVariables();
     mg.setMaxLocals();
+    mg.setMaxStack();
   }
 
   /**
-   * Remove the local variable type table attribute (LVTT) from mg. Evidently some changes require
+   * Removes the local variable type table attribute (LVTT) from mg. Evidently some changes require
    * this to be updated, but without BCEL support that would be hard to do. It should be safe to
    * just delete it since it is optional and really only of use to a debugger.
    *
@@ -608,7 +633,7 @@ public final class BcelUtil {
    * type.
    *
    * @param type the type
-   * @return the Java classname that corresponds to type
+   * @return the Java class name that corresponds to type
    */
   public static @ClassGetName String typeToClassgetname(Type type) {
     String signature = type.getSignature();
@@ -625,7 +650,7 @@ public final class BcelUtil {
 
     String classname = typeToClassgetname(type);
     try {
-      return ReflectionPlume.classForName(classname);
+      return ReflectionP.classForName(classname);
     } catch (Exception e) {
       throw new RuntimeException("can't find class for " + classname, e);
     }
@@ -637,10 +662,8 @@ public final class BcelUtil {
    * @param types the array to extend
    * @param newType the element to add to the end of the array
    * @return a new array, with {@code newType} at the end
-   * @deprecated use ArraysPlume.append()
    */
-  @Deprecated(since = "2025-11-26") // to make package-private
-  public static Type[] postpendToArray(Type[] types, Type newType) {
+  /*package-private*/ static Type[] postpendToArray(Type[] types, Type newType) {
     if (types.length == Integer.MAX_VALUE) {
       throw new Error("array " + Arrays.toString(types) + " is too large to extend");
     }
@@ -696,19 +719,19 @@ public final class BcelUtil {
   /**
    * Returns the type corresponding to a given fully-qualified binary name.
    *
-   * @param classname the fully-qualified binary name of a type, which is like a
-   *     fully-qualified-name but uses "$" rather than "." for nested classes
+   * @param classname the fully-qualified binary name of a type, which is like a fully-qualified
+   *     name but uses "$" rather than "." for nested classes
    * @return the type corresponding to the given name
    */
   public static Type fqBinaryNameToType(@FqBinaryName String classname) {
 
     Signatures.ClassnameAndDimensions cad =
         Signatures.ClassnameAndDimensions.parseFqBinaryName(classname);
-    Type eltType = binaryNameToType(cad.classname);
-    if (cad.dimensions == 0) {
+    Type eltType = binaryNameToType(cad.classname());
+    if (cad.dimensions() == 0) {
       return eltType;
     } else {
-      return new ArrayType(eltType, cad.dimensions);
+      return new ArrayType(eltType, cad.dimensions());
     }
   }
 }

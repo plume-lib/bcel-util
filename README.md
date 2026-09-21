@@ -1,7 +1,7 @@
 # Plume-lib Bcel-Util:  utility methods for BCEL
 
 Static utility methods for working with the [Apache Commons
-BCEL](https://commons.apache.org/proper/commons-bcel/) bytecode engineering
+BCEL](https://commons.apache.org/proper/commons-bcel/) byte code engineering
 library.
 
 For details, see the [API documentation](http://plumelib.org/bcel-util/api/).
@@ -15,8 +15,8 @@ In a Gradle buildfile, write
 
 ```gradle
 dependencies {
-  implementation("org.plumelib:bcel-util:1.2.4")
+  implementation("org.plumelib:bcel-util:2.0.0")
 }
 ```
 
-Other build systems are [similar](https://search.maven.org/artifact/org.plumelib/bcel-util/1.2.4/jar).
+Other build systems are [similar](https://search.maven.org/artifact/org.plumelib/bcel-util/2.0.0/jar).

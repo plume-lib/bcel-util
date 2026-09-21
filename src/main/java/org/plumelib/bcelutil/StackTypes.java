@@ -62,7 +62,7 @@ public final class StackTypes {
   /**
    * Returns the stack contents at the specified offset.
    *
-   * @param offset the offset to which to get the stack contents
+   * @param offset the offset at which to get the stack contents
    * @return the stack at the (instruction at the) given offset
    */
   public OperandStack get(@IndexFor({"localVariableses", "operandStacks"}) int offset) {
@@ -107,7 +107,7 @@ public final class StackTypes {
   /**
    * Returns a printed representation of the given LocalVariables.
    *
-   * @param lv the LocalVariablesStack to print
+   * @param lv the LocalVariables to print
    * @return a printed representation of {@code lv}
    */
   @SuppressWarnings({

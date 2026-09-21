@@ -49,11 +49,11 @@ import org.checkerframework.dataflow.qual.Pure;
  * LineNumberTable and the LocalVariableTable. However, for historical reasons, it does not.
  *
  * <p>This class cannot be a set of static methods (like {@link BcelUtil}) as it maintains state
- * during the client's processing of a method that must be available on a per thread basis. Thus it
+ * during the client's processing of a method that must be available on a per-thread basis. Thus it
  * is an abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}. A client
  * would not normally extend this class directly.
  */
-@SuppressWarnings({"nullness", "PMD.AbstractClassWithoutAbstractMethod", "PMD.TooManyFields"})
+@SuppressWarnings({"nullness", "PMD.AbstractClassWithoutAbstractMethod"})
 public abstract class StackMapUtils {
 
   /** Create a new StackMapUtils object. */
@@ -75,8 +75,8 @@ public abstract class StackMapUtils {
    *     or 'slot number' to describe this second case.
    *
    * Unfortunately, BCEL uses the method names getIndex and setIndex
-   * to refer to 'offset's into the local stack frame.
-   * It uses getPosition and setPosition to refer to 'offset's into
+   * to refer to offsets into the local stack frame.
+   * It uses getPosition and setPosition to refer to offsets into
    * the byte codes.
    */
 
@@ -383,11 +383,14 @@ public abstract class StackMapUtils {
     }
   }
 
-  // TODO: From the documentation, I am not sure what this method does or when it should be called.
   /**
    * We need to locate and remember any NEW instructions that create uninitialized objects. Their
    * offset may be contained in a StackMap entry and will probably need to be updated as we add
    * instrumentation code. Note that these instructions are fairly rare.
+   *
+   * <p>Call this once per method, after {@link #fixLocalVariableTable} and before modifying the
+   * method's instructions. After the modifications, call {@link #updateUninitializedNewOffsets}.
+   * See the template in {@link InstructionListUtils}.
    *
    * @param il instruction list to search
    */
@@ -425,9 +428,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * One of uninitialized NEW instructions has moved. Update its offset in StackMap entries. Note
-   * that more than one entry could refer to the same instruction. This is a helper routine used by
-   * updateUninitializedNewOffsets.
+   * One of the uninitialized NEW instructions has moved. Update its offset in StackMap entries.
+   * Note that more than one entry could refer to the same instruction. This is a helper routine
+   * used by updateUninitializedNewOffsets.
    *
    * @param oldOffset original location of NEW instruction
    * @param newOffset new location of NEW instruction
@@ -487,7 +490,7 @@ public abstract class StackMapUtils {
 
   /**
    * Process the instruction list, adding size (1 or 2) to the index of each Instruction that
-   * references a local that is equal or higher in the local map than indexFirstMovedlocal. Size
+   * references a local that is equal to or higher in the local map than indexFirstMovedlocal. Size
    * should be the size of the new local that was just inserted at indexFirstMovedlocal.
    *
    * @param mgen MethodGen to be modified
@@ -517,7 +520,7 @@ public abstract class StackMapUtils {
         }
       }
       // Unfortunately, BCEL doesn't take care of incrementing the
-      // offset within StackMapEntrys.
+      // offset within StackMapEntry objects.
       int delta = inst.getLength() - origLength;
       if (delta > 0) {
         il.setPositions();
@@ -533,8 +536,8 @@ public abstract class StackMapUtils {
    * stackMapTable!
    *
    * @param mgen MethodGen to search
-   * @param javaClassVersion Java version for the classfile; stackMapTable is optional before Java
-   *     1.7 (= classfile version 51)
+   * @param javaClassVersion Java version for the class file; stackMapTable is optional before Java
+   *     1.7 (= class file version 51)
    */
   @EnsuresNonNull({"stackMapTable", "smta"})
   protected final void setCurrentStackMapTable(MethodGen mgen, int javaClassVersion) {
@@ -653,7 +656,7 @@ public abstract class StackMapUtils {
 
     return switch (smt.getType()) {
       // "ITEM_Bogus" is 'top' (undefined) in JVM verification nomenclature.
-      // I have no idea what "ITEM_Null means, but Groovy generates it (MLR).
+      // I have no idea what "ITEM_Null" means, but Groovy generates it (MLR).
       case Const.ITEM_Bogus, Const.ITEM_Null -> null;
       case Const.ITEM_Integer -> Type.INT;
       case Const.ITEM_Float -> Type.FLOAT;
@@ -732,9 +735,9 @@ public abstract class StackMapUtils {
   }
 
   /**
-   * Add a new parameter to the method. This will be added after last current parameter and before
-   * the first local variable. This might have the side effect of causing us to rewrite the method
-   * byte codes to adjust the offsets for the local variables - see below for details.
+   * Add a new parameter to the method. This will be added after the last current parameter and
+   * before the first local variable. This might have the side effect of causing us to rewrite the
+   * method byte codes to adjust the offsets for the local variables - see below for details.
    *
    * <p>Must call fixLocalVariableTable (just once per method) before calling this routine.
    *
@@ -851,7 +854,7 @@ public abstract class StackMapUtils {
     // us) and the StackMapTable (yes - BCEL should do this, but it doesn't).
     //
     // We never want to insert our local prior to any parameters.  This would
-    // happen naturally, but some old class files have non zero addresses
+    // happen naturally, but some old class files have non-zero addresses
     // for 'this' and/or the parameters so we need to add an explicit
     // check to make sure we skip these variables.
 
@@ -960,10 +963,10 @@ public abstract class StackMapUtils {
   /** The type of a local variable during its live range. */
   protected Type liveRangeType = null;
 
-  /** The storage size of local variable during its live range. */
+  /** The storage size of a local variable during its live range. */
   protected int liveRangeOperandSize = 0;
 
-  /** The types of elements on the operand stack for current method. */
+  /** The types of elements on the operand stack for the current method. */
   protected StackTypes stackTypes = null;
 
   /**
@@ -973,7 +976,7 @@ public abstract class StackMapUtils {
    * This routine creates LocalVariable entries for these missing items.
    *
    * <ol>
-   *   <li>The java Compiler allocates a hidden parameter for the constructor of an inner class.
+   *   <li>The Java compiler allocates a hidden parameter for the constructor of an inner class.
    *       These items are given the name $hidden$ appended with their offset.
    *   <li>The Java compiler allocates unnamed local temps for:
    *       <ul>
@@ -988,7 +991,6 @@ public abstract class StackMapUtils {
    *
    * @param mgen MethodGen to be modified
    */
-  @SuppressWarnings("PMD.AvoidReassigningLoopVariables")
   @EnsuresNonNull("initialTypeList")
   protected final void fixLocalVariableTable(MethodGen mgen) {
     InstructionList il = mgen.getInstructionList();
@@ -1017,7 +1019,7 @@ public abstract class StackMapUtils {
     // Index into locals of the first parameter
     int locIndex = 0;
 
-    // Rarely, the java compiler gets the max locals count wrong (too big).
+    // Rarely, the Java compiler gets the max locals count wrong (too big).
     // This would cause problems for us later, so we need to recalculate
     // the highest local used based on looking at code offsets.
     mgen.setMaxLocals();
@@ -1043,8 +1045,8 @@ public abstract class StackMapUtils {
       offset = 1;
       firstLocalIndex++;
     } else {
-      // The java method sun/misc/ProxyGenerator generates proxy classes at run time.  For some
-      // unknown reason when it generates code for <clinit> it allocates local 0 but never uses it.
+      // The Java class sun/misc/ProxyGenerator generates proxy classes at run time.  For some
+      // unknown reason, when it generates code for <clinit> it allocates local 0 but never uses it.
       if (mgen.getClassName().startsWith("com.sun.proxy.") && mgen.getName().equals("<clinit>")) {
         newLvg = mgen.addLocalVariable("$clinit$hidden$" + offset, Type.INT, offset, null, null);
         debugInstrument.log(
@@ -1074,7 +1076,7 @@ public abstract class StackMapUtils {
       offset += argType.getSize();
     }
 
-    // At this point the LocalVaraibles contain:
+    // At this point the LocalVariables contain:
     //   the 'this' pointer (if present)
     //   the parameters to the method
     // This will be used to construct the initial state of the
@@ -1330,7 +1332,7 @@ public abstract class StackMapUtils {
         Type tos = stack.peek(0);
         // System.out.printf ("tos: %s, liveType: %s%n", tos, liveRangeType);
         // Store of a null does not change type.
-        // UNDONE: if tos is subclass of liveRangeType, should not start new range
+        // UNDONE: if tos is a subclass of liveRangeType, should not start a new range
         if (liveRangeStart == null || (!tos.equals(Type.NULL) && !tos.equals(liveRangeType))) {
           // close current live range
           create_local_from_live_range(mgen, offset);
@@ -1376,7 +1378,7 @@ public abstract class StackMapUtils {
         if (liveRangeType == null) {
           throw new RuntimeException("gen_locals_from_byte_code: no store before load");
         } else if (!tos.equals(liveRangeType)) {
-          // Load type can be super class of store type.  Rather than write code
+          // Load type can be a superclass of store type.  Rather than write code
           // using reflection to verify, we just assume compiler got it right.
           // throw new RuntimeException("gen_locals_from_byte_code: store/load types do not match");
         }
@@ -1407,7 +1409,7 @@ public abstract class StackMapUtils {
     if (liveRangeStart == null) {
       return;
     }
-    // Type.getType doesn't understand NULL which is the type of the top of operand stack
+    // Type.getType doesn't understand NULL which is the type of the top of the operand stack
     // after the JVM aconst_null instruction.
     if (Type.NULL.equals(liveRangeType)) {
       liveRangeType = Type.OBJECT;
