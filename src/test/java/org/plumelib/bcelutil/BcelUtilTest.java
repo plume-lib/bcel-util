@@ -406,12 +406,11 @@ final class BcelUtilTest {
     InstructionList original = nonNull(mg.getInstructionList(), "instruction list");
     int originalLength = original.getLength();
 
-    // This causes a Java compilation error.  Why?
-    // Error e = assertThrows(IllegalArgumentException.class, () ->
-    // BcelUtil.makeMethodBodyEmpty(mg));
-    // assertTrue(
-    //     nonNull(e.getMessage(), "exception message").contains("<init>"),
-    //     "the message should name the constructor: " + e.getMessage());
+    IllegalArgumentException e =
+        assertThrows(IllegalArgumentException.class, () -> BcelUtil.makeMethodBodyEmpty(mg));
+    assertTrue(
+        nonNull(e.getMessage(), "exception message").contains("<init>"),
+        "the message should name the constructor: " + e.getMessage());
 
     assertEquals(
         originalLength,

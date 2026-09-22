@@ -6,7 +6,9 @@
 - Requires Java 21 to run.
 - In `InstructionListUtils`:
   - renamed `append_inst()` to `appendInst()`
+  - renamed `build_il()` to `buildIl()`
   - renamed `delete_instructions()` to `deleteInstructions()`
+- Deprecated `BcelUtil.javaVersion`; use `Runtime.version().feature()` instead.
 
 ## 2.0.0 (2026-08-05)
 

@@ -46,6 +46,15 @@ public final class BcelUtil {
   /** The type that represents String[]. */
   private static final Type STRING_ARRAY = Type.getType("[Ljava.lang.String;");
 
+  /**
+   * The major version number of the Java runtime (JRE), such as 17, 21, or 25.
+   *
+   * @deprecated use {@code Runtime.version().feature()}
+   */
+  @Deprecated // 2026-08-30
+  // @SuppressWarnings("PMD.FieldNamingConventions")
+  public static final int javaVersion = Runtime.version().feature();
+
   /** This class is a collection of methods; it does not represent anything. */
   private BcelUtil() {
     throw new UnsupportedOperationException("do not instantiate");

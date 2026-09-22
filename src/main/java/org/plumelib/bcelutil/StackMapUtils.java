@@ -1393,13 +1393,13 @@ public abstract class StackMapUtils {
       liveRangeEnd = liveRangeStart; // not necessarily true, but only needs to be !null
       liveRangeType = liveType;
       liveRangeOperandSize = minSize;
-      minSize = gen_locals_from_byte_codes(mgen, offset, il.findHandle(byteCodeOffset));
+      minSize = genLocalsFromByteCodes(mgen, offset, il.findHandle(byteCodeOffset));
     } else {
       if (minSize == 3) {
         // We did not find the offset in any of the stack maps; that must mean
         // the live range is in between two stack maps or after the last stack map.
         // We need to scan all the byte codes to calculate the live range and type.
-        minSize = gen_locals_from_byte_codes(mgen, offset);
+        minSize = genLocalsFromByteCodes(mgen, offset);
         // offset is never mentioned in code; go on to next location
         if (minSize == 3) {
           return offset + 1;
@@ -1449,7 +1449,7 @@ public abstract class StackMapUtils {
     liveRangeType = null;
     // only sizes are 1 or 2; start with something larger.
     liveRangeOperandSize = 3;
-    return gen_locals_from_byte_codes(mgen, offset, mgen.getInstructionList().getStart());
+    return genLocalsFromByteCodes(mgen, offset, mgen.getInstructionList().getStart());
   }
 
   /**
@@ -1458,7 +1458,7 @@ public abstract class StackMapUtils {
    * @param mgen MethodGen of method to search
    * @param offset offset of the local
    * @return minimum size of local(s) found at offset
-   * @deprecated use {@link #genLocalsFromByteCodes}
+   * @deprecated use {@link #genLocalsFromByteCodes(MethodGen, int)}
    */
   // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
@@ -1583,8 +1583,10 @@ public abstract class StackMapUtils {
    * @param offset offset of the local
    * @param start search forward from this instruction
    * @return minimum size of local(s) found at offset
+   * @deprecated use {@link #genLocalsFromByteCodes(MethodGen, int, InstructionHandle)}
    */
   // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
   protected final int gen_locals_from_byte_codes(
       MethodGen mgen, int offset, InstructionHandle start) {
     return genLocalsFromByteCodes(mgen, offset, start);

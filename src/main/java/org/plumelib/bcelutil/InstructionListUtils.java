@@ -281,6 +281,33 @@ public abstract class InstructionListUtils extends StackMapUtils {
   }
 
   /**
+   * Convenience function to build an instruction list.
+   *
+   * @param instructions a variable number of BCEL instructions
+   * @return an InstructionList
+   */
+  protected final InstructionList buildIl(Instruction... instructions) {
+    InstructionList il = new InstructionList();
+    for (Instruction inst : instructions) {
+      appendInst(il, inst);
+    }
+    return il;
+  }
+
+  /**
+   * Convenience function to build an instruction list.
+   *
+   * @param instructions a variable number of BCEL instructions
+   * @return an InstructionList
+   * @deprecated use {@link #buildIl}
+   */
+  @Deprecated // 2026-08-30
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  protected final InstructionList build_il(Instruction... instructions) {
+    return buildIl(instructions);
+  }
+
+  /**
    * Delete instruction(s) from startIh through endIh in an instruction list. startIh may be the
    * first instruction of the list, but endIh must not be the last instruction of the list. startIh
    * may be equal to endIh. There must not be any targeters on any of the instructions to be deleted
