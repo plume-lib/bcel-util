@@ -18,6 +18,7 @@
     <rule ref="category/java/bestpractices.xml/DefaultLabelNotLastInSwitch" />
     <rule ref="category/java/bestpractices.xml/DoubleBraceInitialization" />
     <rule ref="category/java/bestpractices.xml/ForLoopCanBeForeach" />
+    <rule ref="category/java/bestpractices.xml/ForLoopVariableCount" />
     <rule ref="category/java/bestpractices.xml/GuardLogStatement">
         <properties>
             <property name="logLevels" value="trace,debug,warn,error,log,finest,finer,fine,info,warning,severe" />
@@ -57,7 +58,6 @@
     <rule ref="category/java/bestpractices.xml/AvoidReassigningCatchVariables" />
     <rule ref="category/java/bestpractices.xml/AvoidReassigningLoopVariables" />
     <rule ref="category/java/bestpractices.xml/ExhaustiveSwitchHasDefault" /> Including a default is protection against future changes to the enum.
-    <rule ref="category/java/bestpractices.xml/ForLoopVariableCount" />
     <rule ref="category/java/bestpractices.xml/LiteralsFirstInComparisons" />
     <rule ref="category/java/bestpractices.xml/LooseCoupling" />
     <rule ref="category/java/bestpractices.xml/PreserveStackTrace" />
@@ -154,14 +154,15 @@
     <rule ref="category/java/design.xml/ExceptionAsFlowControl" />
     <rule ref="category/java/design.xml/ExcessiveParameterList" />
     <rule ref="category/java/design.xml/FinalFieldCouldBeStatic" />
+    <rule ref="category/java/design.xml/InstantiableUtilityClass" />
     <rule ref="category/java/design.xml/InvalidJavaBean" />
     <rule ref="category/java/design.xml/LogicInversion" />
+    <rule ref="category/java/design.xml/ProtectedMemberInFinalClass" />
     <rule ref="category/java/design.xml/SignatureDeclareThrowsException" />
     <rule ref="category/java/design.xml/SimplifiedTernary" />
     <rule ref="category/java/design.xml/SimplifyBooleanExpressions" />
     <rule ref="category/java/design.xml/SimplifyConditional" />
     <rule ref="category/java/design.xml/UselessOverridingMethod" />
-    <rule ref="category/java/design.xml/InstantiableUtilityClass" />
 
     <!-- design rules that seem to be broken.
     <rule ref="category/java/design.xml/SingularField" />
@@ -287,6 +288,7 @@
     <rule ref="category/java/errorprone.xml/UnnecessaryBooleanAssertion" />
     <rule ref="category/java/errorprone.xml/UnnecessaryCaseChange" />
     <rule ref="category/java/errorprone.xml/UnnecessaryConversionTemporary" />
+    <rule ref="category/java/errorprone.xml/UnusedReturnValue" />
     <rule ref="category/java/errorprone.xml/UseCorrectExceptionLogging" />
     <rule ref="category/java/errorprone.xml/UseEqualsToCompareStrings" />
     <rule ref="category/java/errorprone.xml/UseLocaleWithCaseConversions" />
