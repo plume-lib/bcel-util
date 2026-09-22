@@ -40,7 +40,7 @@ import org.plumelib.reflection.Signatures;
 public final class BcelUtil {
 
   /** Controls whether the checks in {@link #checkMgen} are performed. */
-  @SuppressWarnings("PMD.MutableStaticState")
+  // @SuppressWarnings("PMD.MutableStaticState")
   public static boolean skipChecks = false;
 
   /** The type that represents String[]. */
@@ -88,6 +88,7 @@ public final class BcelUtil {
    * @param m the method whose access flags to retrieve
    * @return a string representation of the access flags of method m
    */
+  @SuppressWarnings("PMD.ForLoopVariableCount")
   /* package */ static String accessFlagsToString(Method m) {
 
     int flags = m.getAccessFlags();
@@ -355,7 +356,7 @@ public final class BcelUtil {
    *
    * @param gen the class to check
    */
-  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+  // @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public static void checkMgens(final ClassGen gen) {
 
     if (skipChecks) {

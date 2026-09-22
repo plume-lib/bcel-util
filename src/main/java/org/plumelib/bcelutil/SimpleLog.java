@@ -21,7 +21,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public final class SimpleLog {
 
   /** If false, do no output. */
-  @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
+  // @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
   public boolean enabled;
 
   /** Where to write logging output. Null if nothing has been output yet. */

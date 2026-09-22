@@ -55,7 +55,7 @@ import org.checkerframework.dataflow.qual.Pure;
 @SuppressWarnings({
   "nullness",
   "PMD.AbstractClassWithoutAbstractMethod",
-  "PMD.FieldDeclarationsShouldBeAtStartOfClass"
+  // "PMD.FieldDeclarationsShouldBeAtStartOfClass"
 })
 public abstract class StackMapUtils {
 
@@ -171,7 +171,7 @@ public abstract class StackMapUtils {
    * @return the attribute name for the specified attribute
    * @deprecated use {@link #getAttributeName}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   @Pure
   protected final String get_attribute_name(Attribute a) {
@@ -196,7 +196,7 @@ public abstract class StackMapUtils {
    * @return true iff the attribute is a LocalVariableTypeTable
    * @deprecated use {@link #isLocalVariableTypeTable}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   @Pure
   protected final boolean is_local_variable_type_table(Attribute a) {
@@ -237,7 +237,7 @@ public abstract class StackMapUtils {
    * @return the StackMapTable attribute for the method (or null if not present)
    * @deprecated use {@link #getStackMapTableAttribute}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   @Pure
   protected final @Nullable Attribute getStackMapTable_attribute(MethodGen mgen) {
@@ -267,7 +267,7 @@ public abstract class StackMapUtils {
    * @return the LocalVariableTypeTable attribute for the method (or null if not present)
    * @deprecated use {@link #getLocalVariableTypeTableAttribute}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   @Pure
   protected final @Nullable Attribute get_local_variable_type_table_attribute(MethodGen mgen) {
@@ -293,7 +293,7 @@ public abstract class StackMapUtils {
    * @param mgen the method to clear out
    * @deprecated use {@link #removeLocalVariableTypeTable}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   protected final void remove_local_variable_type_table(MethodGen mgen) {
     removeLocalVariableTypeTable(mgen);
@@ -421,7 +421,7 @@ public abstract class StackMapUtils {
    * @param ih where to start looking for a switch instruction
    * @param il instruction list to search
    */
-  @SuppressWarnings("PMD.AvoidReassigningParameters")
+  // @SuppressWarnings("PMD.AvoidReassigningParameters")
   protected final void modifyStackMapsForSwitches(InstructionHandle ih, InstructionList il) {
     if (!needStackMap) {
       return;
@@ -610,7 +610,7 @@ public abstract class StackMapUtils {
    * @param size size of new local added (1 or 2)
    * @deprecated use {@link #adjustCodeForLocalsChange}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   protected final void adjust_code_for_locals_change(
       MethodGen mgen, int indexFirstMovedlocal, int size) {
@@ -775,7 +775,7 @@ public abstract class StackMapUtils {
    * @return result Type
    * @deprecated use {@code #generateTypeFromStackMapType}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   protected final Type generate_Type_from_StackMapType(StackMapType smt) {
     return generateTypeFromStackMapType(smt);
@@ -811,7 +811,7 @@ public abstract class StackMapUtils {
 
         int numLocals = entry.getNumberOfLocals();
         StackMapType[] oldLocalTypes = entry.getTypesOfLocals();
-        @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+        // @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
         StackMapType[] newLocalTypes = new StackMapType[numLocals + 1];
 
         // System.out.printf ("update_full_frame %s %s %s %n", offset, numLocals, locals.length);
@@ -844,7 +844,7 @@ public abstract class StackMapUtils {
    * @param locals a copy of the local variable table prior to this modification
    * @deprecated use {@link #updateFullFrameStackMapEntries}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   protected final void update_full_frameStackMap_entries(
       int offset, Type typeNewVar, LocalVariableGen[] locals) {
@@ -1077,7 +1077,7 @@ public abstract class StackMapUtils {
    * @return a LocalVariableGen for the new local
    * @deprecated use {@link #createMethodScopeLocal}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   protected final LocalVariableGen create_method_scope_local(
       MethodGen mgen, String localName, Type localType) {
@@ -1129,7 +1129,7 @@ public abstract class StackMapUtils {
    *
    * @param mgen MethodGen to be modified
    */
-  @SuppressWarnings("PMD.AvoidReassigningLoopVariables") // `ii--`
+  // @SuppressWarnings("PMD.AvoidReassigningLoopVariables") // `ii--`
   @EnsuresNonNull("initialTypeList")
   protected final void fixLocalVariableTable(MethodGen mgen) {
     InstructionList il = mgen.getInstructionList();
@@ -1278,7 +1278,7 @@ public abstract class StackMapUtils {
    * @param offset compiler assigned local offset of hidden temp(s) or local(s)
    * @return offset incremented by size of smallest variable found at offset
    */
-  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops") // use Arrays.copyOf instead?
+  // @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops") // use Arrays.copyOf instead?
   @RequiresNonNull("initialTypeList")
   protected final int genLocals(MethodGen mgen, int offset) {
     InstructionList il = mgen.getInstructionList();
@@ -1422,7 +1422,7 @@ public abstract class StackMapUtils {
    * @return offset incremented by size of smallest variable found at offset
    * @deprecated use {@link #genLocals}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   @RequiresNonNull("initialTypeList")
   protected final int gen_locals(MethodGen mgen, int offset) {
@@ -1460,7 +1460,7 @@ public abstract class StackMapUtils {
    * @return minimum size of local(s) found at offset
    * @deprecated use {@link #genLocalsFromByteCodes}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   protected final int gen_locals_from_byte_codes(MethodGen mgen, int offset) {
     return genLocalsFromByteCodes(mgen, offset);
@@ -1584,7 +1584,7 @@ public abstract class StackMapUtils {
    * @param start search forward from this instruction
    * @return minimum size of local(s) found at offset
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   protected final int gen_locals_from_byte_codes(
       MethodGen mgen, int offset, InstructionHandle start) {
     return genLocalsFromByteCodes(mgen, offset, start);
@@ -1631,7 +1631,7 @@ public abstract class StackMapUtils {
    * @param offset offset of the local
    * @deprecated use {@link #createLocalFromLiveRange}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   protected final void create_local_from_live_range(MethodGen mgen, int offset) {
     createLocalFromLiveRange(mgen, offset);
@@ -1668,7 +1668,7 @@ public abstract class StackMapUtils {
    * @param mgen MethodGen of method whose stack types to compute
    * @deprecated use {@link #setMethodStackTypes}
    */
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   @Deprecated // 2026-08-30
   protected final void set_method_stackTypes(MethodGen mgen) {
     setMethodStackTypes(mgen);

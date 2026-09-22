@@ -146,7 +146,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @deprecated use {@link appendInst}
    */
   @Deprecated // 2026-08-30
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   protected final void append_inst(InstructionList il, Instruction inst) {
     appendInst(il, inst);
   }
@@ -361,7 +361,7 @@ public abstract class InstructionListUtils extends StackMapUtils {
    * @deprecated use {@link #deleteInstructions}
    */
   @Deprecated // 2026-08-30
-  @SuppressWarnings("PMD.MethodNamingConventions")
+  // @SuppressWarnings("PMD.MethodNamingConventions")
   protected final void delete_instructions(
       MethodGen mg, InstructionHandle startIh, InstructionHandle endIh) {
     deleteInstructions(mg, startIh, endIh);
