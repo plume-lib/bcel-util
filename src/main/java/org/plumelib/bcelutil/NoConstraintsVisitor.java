@@ -182,7 +182,9 @@ import org.apache.bcel.verifier.structurals.InstConstraintVisitor;
 public class NoConstraintsVisitor extends InstConstraintVisitor {
 
   /** Creates a new NoConstraintsVisitor. */
-  public NoConstraintsVisitor() {}
+  public NoConstraintsVisitor() {
+    super();
+  }
 
   @Override
   public void setFrame(Frame f) {}
