@@ -38,19 +38,27 @@ import org.plumelib.reflection.Signatures;
 
 /** Static utility methods for working with BCEL. */
 public final class BcelUtil {
-  /** This class is a collection of methods; it does not represent anything. */
-  private BcelUtil() {
-    throw new Error("do not instantiate");
-  }
 
   /** Controls whether the checks in {@link #checkMgen} are performed. */
+  // @SuppressWarnings("PMD.MutableStaticState")
   public static boolean skipChecks = false;
 
   /** The type that represents String[]. */
-  private static final Type stringArray = Type.getType("[Ljava.lang.String;");
+  private static final Type STRING_ARRAY = Type.getType("[Ljava.lang.String;");
 
-  /** The major version number of the Java runtime (JRE), such as 17, 21, or 25. */
+  /**
+   * The major version number of the Java runtime (JRE), such as 17, 21, or 25.
+   *
+   * @deprecated use {@code Runtime.version().feature()}
+   */
+  @Deprecated // 2026-08-30
+  // @SuppressWarnings("PMD.FieldNamingConventions")
   public static final int javaVersion = Runtime.version().feature();
+
+  /** This class is a collection of methods; it does not represent anything. */
+  private BcelUtil() {
+    throw new UnsupportedOperationException("do not instantiate");
+  }
 
   // 'ToString' methods
 
@@ -89,13 +97,14 @@ public final class BcelUtil {
    * @param m the method whose access flags to retrieve
    * @return a string representation of the access flags of method m
    */
-  static String accessFlagsToString(Method m) {
+  @SuppressWarnings("PMD.ForLoopVariableCount")
+  /* package */ static String accessFlagsToString(Method m) {
 
     int flags = m.getAccessFlags();
 
     StringJoiner buf = new StringJoiner(" ");
     // Note that pow is a binary mask for the flag (= 2^i).
-    for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG_I; i++) {
+    for (int i = 0, pow = 1; i <= Const.MAX_ACC_FLAG_I; i++, pow <<= 1) {
       if ((flags & pow) != 0) {
         if (i < Const.ACCESS_NAMES_LENGTH) {
           buf.add(Const.getAccessName(i));
@@ -103,7 +112,6 @@ public final class BcelUtil {
           buf.add(String.format("ACC_BIT(%x)", pow));
         }
       }
-      pow <<= 1;
     }
 
     return buf.toString();
@@ -157,8 +165,7 @@ public final class BcelUtil {
     ConstantPool pool = a.getConstantPool();
     int conIndex = a.getNameIndex();
     Constant c = pool.getConstant(conIndex);
-    String attName = ((ConstantUtf8) c).getBytes();
-    return attName;
+    return ((ConstantUtf8) c).getBytes();
   }
 
   /**
@@ -172,8 +179,7 @@ public final class BcelUtil {
 
     int conIndex = a.getNameIndex();
     Constant c = pool.getConstant(conIndex);
-    String attName = ((ConstantUtf8) c).getBytes();
-    return attName;
+    return ((ConstantUtf8) c).getBytes();
   }
 
   // 'is' (boolean test) methods
@@ -186,7 +192,7 @@ public final class BcelUtil {
    */
   public static boolean isConstructor(MethodGen mg) {
     if (mg.getName().equals("")) {
-      throw new Error("method name cannot be empty");
+      throw new IllegalStateException("method name cannot be empty");
     }
     return mg.getName().equals("<init>");
   }
@@ -199,7 +205,7 @@ public final class BcelUtil {
    */
   public static boolean isConstructor(Method m) {
     if (m.getName().equals("")) {
-      throw new Error("method name cannot be empty");
+      throw new IllegalStateException("method name cannot be empty");
     }
     return m.getName().equals("<init>");
   }
@@ -307,7 +313,7 @@ public final class BcelUtil {
         && (mg.getReturnType() == Type.VOID)
         && mg.getName().equals("main")
         && (argTypes.length == 1)
-        && argTypes[0].equals(stringArray);
+        && argTypes[0].equals(STRING_ARRAY);
   }
 
   // consistency check methods
@@ -355,10 +361,11 @@ public final class BcelUtil {
   }
 
   /**
-   * Checks all of the methods in gen for consistency.
+   * Checks all of the methods in {@code gen} for consistency.
    *
    * @param gen the class to check
    */
+  // @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public static void checkMgens(final ClassGen gen) {
 
     if (skipChecks) {
@@ -379,7 +386,7 @@ public final class BcelUtil {
 
   // 'dump' methods
 
-  /** Prints the current Java call stack. */
+  /** Prints the current Java call stack to {@code System.out}. */
   public static void dumpStackTrace() {
 
     StackTraceElement[] ste = Thread.currentThread().getStackTrace();
@@ -407,7 +414,7 @@ public final class BcelUtil {
    *
    * @param gen the class whose methods to print
    */
-  static void dumpMethods(ClassGen gen) {
+  /*package*/ static void dumpMethods(ClassGen gen) {
 
     System.out.printf("Class %s methods:%n", gen.getClassName());
     for (Method m : gen.getMethods()) {
@@ -527,7 +534,7 @@ public final class BcelUtil {
 
     Constant c = pool.getConstant(index);
     if (c == null) {
-      throw new Error("Bad index " + index + " into pool");
+      throw new IllegalArgumentException("Bad index " + index + " into pool");
     }
     if (c instanceof ConstantUtf8 cutf8) {
       return cutf8.getBytes();
@@ -589,7 +596,7 @@ public final class BcelUtil {
   public static void makeMethodBodyEmpty(MethodGen mg) {
 
     if (isConstructor(mg)) {
-      throw new Error(
+      throw new IllegalArgumentException(
           "cannot empty the body of constructor "
               + mg.getClassName()
               + "."
@@ -663,9 +670,10 @@ public final class BcelUtil {
    * @param newType the element to add to the end of the array
    * @return a new array, with {@code newType} at the end
    */
-  /*package-private*/ static Type[] postpendToArray(Type[] types, Type newType) {
+  /*package*/ static Type[] postpendToArray(Type[] types, Type newType) {
     if (types.length == Integer.MAX_VALUE) {
-      throw new Error("array " + Arrays.toString(types) + " is too large to extend");
+      throw new IllegalArgumentException(
+          "array " + Arrays.toString(types) + " is too large to extend");
     }
     Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 0, types.length);
@@ -682,7 +690,8 @@ public final class BcelUtil {
    */
   public static Type[] prependToArray(Type newType, Type[] types) {
     if (types.length == Integer.MAX_VALUE) {
-      throw new Error("array " + Arrays.toString(types) + " is too large to extend");
+      throw new IllegalArgumentException(
+          "array " + Arrays.toString(types) + " is too large to extend");
     }
     Type[] newTypes = new Type[types.length + 1];
     System.arraycopy(types, 0, newTypes, 1, types.length);
