@@ -53,13 +53,12 @@ import org.checkerframework.dataflow.qual.Pure;
  * is an abstract class extended by {@link org.plumelib.bcelutil.InstructionListUtils}. A client
  * would not normally extend this class directly.
  */
-@SuppressWarnings({"nullness", "PMD.AbstractClassWithoutAbstractMethod"})
+@SuppressWarnings({
+  "nullness",
+  "PMD.AbstractClassWithoutAbstractMethod",
+  // "PMD.FieldDeclarationsShouldBeAtStartOfClass"
+})
 public abstract class StackMapUtils {
-
-  /** Create a new StackMapUtils object. */
-  public StackMapUtils() {
-    // Nothing to do.
-  }
 
   /*
    * NOMENCLATURE
@@ -127,13 +126,18 @@ public abstract class StackMapUtils {
 
   /** An empty StackMap used for initialization. */
   @SuppressWarnings("interning") // @InternedDistinct initialization with fresh object
-  private StackMapEntry @InternedDistinct [] emptyStackMapTable = {};
+  private static final StackMapEntry @InternedDistinct [] EMPTY_STACK_MAP_TABLE = {};
 
   /**
    * A map from instructions that create uninitialized NEW objects to the corresponding StackMap
    * entry. Set by buildUninitializedNewMap.
    */
-  private @Modifiable Map<InstructionHandle, Integer> uninitializedNewMap = new HashMap<>();
+  private final @Modifiable Map<InstructionHandle, Integer> uninitializedNewMap = new HashMap<>();
+
+  /** Create a new StackMapUtils object. */
+  public StackMapUtils() {
+    // Nothing to do.
+  }
 
   /**
    * Returns a String array with newString added to the end of arr.
@@ -155,11 +159,24 @@ public abstract class StackMapUtils {
    * @return the attribute name for the specified attribute
    */
   @Pure
-  protected final String get_attribute_name(Attribute a) {
+  protected final String getAttributeName(Attribute a) {
     int conIndex = a.getNameIndex();
     Constant c = pool.getConstant(conIndex);
-    String attName = ((ConstantUtf8) c).getBytes();
-    return attName;
+    return ((ConstantUtf8) c).getBytes();
+  }
+
+  /**
+   * Returns the attribute name for the specified attribute.
+   *
+   * @param a the attribute
+   * @return the attribute name for the specified attribute
+   * @deprecated use {@link #getAttributeName}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  @Pure
+  protected final String get_attribute_name(Attribute a) {
+    return getAttributeName(a);
   }
 
   /**
@@ -169,8 +186,22 @@ public abstract class StackMapUtils {
    * @return true iff the attribute is a LocalVariableTypeTable
    */
   @Pure
-  protected final boolean is_local_variable_type_table(Attribute a) {
+  protected final boolean isLocalVariableTypeTable(Attribute a) {
     return get_attribute_name(a).equals("LocalVariableTypeTable");
+  }
+
+  /**
+   * Returns true if the specified attribute is a LocalVariableTypeTable.
+   *
+   * @param a the attribute
+   * @return true iff the attribute is a LocalVariableTypeTable
+   * @deprecated use {@link #isLocalVariableTypeTable}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  @Pure
+  protected final boolean is_local_variable_type_table(Attribute a) {
+    return isLocalVariableTypeTable(a);
   }
 
   /**
@@ -191,9 +222,39 @@ public abstract class StackMapUtils {
    * @return the StackMapTable attribute for the method (or null if not present)
    */
   @Pure
-  protected final @Nullable Attribute getStackMapTable_attribute(MethodGen mgen) {
+  protected final @Nullable Attribute getStackMapTableAttribute(MethodGen mgen) {
     for (Attribute a : mgen.getCodeAttributes()) {
       if (isStackMapTable(a)) {
+        return a;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Find the StackMapTable attribute for a method. Return null if there isn't one.
+   *
+   * @param mgen the method
+   * @return the StackMapTable attribute for the method (or null if not present)
+   * @deprecated use {@link #getStackMapTableAttribute}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  @Pure
+  protected final @Nullable Attribute getStackMapTable_attribute(MethodGen mgen) {
+    return getStackMapTableAttribute(mgen);
+  }
+
+  /**
+   * Find the LocalVariableTypeTable attribute for a method. Return null if there isn't one.
+   *
+   * @param mgen the method
+   * @return the LocalVariableTypeTable attribute for the method (or null if not present)
+   */
+  @Pure
+  protected final @Nullable Attribute getLocalVariableTypeTableAttribute(MethodGen mgen) {
+    for (Attribute a : mgen.getCodeAttributes()) {
+      if (is_local_variable_type_table(a)) {
         return a;
       }
     }
@@ -205,15 +266,13 @@ public abstract class StackMapUtils {
    *
    * @param mgen the method
    * @return the LocalVariableTypeTable attribute for the method (or null if not present)
+   * @deprecated use {@link #getLocalVariableTypeTableAttribute}
    */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
   @Pure
   protected final @Nullable Attribute get_local_variable_type_table_attribute(MethodGen mgen) {
-    for (Attribute a : mgen.getCodeAttributes()) {
-      if (is_local_variable_type_table(a)) {
-        return a;
-      }
-    }
-    return null;
+    return getLocalVariableTypeTableAttribute(mgen);
   }
 
   /**
@@ -223,8 +282,22 @@ public abstract class StackMapUtils {
    *
    * @param mgen the method to clear out
    */
-  protected final void remove_local_variable_type_table(MethodGen mgen) {
+  protected final void removeLocalVariableTypeTable(MethodGen mgen) {
     mgen.removeLocalVariableTypeTable();
+  }
+
+  /**
+   * Remove the local variable type table attribute (LVTT) from mgen. Some instrumentation changes
+   * require this to be updated, but without BCEL support that would be hard to do. It should be
+   * safe to just delete it since it is optional and really only of use to a debugger.
+   *
+   * @param mgen the method to clear out
+   * @deprecated use {@link #removeLocalVariableTypeTable}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  protected final void remove_local_variable_type_table(MethodGen mgen) {
+    removeLocalVariableTypeTable(mgen);
   }
 
   /**
@@ -349,6 +422,7 @@ public abstract class StackMapUtils {
    * @param ih where to start looking for a switch instruction
    * @param il instruction list to search
    */
+  // @SuppressWarnings("PMD.AvoidReassigningParameters")
   protected final void modifyStackMapsForSwitches(InstructionHandle ih, InstructionList il) {
     if (!needStackMap) {
       return;
@@ -358,7 +432,7 @@ public abstract class StackMapUtils {
     il.setPositions();
 
     // Loop through each instruction looking for a switch
-    while (ih != null) {
+    for (; ih != null; ih = ih.getNext()) {
       Instruction inst = ih.getInstruction();
       short opcode = inst.getOpcode();
 
@@ -369,7 +443,7 @@ public abstract class StackMapUtils {
           throw new RuntimeException("Invalid StackMap offset 3");
         }
         StackMapEntry stackMap = stackMapTable[index];
-        int delta = (currentOffset + inst.getLength()) - runningOffset;
+        int delta = currentOffset + inst.getLength() - runningOffset;
         if (delta != 0) {
           stackMap.updateByteCodeOffset(delta);
         }
@@ -377,9 +451,6 @@ public abstract class StackMapUtils {
         // we only have to do the first one after a switch.
         // But we do need to look at all the switch instructions.
       }
-
-      // Go on to the next instruction in the list
-      ih = ih.getNext();
     }
   }
 
@@ -497,7 +568,7 @@ public abstract class StackMapUtils {
    * @param indexFirstMovedlocal original index of first local moved "up"
    * @param size size of new local added (1 or 2)
    */
-  protected final void adjust_code_for_locals_change(
+  protected final void adjustCodeForLocalsChange(
       MethodGen mgen, int indexFirstMovedlocal, int size) {
 
     InstructionList il = mgen.getInstructionList();
@@ -531,6 +602,23 @@ public abstract class StackMapUtils {
   }
 
   /**
+   * Process the instruction list, adding size (1 or 2) to the index of each Instruction that
+   * references a local that is equal to or higher in the local map than indexFirstMovedlocal. Size
+   * should be the size of the new local that was just inserted at indexFirstMovedlocal.
+   *
+   * @param mgen MethodGen to be modified
+   * @param indexFirstMovedlocal original index of first local moved "up"
+   * @param size size of new local added (1 or 2)
+   * @deprecated use {@link #adjustCodeForLocalsChange}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  protected final void adjust_code_for_locals_change(
+      MethodGen mgen, int indexFirstMovedlocal, int size) {
+    adjustCodeForLocalsChange(mgen, indexFirstMovedlocal, size);
+  }
+
+  /**
    * Sets the {@link #stackMapTable} and {@link #smta} fields from the MethodGen argument. If there
    * is none, create a new empty one. Must be called prior to any other methods that manipulate the
    * stackMapTable!
@@ -555,7 +643,7 @@ public abstract class StackMapUtils {
       // Delete existing stack map - we'll add a new one later.
       mgen.removeCodeAttribute(smta);
     } else {
-      stackMapTable = emptyStackMapTable;
+      stackMapTable = EMPTY_STACK_MAP_TABLE;
       if (javaClassVersion > Const.MAJOR_1_6) {
         needStackMap = true;
       }
@@ -589,7 +677,7 @@ public abstract class StackMapUtils {
     if (!needStackMap) {
       return;
     }
-    if (stackMapTable == emptyStackMapTable) {
+    if (stackMapTable == EMPTY_STACK_MAP_TABLE) {
       return;
     }
     printStackMapTable("Final");
@@ -652,7 +740,7 @@ public abstract class StackMapUtils {
    * @param smt StackMapType to be converted
    * @return result Type
    */
-  protected final Type generate_Type_from_StackMapType(StackMapType smt) {
+  protected final Type generateTypeFromStackMapType(StackMapType smt) {
 
     return switch (smt.getType()) {
       // "ITEM_Bogus" is 'top' (undefined) in JVM verification nomenclature.
@@ -682,6 +770,19 @@ public abstract class StackMapUtils {
   }
 
   /**
+   * Convert a StackMapType to a Type.
+   *
+   * @param smt StackMapType to be converted
+   * @return result Type
+   * @deprecated use {@code #generateTypeFromStackMapType}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  protected final Type generate_Type_from_StackMapType(StackMapType smt) {
+    return generateTypeFromStackMapType(smt);
+  }
+
+  /**
    * Returns the operand size of this type (2 for long and double, 1 otherwise).
    *
    * @param smt a StackMapType object
@@ -702,7 +803,7 @@ public abstract class StackMapUtils {
    * @param typeNewVar type of new variable we are adding
    * @param locals a copy of the local variable table prior to this modification
    */
-  protected final void update_full_frameStackMap_entries(
+  protected final void updateFullFrameStackMapEntries(
       int offset, Type typeNewVar, LocalVariableGen[] locals) {
     @NonNegative int index; // locals index
 
@@ -710,8 +811,9 @@ public abstract class StackMapUtils {
       if (entry.getFrameType() == Const.FULL_FRAME) {
 
         int numLocals = entry.getNumberOfLocals();
-        StackMapType[] newLocalTypes = new StackMapType[numLocals + 1];
         StackMapType[] oldLocalTypes = entry.getTypesOfLocals();
+        // @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+        StackMapType[] newLocalTypes = new StackMapType[numLocals + 1];
 
         // System.out.printf ("update_full_frame %s %s %s %n", offset, numLocals, locals.length);
 
@@ -732,6 +834,22 @@ public abstract class StackMapUtils {
         entry.setTypesOfLocals(newLocalTypes);
       }
     }
+  }
+
+  /**
+   * Update any FULL_FRAME StackMap entries to include a new local var. The locals array is a copy
+   * of the local variables PRIOR to the addition of the new local in question.
+   *
+   * @param offset offset into stack of the new variable we are adding
+   * @param typeNewVar type of new variable we are adding
+   * @param locals a copy of the local variable table prior to this modification
+   * @deprecated use {@link #updateFullFrameStackMapEntries}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  protected final void update_full_frameStackMap_entries(
+      int offset, Type typeNewVar, LocalVariableGen[] locals) {
+    updateFullFrameStackMapEntries(offset, typeNewVar, locals);
   }
 
   /**
@@ -765,7 +883,7 @@ public abstract class StackMapUtils {
     int newIndex = 0;
     int newOffset = 0;
 
-    boolean hasCode = (mgen.getInstructionList() != null);
+    boolean hasCode = mgen.getInstructionList() != null;
 
     if (hasCode) {
       if (!mgen.isStatic()) {
@@ -838,7 +956,7 @@ public abstract class StackMapUtils {
    * @param localType type of new local
    * @return a LocalVariableGen for the new local
    */
-  protected final LocalVariableGen create_method_scope_local(
+  protected final LocalVariableGen createMethodScopeLocal(
       MethodGen mgen, String localName, Type localType) {
     // BCEL sorts local vars and presents them in offset order.  Search
     // locals for first var with start != 0. If none, just add the new
@@ -946,6 +1064,27 @@ public abstract class StackMapUtils {
     return lvNew;
   }
 
+  /**
+   * Create a new local with a scope of the full method. This means we need to search the existing
+   * locals to find the proper index for our new local. This might have the side effect of causing
+   * us to rewrite the method byte codes to adjust the offsets for the existing local variables -
+   * see below for details.
+   *
+   * <p>Must call fixLocalVariableTable (just once per method) before calling this routine.
+   *
+   * @param mgen MethodGen to be modified
+   * @param localName name of new local
+   * @param localType type of new local
+   * @return a LocalVariableGen for the new local
+   * @deprecated use {@link #createMethodScopeLocal}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  protected final LocalVariableGen create_method_scope_local(
+      MethodGen mgen, String localName, Type localType) {
+    return createMethodScopeLocal(mgen, localName, localType);
+  }
+
   // //////////////////////////////////////////////////////////////////////
   // fixLocalVariableTable
   //
@@ -991,6 +1130,7 @@ public abstract class StackMapUtils {
    *
    * @param mgen MethodGen to be modified
    */
+  // @SuppressWarnings("PMD.AvoidReassigningLoopVariables") // `ii--`
   @EnsuresNonNull("initialTypeList")
   protected final void fixLocalVariableTable(MethodGen mgen) {
     InstructionList il = mgen.getInstructionList();
@@ -1002,10 +1142,6 @@ public abstract class StackMapUtils {
 
     // Get the current local variables (includes 'this' and parameters)
     LocalVariableGen[] locals = mgen.getLocalVariables();
-    LocalVariableGen l;
-    LocalVariableGen newLvg;
-
-    // We need a deep copy
     for (int ii = 0; ii < locals.length; ii++) {
       locals[ii] = (LocalVariableGen) locals[ii].clone();
     }
@@ -1034,9 +1170,10 @@ public abstract class StackMapUtils {
     // entries in the list.
     firstLocalIndex = argTypes.length;
 
+    LocalVariableGen newLvg;
     if (!mgen.isStatic()) {
       // Add the 'this' pointer back in.
-      l = locals[0];
+      LocalVariableGen l = locals[0];
       newLvg = mgen.addLocalVariable(l.getName(), l.getType(), l.getIndex(), null, null);
       debugInstrument.log(
           "Added <this> %s%n",
@@ -1066,7 +1203,7 @@ public abstract class StackMapUtils {
         // Create a local variable to describe the missing parameter
         newLvg = mgen.addLocalVariable("$hidden$" + offset, argType, offset, null, null);
       } else {
-        l = locals[locIndex];
+        LocalVariableGen l = locals[locIndex];
         newLvg = mgen.addLocalVariable(l.getName(), l.getType(), l.getIndex(), null, null);
         locIndex++;
       }
@@ -1103,11 +1240,11 @@ public abstract class StackMapUtils {
     stackTypes = null;
 
     for (int ii = firstLocalIndex; ii < locals.length; ii++) {
-      l = locals[ii];
+      LocalVariableGen l = locals[ii];
       if (l.getIndex() > offset) {
-        // A gap in index values indicates a compiler allocated temp.
-        // (if offset is 0, probably a lock object)
-        // there is at least one hidden compiler temp before the next local
+        // A gap in index values indicates a compiler-allocated temp.
+        // (If the offset is 0, it is probably a lock object.)
+        // There is at least one hidden compiler temp before the next local.
         offset = gen_locals(mgen, offset);
         ii--; // need to revisit same local
       } else {
@@ -1142,17 +1279,18 @@ public abstract class StackMapUtils {
    * @param offset compiler assigned local offset of hidden temp(s) or local(s)
    * @return offset incremented by size of smallest variable found at offset
    */
+  // @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops") // use Arrays.copyOf instead?
   @RequiresNonNull("initialTypeList")
-  protected final int gen_locals(MethodGen mgen, int offset) {
-    int liveStart = 0;
-    Type liveType = null;
+  protected final int genLocals(MethodGen mgen, int offset) {
     InstructionList il = mgen.getInstructionList();
     il.setPositions();
+
+    int liveStart = 0;
+    Type liveType = null;
 
     // Set up initial state of StackMap info on entry to method.
     int localsOffsetHeight = 0;
     int byteCodeOffset = -1;
-    LocalVariableGen newLvg;
     int minSize = 3; // only sizes are 1 or 2; start with something larger.
 
     numberActiveLocals = initialLocalsCount;
@@ -1222,7 +1360,7 @@ public abstract class StackMapUtils {
         // did the latest StackMap entry undefine the temp or local in question?
         if (offset >= localsOffsetHeight) {
           // create a LocalVariable
-          newLvg =
+          LocalVariableGen newLvg =
               mgen.addLocalVariable(
                   "DaIkOnTeMp" + offset,
                   liveType,
@@ -1256,13 +1394,13 @@ public abstract class StackMapUtils {
       liveRangeEnd = liveRangeStart; // not necessarily true, but only needs to be !null
       liveRangeType = liveType;
       liveRangeOperandSize = minSize;
-      minSize = gen_locals_from_byte_codes(mgen, offset, il.findHandle(byteCodeOffset));
+      minSize = genLocalsFromByteCodes(mgen, offset, il.findHandle(byteCodeOffset));
     } else {
       if (minSize == 3) {
         // We did not find the offset in any of the stack maps; that must mean
         // the live range is in between two stack maps or after the last stack map.
         // We need to scan all the byte codes to calculate the live range and type.
-        minSize = gen_locals_from_byte_codes(mgen, offset);
+        minSize = genLocalsFromByteCodes(mgen, offset);
         // offset is never mentioned in code; go on to next location
         if (minSize == 3) {
           return offset + 1;
@@ -1273,13 +1411,33 @@ public abstract class StackMapUtils {
   }
 
   /**
+   * Find the live range of the compiler temp(s) and/or user declared local(s) at the given offset
+   * and create a LocalVariableGen for each. Note the compiler might generate temps of different
+   * sizes at the same offset (must have disjoint lifetimes). In general, these variables will not
+   * have a live range of the entire method. We try to calculate the true live range so if, at some
+   * later point, we need to generate a new StackMap we can include the correct list of active
+   * locals.
+   *
+   * @param mgen the method
+   * @param offset compiler assigned local offset of hidden temp(s) or local(s)
+   * @return offset incremented by size of smallest variable found at offset
+   * @deprecated use {@link #genLocals}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  @RequiresNonNull("initialTypeList")
+  protected final int gen_locals(MethodGen mgen, int offset) {
+    return genLocals(mgen, offset);
+  }
+
+  /**
    * Calculate the live range of a local variable (or variables).
    *
    * @param mgen MethodGen of method to search
    * @param offset offset of the local
    * @return minimum size of local(s) found at offset
    */
-  protected final int gen_locals_from_byte_codes(MethodGen mgen, int offset) {
+  protected final int genLocalsFromByteCodes(MethodGen mgen, int offset) {
     // The same local offset could be used for multiple local variables
     // with disjoint lifetimes.  We attempt to deal with this by looking
     // at the type of a store instruction and if it does not equal the
@@ -1292,7 +1450,21 @@ public abstract class StackMapUtils {
     liveRangeType = null;
     // only sizes are 1 or 2; start with something larger.
     liveRangeOperandSize = 3;
-    return gen_locals_from_byte_codes(mgen, offset, mgen.getInstructionList().getStart());
+    return genLocalsFromByteCodes(mgen, offset, mgen.getInstructionList().getStart());
+  }
+
+  /**
+   * Calculate the live range of a local variable (or variables).
+   *
+   * @param mgen MethodGen of method to search
+   * @param offset offset of the local
+   * @return minimum size of local(s) found at offset
+   * @deprecated use {@link #genLocalsFromByteCodes(MethodGen, int)}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  protected final int gen_locals_from_byte_codes(MethodGen mgen, int offset) {
+    return genLocalsFromByteCodes(mgen, offset);
   }
 
   /**
@@ -1311,8 +1483,7 @@ public abstract class StackMapUtils {
    * @param start search forward from this instruction
    * @return minimum size of local(s) found at offset
    */
-  protected final int gen_locals_from_byte_codes(
-      MethodGen mgen, int offset, InstructionHandle start) {
+  protected final int genLocalsFromByteCodes(MethodGen mgen, int offset, InstructionHandle start) {
     OperandStack stack;
     set_method_stackTypes(mgen);
     InstructionList il = mgen.getInstructionList();
@@ -1399,13 +1570,37 @@ public abstract class StackMapUtils {
   }
 
   /**
+   * Calculate the live range of a local variable starting from the given InstructionHandle. The
+   * following live_range globals must be set:
+   *
+   * <ul>
+   *   <li>liveRangeStart
+   *   <li>liveRangeEnd
+   *   <li>liveRangeType
+   *   <li>liveRangeOperandSize
+   * </ul>
+   *
+   * @param mgen MethodGen of method to search
+   * @param offset offset of the local
+   * @param start search forward from this instruction
+   * @return minimum size of local(s) found at offset
+   * @deprecated use {@link #genLocalsFromByteCodes(MethodGen, int, InstructionHandle)}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  protected final int gen_locals_from_byte_codes(
+      MethodGen mgen, int offset, InstructionHandle start) {
+    return genLocalsFromByteCodes(mgen, offset, start);
+  }
+
+  /**
    * Create a new LocalVariable from the live_range data. Does nothing if {@link #liveRangeStart} is
    * null.
    *
    * @param mgen MethodGen of method to search
    * @param offset offset of the local
    */
-  protected final void create_local_from_live_range(MethodGen mgen, int offset) {
+  protected final void createLocalFromLiveRange(MethodGen mgen, int offset) {
     if (liveRangeStart == null) {
       return;
     }
@@ -1432,12 +1627,26 @@ public abstract class StackMapUtils {
   }
 
   /**
+   * Create a new LocalVariable from the live_range data. Does nothing if {@link #liveRangeStart} is
+   * null.
+   *
+   * @param mgen MethodGen of method to search
+   * @param offset offset of the local
+   * @deprecated use {@link #createLocalFromLiveRange}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  protected final void create_local_from_live_range(MethodGen mgen, int offset) {
+    createLocalFromLiveRange(mgen, offset);
+  }
+
+  /**
    * Calculates the stack types for each byte code offset of the current method, and stores them in
    * variable {@link #stackTypes}. Does nothing if {@link #stackTypes} is already set.
    *
    * @param mgen MethodGen of method whose stack types to compute
    */
-  protected final void set_method_stackTypes(MethodGen mgen) {
+  protected final void setMethodStackTypes(MethodGen mgen) {
     // We cache the stack types for the current method.
     // fixLocalVariableTable sets stackTypes to null at the start of each method.
     if (stackTypes == null) {
@@ -1453,6 +1662,19 @@ public abstract class StackMapUtils {
         throw e;
       }
     }
+  }
+
+  /**
+   * Calculates the stack types for each byte code offset of the current method, and stores them in
+   * variable {@link #stackTypes}. Does nothing if {@link #stackTypes} is already set.
+   *
+   * @param mgen MethodGen of method whose stack types to compute
+   * @deprecated use {@link #setMethodStackTypes}
+   */
+  // @SuppressWarnings("PMD.MethodNamingConventions")
+  @Deprecated // 2026-08-30
+  protected final void set_method_stackTypes(MethodGen mgen) {
+    setMethodStackTypes(mgen);
   }
 
   /**

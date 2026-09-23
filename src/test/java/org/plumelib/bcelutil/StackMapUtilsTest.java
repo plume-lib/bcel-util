@@ -98,7 +98,7 @@ final class StackMapUtilsTest {
       StackMapType smt = subject.generateStackMapTypeFromType(t);
       assertEquals(Const.ITEM_Integer, smt.getType(), "for " + t);
       // All of these are int in the JVM's verification type system.
-      assertEquals(Type.INT, subject.generate_Type_from_StackMapType(smt), "for " + t);
+      assertEquals(Type.INT, subject.generateTypeFromStackMapType(smt), "for " + t);
     }
   }
 
@@ -106,7 +106,7 @@ final class StackMapUtilsTest {
   void floatingPointAndLongTypesRoundTrip() {
     for (Type t : new Type[] {Type.FLOAT, Type.DOUBLE, Type.LONG}) {
       StackMapType smt = subject.generateStackMapTypeFromType(t);
-      assertEquals(t, subject.generate_Type_from_StackMapType(smt), "for " + t);
+      assertEquals(t, subject.generateTypeFromStackMapType(smt), "for " + t);
     }
   }
 
@@ -114,7 +114,7 @@ final class StackMapUtilsTest {
   void objectTypesRoundTrip() {
     StackMapType smt = subject.generateStackMapTypeFromType(Type.STRING);
     assertEquals(Const.ITEM_Object, smt.getType());
-    assertEquals(Type.STRING, subject.generate_Type_from_StackMapType(smt));
+    assertEquals(Type.STRING, subject.generateTypeFromStackMapType(smt));
   }
 
   @Test
@@ -122,12 +122,12 @@ final class StackMapUtilsTest {
     ArrayType intArray = new ArrayType(Type.INT, 2);
     StackMapType smt = subject.generateStackMapTypeFromType(intArray);
     assertEquals(Const.ITEM_Object, smt.getType());
-    assertEquals(intArray, subject.generate_Type_from_StackMapType(smt));
+    assertEquals(intArray, subject.generateTypeFromStackMapType(smt));
 
     ArrayType stringArray = new ArrayType(Type.STRING, 1);
     assertEquals(
         stringArray,
-        subject.generate_Type_from_StackMapType(subject.generateStackMapTypeFromType(stringArray)));
+        subject.generateTypeFromStackMapType(subject.generateStackMapTypeFromType(stringArray)));
   }
 
   @Test
@@ -139,7 +139,7 @@ final class StackMapUtilsTest {
   void itemBogusBecomesNull() {
     // "ITEM_Bogus" is 'top' (undefined) in the JVM's verification nomenclature.
     StackMapType bogus = new StackMapType(Const.ITEM_Bogus, -1, subject.pool.getConstantPool());
-    assertNull(subject.generate_Type_from_StackMapType(bogus));
+    assertNull(subject.generateTypeFromStackMapType(bogus));
   }
 
   // getSize
@@ -166,14 +166,14 @@ final class StackMapUtilsTest {
     // "sum" contains a loop, so javac emits a StackMapTable for it.
     Attribute found =
         Fixtures.nonNull(
-            subject.getStackMapTable_attribute(useMethod("sum")), "sum's StackMapTable attribute");
-    assertEquals("StackMapTable", subject.get_attribute_name(found));
+            subject.getStackMapTableAttribute(useMethod("sum")), "sum's StackMapTable attribute");
+    assertEquals("StackMapTable", subject.getAttributeName(found));
   }
 
   @Test
   void stackMapTableIsAbsentFromAStraightLineMethod() {
     // "getValue" has no branches, so it needs no StackMapTable.
-    assertNull(subject.getStackMapTable_attribute(useMethod("getValue")));
+    assertNull(subject.getStackMapTableAttribute(useMethod("getValue")));
   }
 
   @Test
@@ -181,9 +181,9 @@ final class StackMapUtilsTest {
     MethodGen mg = useMethod("sum");
     int examined = 0;
     for (Attribute a : mg.getCodeAttributes()) {
-      String name = subject.get_attribute_name(a);
+      String name = subject.getAttributeName(a);
       assertFalse(name.isEmpty(), "an attribute name should not be empty");
-      assertEquals(name.equals("LocalVariableTypeTable"), subject.is_local_variable_type_table(a));
+      assertEquals(name.equals("LocalVariableTypeTable"), subject.isLocalVariableTypeTable(a));
       assertEquals(name.equals("StackMapTable"), subject.isStackMapTable(a));
       examined++;
     }
@@ -193,9 +193,9 @@ final class StackMapUtilsTest {
   @Test
   void removeLocalVariableTypeTableLeavesOtherAttributes() {
     MethodGen mg = useMethod("sum");
-    subject.remove_local_variable_type_table(mg);
+    subject.removeLocalVariableTypeTable(mg);
     for (Attribute a : mg.getCodeAttributes()) {
-      assertFalse(subject.is_local_variable_type_table(a));
+      assertFalse(subject.isLocalVariableTypeTable(a));
     }
   }
 }

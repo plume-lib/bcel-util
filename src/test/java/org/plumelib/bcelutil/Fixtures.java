@@ -29,7 +29,7 @@ final class Fixtures {
 
   /** This class is a collection of static members; it does not represent anything. */
   private Fixtures() {
-    throw new Error("do not instantiate");
+    throw new UnsupportedOperationException("do not instantiate");
   }
 
   /**

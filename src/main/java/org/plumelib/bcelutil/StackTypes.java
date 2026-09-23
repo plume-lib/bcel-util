@@ -22,13 +22,13 @@ public final class StackTypes {
    * The state of the operand stack at each instruction location. The instruction's byte code offset
    * is used as the index.
    */
-  OperandStack @SameLen("localVariableses") [] operandStacks;
+  /*package*/ OperandStack @SameLen("localVariableses") [] operandStacks;
 
   /**
    * The state of the live local variables at each instruction location. The instruction's byte code
    * offset is used as the index.
    */
-  LocalVariables @SameLen("operandStacks") [] localVariableses;
+  /*package*/ LocalVariables @SameLen("operandStacks") [] localVariableses;
 
   /**
    * Create a record of the types on the stack at each instruction in a method. The created object
