@@ -209,6 +209,7 @@ checkerFramework {
       // TODO: "org.checkerframework.checker.index.IndexChecker",
       "org.checkerframework.checker.interning.InterningChecker",
       "org.checkerframework.checker.lock.LockChecker",
+      "org.checkerframework.checker.modifiability.ModifiabilityChecker",
       "org.checkerframework.checker.nullness.NullnessChecker",
       "org.checkerframework.checker.regex.RegexChecker",
       "org.checkerframework.checker.resourceleak.ResourceLeakChecker",
